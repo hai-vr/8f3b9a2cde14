@@ -10,6 +10,7 @@ namespace Hai.Project12.UserInterfaceElements
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
         [SerializeField] private Transform layoutGroupHolder;
         [SerializeField] private Transform titleGroupHolder;
+        [SerializeField] private GameObject settings;
 
         private List<string> _audioOptions;
         private List<string> _controlsOptions;
@@ -34,7 +35,7 @@ namespace Hai.Project12.UserInterfaceElements
             _h12builder.P12CenteredButton("New Game", () => { });
             _h12builder.P12CenteredButton("Load Game", () => { });
             _h12builder.P12CenteredButton("Go to Sandbox", () => { });
-            _h12builder.P12CenteredButton("Settings", () => { });
+            _h12builder.P12CenteredButton("Settings", () => { settings.SetActive(!settings.activeSelf); });
         }
     }
 }

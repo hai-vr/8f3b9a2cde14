@@ -1,16 +1,15 @@
 using UnityEngine;
 
-public class P12AutoDeleteEOInScene : MonoBehaviour
+namespace Hai.Project12.UserInterfaceElements
 {
-    void Start()
+    public class P12AutoDeleteEOInScene : MonoBehaviour
     {
-        foreach (var obj in GameObject.FindGameObjectsWithTag("EditorOnly"))
+        private void Start()
         {
-            if (obj)
-            {
-                Object.Destroy(obj);
-            }
+            foreach (var obj in FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                if (obj && obj.CompareTag("EditorOnly"))
+                    Destroy(obj);
+            Destroy(gameObject);
         }
-        Object.Destroy(gameObject);
     }
 }

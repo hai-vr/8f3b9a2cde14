@@ -126,6 +126,7 @@ namespace Hai.Project12.UserInterfaceElements
             _h12builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Face Tracking", storedValue = 0f});
             _h12builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Unlit" });
             _h12builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Blush", storedValue = 0.6f });
+            _h12builder.P12SingularButton("Send Netmessage Test", "Trigger", () => { });
         }
 
         private void CreateActions()

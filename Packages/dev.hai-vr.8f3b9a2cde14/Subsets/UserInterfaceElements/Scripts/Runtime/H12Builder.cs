@@ -4,6 +4,7 @@ using BattlePhaze.SettingsManager;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace Hai.Project12.UserInterfaceElements
 {
@@ -66,6 +67,8 @@ namespace Hai.Project12.UserInterfaceElements
         {
             var ours = UnityEngine.Object.Instantiate(_prefabs.titleButton, _titleGroupHolder);
             ours.name = $"P12TB-{rawTitle}";
+
+            Object.Destroy(ours.GetComponent<P12AnimButton>());
 
             var line = ours.GetComponent<P12UILine>();
             line.SetTitle(rawTitle);
