@@ -48,5 +48,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd335b2de328a1746be4b00c6d4d95c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  toggle: {fileID: 4932860037478928534, guid: ed77c9d4137ce7640b7940cc269a8350, type: 3}
   slider: {fileID: 4932860037478928534, guid: d1936e7d17fd60146a1bd9232c46a193, type: 3}
+  dropdown: {fileID: 4932860037478928534, guid: d81110ef3dba25d4ea483912792b069c, type: 3}
   titleButton: {fileID: 87907706601786644, guid: de56d1ad34f4c674984d7ac5ae339f8d, type: 3}

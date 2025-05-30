@@ -25,6 +25,7 @@ namespace Hai.Project12.UserInterfaceElements
         {
             ArbitraryFloat,
             Percentage01,
+            Percentage080,
             Percentage0100,
             AngleDegrees,
             InGameRangeUnityUnits,
