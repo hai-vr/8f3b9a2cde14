@@ -15,7 +15,6 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void OnEnable()
         {
-            Debug.Log($"OnEnable called on {name}");
             storedValue = defaultValue;
         }
     }

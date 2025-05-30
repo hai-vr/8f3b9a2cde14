@@ -23,7 +23,7 @@ namespace Hai.Project12.UserInterfaceElements
         private P12UILine _lineVideo;
         private P12UILine _lineControls;
 
-        private H12Builder _h12builder;
+        private H12Builder _h12Builder;
 
         private void Start()
         {
@@ -32,7 +32,7 @@ namespace Hai.Project12.UserInterfaceElements
                 .Select(input => input.Name)
             ));
 
-            _h12builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
+            _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
 
             _audioOptions = new List<string>(new[]
             {
@@ -72,11 +72,11 @@ namespace Hai.Project12.UserInterfaceElements
                 "Field Of View", // Slider
             });
 
-            _lineGadgets = _h12builder.P12TitleButton("Gadgets", () => Click(P12ExampleCategory.Gadgets));
-            _lineActions = _h12builder.P12TitleButton("Actions", () => Click(P12ExampleCategory.Actions));
-            _lineAudio = _h12builder.P12TitleButton("Audio", () => Click(P12ExampleCategory.Audio));
-            _lineVideo = _h12builder.P12TitleButton("Video", () => Click(P12ExampleCategory.Video));
-            _lineControls = _h12builder.P12TitleButton("Controls", () => Click(P12ExampleCategory.Controls));
+            _lineGadgets = _h12Builder.P12TitleButton("Gadgets", () => Click(P12ExampleCategory.Gadgets));
+            _lineActions = _h12Builder.P12TitleButton("Actions", () => Click(P12ExampleCategory.Actions));
+            _lineAudio = _h12Builder.P12TitleButton("Audio", () => Click(P12ExampleCategory.Audio));
+            _lineVideo = _h12Builder.P12TitleButton("Video", () => Click(P12ExampleCategory.Video));
+            _lineControls = _h12Builder.P12TitleButton("Controls", () => Click(P12ExampleCategory.Controls));
             Click(P12ExampleCategory.Audio);
         }
 
@@ -122,19 +122,19 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void CreateGadgets()
         {
-            _h12builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Eye Tracking", storedValue = 1f});
-            _h12builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Face Tracking", storedValue = 0f});
-            _h12builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Unlit" });
-            _h12builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Blush", storedValue = 0.6f });
-            _h12builder.P12SingularButton("Send Netmessage Test", "Trigger", () => { });
+            _h12Builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Eye Tracking", storedValue = 1f});
+            _h12Builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Face Tracking", storedValue = 0f});
+            _h12Builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Unlit" });
+            _h12Builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Blush", storedValue = 0.6f });
+            _h12Builder.P12SingularButton("Send Netmessage Test", "Trigger", () => { });
         }
 
         private void CreateActions()
         {
-            _h12builder.P12SingularButton("VR Mode", "Switch to VR", () => { });
-            _h12builder.P12SingularButton("Desktop Mode", "Switch to Desktop", () => { });
-            _h12builder.P12SingularButton("Debug", "Open Console", () => { });
-            _h12builder.P12SingularButton("Moderation", "Open Admin Panel", () => { });
+            _h12Builder.P12SingularButton("VR Mode", "Switch to VR", () => { });
+            _h12Builder.P12SingularButton("Desktop Mode", "Switch to Desktop", () => { });
+            _h12Builder.P12SingularButton("Debug", "Open Console", () => { });
+            _h12Builder.P12SingularButton("Moderation", "Open Admin Panel", () => { });
         }
 
         private void CreateOptionsFor(List<string> elements)
@@ -151,9 +151,9 @@ namespace Hai.Project12.UserInterfaceElements
             {
                 if (optionName == SnapTurn)
                 {
-                    _h12builder.P12SingularButton("Turn", "Snap Turn", () => { });
-                    _h12builder.P12SingularButton("", "Smooth Turn", () => { });
-                    _h12builder.P12SingularButton("", "Do Not Turn", () => { });
+                    _h12Builder.P12SingularButton("Turn", "Snap Turn", () => { });
+                    _h12Builder.P12SingularButton("", "Smooth Turn", () => { });
+                    _h12Builder.P12SingularButton("", "Do Not Turn", () => { });
                 }
             }
 
@@ -193,7 +193,7 @@ namespace Hai.Project12.UserInterfaceElements
                     : isPercentage080 ? P12SettableFloatElement.P12UnitDisplayKind.Percentage080
                     : isAngle ? P12SettableFloatElement.P12UnitDisplayKind.AngleDegrees
                     : P12SettableFloatElement.P12UnitDisplayKind.ArbitraryFloat;
-                _h12builder.P12SliderElement(so);
+                _h12Builder.P12SliderElement(so);
             }
             else if (option.Type == SettingsManagerEnums.IsType.DropDown)
             {
@@ -204,11 +204,11 @@ namespace Hai.Project12.UserInterfaceElements
                 var isToggleForDropdown = option.RealValues.Count == 2 && option.RealValues[0] == "true";
                 if (isToggleForDropdown)
                 {
-                    _h12builder.P12ToggleForDropdown(so, option);
+                    _h12Builder.P12ToggleForDropdown(so, option);
                 }
                 else
                 {
-                    _h12builder.P12DropdownElement(so, option);
+                    _h12Builder.P12DropdownElement(so, option);
                 }
             }
         }
