@@ -31,13 +31,29 @@ namespace Hai.Project12.UserInterfaceElements
             line.SetControlExpansion(_controlExpansion);
         }
 
-        internal P12UILine P12Button(string rawTitle, Action clickFn)
+        internal P12UILine P12CenteredButton(string rawTitle, Action clickFn)
         {
             var ours = UnityEngine.Object.Instantiate(_prefabs.titleButton, _layoutGroupHolder);
             ours.name = $"P12B-{rawTitle}";
 
             var line = ours.GetComponent<P12UILine>();
             line.SetTitle(rawTitle);
+            SetupLine(line);
+
+            var btn = ours.GetComponentInChildren<Button>();
+            btn.onClick.AddListener(() => clickFn());
+
+            return line;
+        }
+
+        internal P12UILine P12SingularButton(string rawTitle, string rawButtonLabel, Action clickFn)
+        {
+            var ours = UnityEngine.Object.Instantiate(_prefabs.singularButton, _layoutGroupHolder);
+            ours.name = $"P12B-{rawTitle}";
+
+            var line = ours.GetComponent<P12UILine>();
+            line.SetTitle(rawTitle);
+            line.SetValue(rawButtonLabel);
             SetupLine(line);
 
             var btn = ours.GetComponentInChildren<Button>();

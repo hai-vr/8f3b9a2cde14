@@ -40,11 +40,10 @@ namespace Hai.Project12.UserInterfaceElements
                 "Menus Volume", // Slider
                 "World Volume", // Slider
                 "Player Volume", // Slider
+                "Microphone Denoiser", // Dropdown
                 "Microphone Volume", // Slider
                 "Microphone Range", // Slider
                 "Hearing Range", // Slider
-
-                "Microphone Denoiser" // Dropdown
             });
             _controlsOptions = new List<string>(new[]
             {
@@ -131,10 +130,10 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void CreateActions()
         {
-            _h12builder.P12Button("Switch to VR", () => { });
-            _h12builder.P12Button("Switch to Desktop", () => { });
-            _h12builder.P12Button("Console", () => { });
-            _h12builder.P12Button("Admin", () => { });
+            _h12builder.P12SingularButton("VR Mode", "Switch to VR", () => { });
+            _h12builder.P12SingularButton("Desktop Mode", "Switch to Desktop", () => { });
+            _h12builder.P12SingularButton("Debug", "Open Console", () => { });
+            _h12builder.P12SingularButton("Moderation", "Open Admin Panel", () => { });
         }
 
         private void CreateOptionsFor(List<string> elements)
@@ -151,9 +150,9 @@ namespace Hai.Project12.UserInterfaceElements
             {
                 if (optionName == SnapTurn)
                 {
-                    _h12builder.P12Button("Snap Turn", () => { });
-                    _h12builder.P12Button("Smooth Turn", () => { });
-                    _h12builder.P12Button("Do Not Turn", () => { });
+                    _h12builder.P12SingularButton("Turn", "Snap Turn", () => { });
+                    _h12builder.P12SingularButton("", "Smooth Turn", () => { });
+                    _h12builder.P12SingularButton("", "Do Not Turn", () => { });
                 }
             }
 
