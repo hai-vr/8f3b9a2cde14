@@ -1,0 +1,16 @@
+{
+  "name": "dev.hai-vr.8f3b9a2cde14",
+  "displayName": "Haï ~ 8f3b9a2cde14",
+  "version": "1.0.0",
+  "unity": "2019.4",
+  "description": "8f3b9a2cde14",
+  "author" : {
+    "name" : "Haï~"
+  },
+  "vpmDependencies": {
+  },
+  "url" : "https://docs.hai-vr.dev/docs/products/8f3b9a2cde14",
+  "documentationUrl": "https://docs.hai-vr.dev/docs/products/8f3b9a2cde14",
+  "changelogUrl": "https://docs.hai-vr.dev/docs/changelogs/8f3b9a2cde14",
+  "license": "NOT DEFINED, CHANGE ME"
+}

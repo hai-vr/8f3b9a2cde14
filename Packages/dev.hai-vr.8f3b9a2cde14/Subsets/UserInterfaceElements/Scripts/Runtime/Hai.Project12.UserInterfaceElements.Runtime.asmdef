@@ -1,0 +1,17 @@
+{
+    "name": "Hai.Project12.UserInterfaceElements.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "Unity.TextMeshPro",
+        "BattlePhazeSettingsManger"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
