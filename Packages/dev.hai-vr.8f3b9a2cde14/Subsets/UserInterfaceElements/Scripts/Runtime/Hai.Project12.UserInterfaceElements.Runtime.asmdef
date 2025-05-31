@@ -4,7 +4,9 @@
     "references": [
         "Unity.TextMeshPro",
         "BattlePhazeSettingsManger",
-        "Basis"
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

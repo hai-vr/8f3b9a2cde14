@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
+using Basis.Scripts.Addressable_Driver;
+using Basis.Scripts.Addressable_Driver.Enums;
+using Basis.Scripts.Device_Management;
+using Basis.Scripts.UI.UI_Panels;
 using BattlePhaze.SettingsManager;
 using UnityEngine;
 
@@ -9,7 +12,8 @@ namespace Hai.Project12.UserInterfaceElements
     public class P12Example : MonoBehaviour
     {
         private const string SpecialPrefix = "//SPECIAL/";
-        private const string SnapTurn = SpecialPrefix + "SnapTurn";
+        private const string SpecialSnapTurn = SpecialPrefix + "SnapTurn";
+        private const string Settings_SnapTurnAngle_Key = "Snap Turn Angle"; // This is not a localization label.
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
         [SerializeField] private Transform layoutGroupHolder;
         [SerializeField] private Transform titleGroupHolder;
@@ -29,6 +33,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void Start()
         {
+            SettingsManager.Instance.Initalize(true);
             Debug.Log(string.Join(",", SettingsManager.Instance.Options
                 .Where(input => input.Type == SettingsManagerEnums.IsType.Dynamic)
                 .Select(input => input.Name)
@@ -51,7 +56,7 @@ namespace Hai.Project12.UserInterfaceElements
             _controlsOptions = new List<string>(new[]
             {
                 "Controller DeadZone", // Slider
-                SnapTurn, // Special
+                SpecialSnapTurn, // Special
                 "Snap Turn Angle" // Slider
             });
             _videoOptions = new List<string>(new[]
@@ -134,10 +139,28 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void CreateActions()
         {
-            _h12Builder.P12SingularButton("VR Mode", "Switch to VR", () => { });
-            _h12Builder.P12SingularButton("Desktop Mode", "Switch to Desktop", () => { });
-            _h12Builder.P12SingularButton("Debug", "Open Console", () => { });
-            _h12Builder.P12SingularButton("Moderation", "Open Admin Panel", () => { });
+            _h12Builder.P12SingularButton("VR Mode", "Switch to VR", () =>
+            {
+                BasisDeviceManagement.Instance.SwitchMode("OpenVRLoader");
+            });
+            _h12Builder.P12SingularButton("Desktop Mode", "Switch to Desktop", () =>
+            {
+                BasisDeviceManagement.Instance.SwitchMode(BasisDeviceManagement.Desktop);
+            });
+            _h12Builder.P12SingularButton("Debug", "Open Console", () =>
+            {
+                // See class: BasisUISettings
+                BasisUIManagement.CloseAllMenus();
+                AddressableGenericResource resource = new AddressableGenericResource("LoggerUI", AddressableExpectedResult.SingleItem);
+                BasisUIBase.OpenMenuNow(resource);
+            });
+            _h12Builder.P12SingularButton("Moderation", "Open Admin Panel", () =>
+            {
+
+                BasisUIManagement.CloseAllMenus();
+                AddressableGenericResource resource = new AddressableGenericResource("BasisUIAdminPanel", AddressableExpectedResult.SingleItem);
+                BasisUIBase.OpenMenuNow(resource);
+            });
         }
 
         private void CreateOptionsFor(List<string> elements)
@@ -152,22 +175,35 @@ namespace Hai.Project12.UserInterfaceElements
         {
             if (optionName.StartsWith(SpecialPrefix))
             {
-                if (optionName == SnapTurn)
+                if (optionName == SpecialSnapTurn)
                 {
-                    _h12Builder.P12SingularButton("Turn", "Snap Turn", () => { });
-                    _h12Builder.P12SingularButton("", "Smooth Turn", () => { });
-                    _h12Builder.P12SingularButton("", "Do Not Turn", () => { });
+                    var snapTurnAngleOption = _h12BattlePhazeSettings.FindOptionByNameOrNull(Settings_SnapTurnAngle_Key);
+                    // TODO: Clicking these buttons should reflect back on the slider. Need event listeners
+
+                    _h12Builder.P12SingularButton("Turn", "Snap Turn", () =>
+                    {
+                        var currentValue = _h12BattlePhazeSettings.ParseFloat(snapTurnAngleOption.SelectedValue);
+                        if (currentValue <= 0f)
+                        {
+                            var defaultValue = _h12BattlePhazeSettings.ParseFloat(snapTurnAngleOption.ValueDefault);
+                            _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, defaultValue);
+                        }
+                    });
+                    _h12Builder.P12SingularButton("", "Smooth Turn", () =>
+                    {
+                        _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, -1f);
+                    });
+                    _h12Builder.P12SingularButton("", "Do Not Turn", () =>
+                    {
+                        _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, 0f);
+                    });
                 }
             }
 
-            // FIXME: Don't iterate like this just to find the option that matches the name
-            foreach (var option in SettingsManager.Instance.Options)
+            var option = _h12BattlePhazeSettings.FindOptionByNameOrNull(optionName);
+            if (option != null)
             {
-                if (option.Name == optionName)
-                {
-                    CreateLineFor(option);
-                    break;
-                }
+                CreateLineFor(option);
             }
         }
 
@@ -175,8 +211,8 @@ namespace Hai.Project12.UserInterfaceElements
         {
             if (option.Type == SettingsManagerEnums.IsType.Slider)
             {
-                var minValue = float.Parse(option.SliderMinValue);
-                var maxValue = float.Parse(option.SliderMaxValue);
+                var minValue = _h12BattlePhazeSettings.ParseFloat(option.SliderMinValue);
+                var maxValue = _h12BattlePhazeSettings.ParseFloat(option.SliderMaxValue);
 
                 var isPercentage01 = minValue == 0f && maxValue == 1f;
                 var isPercentage0100 = maxValue == 100f;
@@ -187,7 +223,7 @@ namespace Hai.Project12.UserInterfaceElements
                 so.englishTitle = $"{option.Name}";
                 so.min = minValue;
                 so.max = maxValue;
-                so.defaultValue = float.Parse(option.ValueDefault);
+                so.defaultValue = _h12BattlePhazeSettings.ParseFloat(option.ValueDefault);
                 so.displayAs =
                     isPercentage01 ? P12SettableFloatElement.P12UnitDisplayKind.Percentage01
                     : isPercentage0100 ? P12SettableFloatElement.P12UnitDisplayKind.Percentage0100
@@ -195,13 +231,9 @@ namespace Hai.Project12.UserInterfaceElements
                     : isAngle ? P12SettableFloatElement.P12UnitDisplayKind.AngleDegrees
                     : P12SettableFloatElement.P12UnitDisplayKind.ArbitraryFloat;
 
-                so.storedValue = float.Parse(option.SelectedValue);
+                so.storedValue = _h12BattlePhazeSettings.ParseFloat(option.SelectedValue);
                 // Order matters: Need to declare this event only after we initialized storedValue
-                so.OnValueChanged += value =>
-                {
-                    option.SelectedValue = value.ToString(CultureInfo.InvariantCulture);
-                    _h12BattlePhazeSettings.SaveAndSubmitToBPManager(option, value);
-                };
+                so.OnValueChanged += value => _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(option, value);
 
                 _h12Builder.P12SliderElement(so);
             }
@@ -210,7 +242,11 @@ namespace Hai.Project12.UserInterfaceElements
                 var so = ScriptableObject.CreateInstance<P12SettableStringElement>();
                 so.englishTitle = $"{option.Name}";
                 so.defaultValue = option.ValueDefault;
+
                 so.storedValue = option.SelectedValue;
+                // Order matters: Need to declare this event only after we initialized storedValue
+                so.OnValueChanged += value => _h12BattlePhazeSettings.SaveAndSubmitStringToBPManager(option, value);
+
                 var isToggleForDropdown = option.RealValues.Count == 2 && option.RealValues[0] == "true";
                 if (isToggleForDropdown)
                 {
