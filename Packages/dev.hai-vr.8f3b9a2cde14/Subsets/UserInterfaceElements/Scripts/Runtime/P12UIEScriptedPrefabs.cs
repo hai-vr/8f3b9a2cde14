@@ -9,5 +9,7 @@ namespace Hai.Project12.UserInterfaceElements
         public GameObject dropdown;
         public GameObject singularButton;
         public GameObject titleButton;
+
+        public AudioClip clickAudio;
     }
 }

@@ -53,3 +53,4 @@ MonoBehaviour:
   dropdown: {fileID: 4932860037478928534, guid: d81110ef3dba25d4ea483912792b069c, type: 3}
   singularButton: {fileID: 4932860037478928534, guid: ff654f50d054d684e9e286d71f76bcdb, type: 3}
   titleButton: {fileID: 87907706601786644, guid: de56d1ad34f4c674984d7ac5ae339f8d, type: 3}
+  clickAudio: {fileID: 8300000, guid: afe41df08e5ff29418ee90c58b7d2181, type: 3}

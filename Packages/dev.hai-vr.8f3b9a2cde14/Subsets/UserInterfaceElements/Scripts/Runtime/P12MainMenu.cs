@@ -41,14 +41,6 @@ namespace Hai.Project12.UserInterfaceElements
             _h12builder.P12CenteredButton("New Game", () => { });
             _h12builder.P12CenteredButton("Load Game", () => { });
             _h12builder.P12CenteredButton("Co-op", () => { });
-            _h12builder.P12CenteredButton("Go to Sandbox", () =>
-            {
-                if (_weMadeCursorVisible)
-                {
-                    BasisCursorManagement.LockCursor(nameof(P12MainMenu));
-                    _weMadeCursorVisible = false;
-                }
-            });
             _h12builder.P12CenteredButton("Settings", () =>
             {
                 var newActive = !settings.activeSelf;
@@ -67,6 +59,15 @@ namespace Hai.Project12.UserInterfaceElements
                 else
                 {
                     rootTransform.localPosition = mainPos.localPosition;
+                }
+            });
+            _h12builder.P12CenteredButton("Back to Sandbox", () =>
+            {
+                settings.SetActive(false);
+                if (_weMadeCursorVisible)
+                {
+                    BasisCursorManagement.LockCursor(nameof(P12MainMenu));
+                    _weMadeCursorVisible = false;
                 }
             });
         }

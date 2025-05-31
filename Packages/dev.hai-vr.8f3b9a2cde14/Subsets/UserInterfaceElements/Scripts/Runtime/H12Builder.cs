@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Basis.Scripts.Drivers;
 using BattlePhaze.SettingsManager;
 using TMPro;
 using UnityEngine;
@@ -42,7 +43,11 @@ namespace Hai.Project12.UserInterfaceElements
             SetupLine(line);
 
             var btn = ours.GetComponentInChildren<Button>();
-            btn.onClick.AddListener(() => clickFn());
+            btn.onClick.AddListener(() =>
+            {
+                clickFn();
+                PlayClickAudio();
+            });
 
             return line;
         }
@@ -76,7 +81,11 @@ namespace Hai.Project12.UserInterfaceElements
             line.SetFocused(false);
 
             var btn = ours.GetComponentInChildren<Button>();
-            btn.onClick.AddListener(() => clickFn());
+            btn.onClick.AddListener(() =>
+            {
+                clickFn();
+                PlayClickAudio();
+            });
 
             return line;
         }
@@ -248,6 +257,11 @@ namespace Hai.Project12.UserInterfaceElements
                 default:
                     throw new ArgumentOutOfRangeException(nameof(displayAs), displayAs, null);
             }
+        }
+
+        private void PlayClickAudio()
+        {
+            BasisLocalCameraDriver.Instance.AudioSource.PlayOneShot(_prefabs.clickAudio);
         }
     }
 }

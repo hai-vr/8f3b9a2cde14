@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements
@@ -14,7 +13,19 @@ namespace Hai.Project12.UserInterfaceElements
 
         public float defaultValue;
 
-        [NonSerialized] public float storedValue;
+        private float _storedValue;
+        public float storedValue
+        {
+            get => _storedValue;
+            set
+            {
+                _storedValue = value;
+                OnValueChanged?.Invoke(_storedValue);
+            }
+        }
+
+        public event ValueChanged OnValueChanged;
+        public delegate void ValueChanged(float newValue);
 
         private void OnEnable()
         {

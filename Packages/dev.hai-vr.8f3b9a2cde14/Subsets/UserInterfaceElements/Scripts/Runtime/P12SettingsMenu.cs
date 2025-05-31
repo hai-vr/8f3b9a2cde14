@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using BattlePhaze.SettingsManager;
 using UnityEngine;
@@ -24,6 +25,7 @@ namespace Hai.Project12.UserInterfaceElements
         private P12UILine _lineControls;
 
         private H12Builder _h12Builder;
+        private H12BattlePhazeSettingsHandler _h12BattlePhazeSettings;
 
         private void Start()
         {
@@ -32,6 +34,7 @@ namespace Hai.Project12.UserInterfaceElements
                 .Select(input => input.Name)
             ));
 
+            _h12BattlePhazeSettings = new H12BattlePhazeSettingsHandler(SettingsManager.Instance);
             _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
 
             _audioOptions = new List<string>(new[]
@@ -181,18 +184,25 @@ namespace Hai.Project12.UserInterfaceElements
                 var isAngle = maxValue == 90f;
 
                 var so = ScriptableObject.CreateInstance<P12SettableFloatElement>();
-                // so.englishTitle = $"{option.Name} ({minValue} -> {maxValue})";
                 so.englishTitle = $"{option.Name}";
                 so.min = minValue;
                 so.max = maxValue;
                 so.defaultValue = float.Parse(option.ValueDefault);
-                so.storedValue = float.Parse(option.SelectedValue);
                 so.displayAs =
                     isPercentage01 ? P12SettableFloatElement.P12UnitDisplayKind.Percentage01
                     : isPercentage0100 ? P12SettableFloatElement.P12UnitDisplayKind.Percentage0100
                     : isPercentage080 ? P12SettableFloatElement.P12UnitDisplayKind.Percentage080
                     : isAngle ? P12SettableFloatElement.P12UnitDisplayKind.AngleDegrees
                     : P12SettableFloatElement.P12UnitDisplayKind.ArbitraryFloat;
+
+                so.storedValue = float.Parse(option.SelectedValue);
+                // Order matters: Need to declare this event only after we initialized storedValue
+                so.OnValueChanged += value =>
+                {
+                    option.SelectedValue = value.ToString(CultureInfo.InvariantCulture);
+                    _h12BattlePhazeSettings.SaveAndSubmitToBPManager(option, value);
+                };
+
                 _h12Builder.P12SliderElement(so);
             }
             else if (option.Type == SettingsManagerEnums.IsType.DropDown)
