@@ -149,7 +149,7 @@ namespace Hai.Project12.UserInterfaceElements
             _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement("Face Tracking", 0f));
             _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Unlit", 0f));
             _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Blush", 0.6f));
-            _h12Builder.P12SingularButton(_L_With_Unlocalizable("ui.settings.extra.send_netmessage_test", "Send Netmessage Test"), _L("ui.settings.extra.trigger"), () => { });
+            _h12Builder.P12SingularButton(LocalizeUserProvidedString("ui.settings.extra.send_netmessage_test", "Send Netmessage Test"), _L("ui.settings.extra.trigger"), () => { });
         }
 
         private static P12SettableFloatElement UserProvided_SettableFloatElement(string battlePhazeName, float storedValue)
@@ -158,7 +158,7 @@ namespace Hai.Project12.UserInterfaceElements
 
             var result = ScriptableObject.CreateInstance<P12SettableFloatElement>();
             result.locKey = localizationKey;
-            result.englishTitle = _L_With_Unlocalizable(result.locKey, battlePhazeName);
+            result.englishTitle = LocalizeUserProvidedString(result.locKey, battlePhazeName);
             result.storedValue = storedValue;
             return result;
         }
@@ -285,6 +285,8 @@ namespace Hai.Project12.UserInterfaceElements
             }
             else if (option.Type == SettingsManagerEnums.IsType.DropDown || option.Type == SettingsManagerEnums.IsType.Dynamic)
             {
+                // TODO: Items within the dropdown need to be localized.
+
                 var so = ScriptableObject.CreateInstance<P12SettableStringElement>();
                 so.locKey = localizationKey;
                 so.englishTitle = englishTitle;

@@ -134,6 +134,8 @@ namespace Hai.Project12.UserInterfaceElements
 
         internal P12UILine P12DropdownElement(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp_nullable)
         {
+            // TODO: Items within the dropdown need to be localized.
+
             string Getter() => settableChoice.storedValue;
             void Setter(string newValue) => settableChoice.storedValue = newValue;
 
@@ -211,6 +213,8 @@ namespace Hai.Project12.UserInterfaceElements
 
         internal void P12ToggleForDropdown(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp)
         {
+            // TODO: Items within the dropdown need to be localized.
+
             string Getter() => settableChoice.storedValue;
             void Setter(string newValue) => settableChoice.storedValue = newValue;
 

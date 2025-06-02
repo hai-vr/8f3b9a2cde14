@@ -70,9 +70,9 @@ namespace Hai.Project12.UserInterfaceElements
             return Localize(key, null);
         }
 
-        public static string _L_With_Unlocalizable(string key, string otherwise)
+        public static string LocalizeUserProvidedString(string key, string otherwise)
         {
-            return Localize(key, otherwise);
+            return LocalizationKeyToP12Name.GetValueOrDefault(key, otherwise);
         }
 
         // This function was split into two (without using optional params) to identify the callers of the functions.

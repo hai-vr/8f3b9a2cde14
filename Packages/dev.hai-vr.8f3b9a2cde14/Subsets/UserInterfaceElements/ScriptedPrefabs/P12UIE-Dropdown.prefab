@@ -1031,7 +1031,7 @@ GameObject:
   - component: {fileID: 8408310935313765667}
   - component: {fileID: 2212836903115285092}
   m_Layer: 5
-  m_Name: More
+  m_Name: Higher
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1385,7 +1385,7 @@ GameObject:
   - component: {fileID: 8919321500062482770}
   - component: {fileID: 7419257709180334833}
   m_Layer: 5
-  m_Name: Less
+  m_Name: Lower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2002,6 +2002,7 @@ GameObject:
   - component: {fileID: 4403519825815612399}
   - component: {fileID: 2067041928886436704}
   - component: {fileID: 9189290615046955105}
+  - component: {fileID: 4682385751102643663}
   m_Layer: 5
   m_Name: P12UIE-Dropdown
   m_TagString: Untagged
@@ -2102,6 +2103,21 @@ MonoBehaviour:
   title: {fileID: 5193080854114471096}
   value: {fileID: 6737991457796717335}
   control: {fileID: 721629711436642761}
+--- !u!114 &4682385751102643663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4932860037478928534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 568e7b177b0440b78f86e652f6cc701a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  dropdown: {fileID: 1668520623426302542}
+  lower: {fileID: 7419257709180334833}
+  higher: {fileID: 2212836903115285092}
 --- !u!1 &5279518452216423136
 GameObject:
   m_ObjectHideFlags: 0
@@ -2567,7 +2583,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.0000047683716}
+  m_AnchoredPosition: {x: 0, y: -0.000011444092}
   m_SizeDelta: {x: 0, y: 14}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!1 &8455019751464263679
