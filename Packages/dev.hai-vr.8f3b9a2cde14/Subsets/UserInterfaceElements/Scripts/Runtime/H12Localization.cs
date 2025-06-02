@@ -57,6 +57,9 @@ namespace Hai.Project12.UserInterfaceElements
             //
             { "ui.settings.option.language", "Language" },
             //
+            { "ui.settings.option.localization", "Localization" },
+            { "ui.settings.action.toggle_localization", "Toggle localization" },
+            //
             { "ui.settings.menu.gadgets", "Gadgets" },
             { "ui.settings.menu.actions", "Actions" },
             { "ui.settings.menu.audio", "Audio" },

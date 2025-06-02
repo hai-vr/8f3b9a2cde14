@@ -153,6 +153,11 @@ namespace Hai.Project12.UserInterfaceElements
                 case P12ExampleCategory.Interface:
                     _lineInterface.SetFocused(true);
                     CreateOptionsFor(_interfaceOptions);
+                    _h12Builder.P12SingularButton(_L("ui.settings.option.localization"), _L("ui.settings.action.toggle_localization"), () =>
+                    {
+                        DebugShowKeysOnly = !DebugShowKeysOnly;
+                        Click(P12ExampleCategory.Interface);
+                    });
                     break;
                 case P12ExampleCategory.Controls:
                     _lineControls.SetFocused(true);
@@ -205,7 +210,6 @@ namespace Hai.Project12.UserInterfaceElements
             });
             _h12Builder.P12SingularButton(_L("ui.settings.option.moderation"), _L("ui.settings.action.open_admin_panel"), () =>
             {
-
                 BasisUIManagement.CloseAllMenus();
                 AddressableGenericResource resource = new AddressableGenericResource("BasisUIAdminPanel", AddressableExpectedResult.SingleItem);
                 BasisUIBase.OpenMenuNow(resource);

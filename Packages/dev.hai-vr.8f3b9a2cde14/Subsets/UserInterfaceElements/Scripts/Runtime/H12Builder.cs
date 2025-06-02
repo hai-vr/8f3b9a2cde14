@@ -5,14 +5,13 @@ using BattlePhaze.SettingsManager;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static Hai.Project12.UserInterfaceElements.H12Localization;
 using Object = UnityEngine.Object;
 
 namespace Hai.Project12.UserInterfaceElements
 {
     internal class H12Builder
     {
-        private const string EnglishOffLabel = "OFF";
-        private const string EnglishOnLabel = "ON";
         private readonly P12UIEScriptedPrefabs _prefabs;
         private readonly Transform _layoutGroupHolder;
         private readonly Transform _titleGroupHolder;
@@ -161,7 +160,7 @@ namespace Hai.Project12.UserInterfaceElements
                     }
                     else
                     {
-                        dropdownTitle = H12Localization._L(locKeyNullableWhenLocalizationIncomplete);
+                        dropdownTitle = _L(locKeyNullableWhenLocalizationIncomplete);
                     }
                     dropdownOptions.Add(new TMP_Dropdown.OptionData(dropdownTitle));
                 }
@@ -210,11 +209,11 @@ namespace Hai.Project12.UserInterfaceElements
             var truthness = current;
 
             dropdown.SetIsOnWithoutNotify(truthness);
-            line.SetValue(truthness ? EnglishOnLabel : EnglishOffLabel);
+            line.SetValue(truthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
 
             dropdown.onValueChanged.AddListener(newTruthness =>
             {
-                line.SetValue(newTruthness ? EnglishOnLabel : EnglishOffLabel);
+                line.SetValue(newTruthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
                 setter(newTruthness);
                 AnyValueChanged?.Invoke();
             });
@@ -242,12 +241,12 @@ namespace Hai.Project12.UserInterfaceElements
             var truthness = current == "true";
 
             dropdown.SetIsOnWithoutNotify(truthness);
-            line.SetValue(truthness ? EnglishOnLabel : EnglishOffLabel);
+            line.SetValue(truthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
 
             dropdown.onValueChanged.AddListener(newTruthness =>
             {
                 var realNewValue = bpOptionTemp.RealValues[newTruthness ? 0 : 1];
-                line.SetValue(newTruthness ? EnglishOnLabel : EnglishOffLabel);
+                line.SetValue(newTruthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
                 setter(realNewValue);
                 AnyValueChanged?.Invoke();
             });
@@ -267,7 +266,7 @@ namespace Hai.Project12.UserInterfaceElements
                     return $"{value:0}%";
                 case P12SettableFloatElement.P12UnitDisplayKind.AngleDegrees:
                 {
-                    if (value < 0) return EnglishOffLabel;
+                    if (value < 0) return _L("ui.settings.dropdown.off");
                     return $"{value:0} deg";
                 }
                 case P12SettableFloatElement.P12UnitDisplayKind.InGameRangeUnityUnits:
