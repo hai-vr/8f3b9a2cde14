@@ -13,6 +13,7 @@ framework itself.
 The following items will need to be enacted:
 - We will need to add some form of support for the right-click action on desktop for our telekinesis action (grab at a distance).
 - We will need to change the action of the Escape button to open our own Pause menu.
+- We will need to change the raycast to ignore the world geometry if we're interacting with a non-world menu.
 - We will need to figure out a way to open the Pause menu in desktop mode on first join, so that the cursor always works there.
 - We will need to change the physics timestep of the project to 60 physics updates per second.
   - (All Rigidbodies will need to be set to Interpolate, see the README.md inside RigidbodyAdditions/)

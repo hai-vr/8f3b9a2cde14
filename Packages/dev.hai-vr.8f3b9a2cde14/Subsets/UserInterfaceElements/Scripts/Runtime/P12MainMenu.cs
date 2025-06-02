@@ -49,7 +49,7 @@ namespace Hai.Project12.UserInterfaceElements
         {
             Clear();
             _h12builder.P12CenteredButton("New Game", NewGame);
-            _h12builder.P12CenteredButton("Load Game", () => { });
+            _h12builder.P12CenteredButton("Load Game", UnloadGame);
             _h12builder.P12CenteredButton("Co-op", () => { });
             _h12builder.P12CenteredButton("Settings", () =>
             {
@@ -106,6 +106,11 @@ namespace Hai.Project12.UserInterfaceElements
             temp___worldSpaceUICenter.rotation = temp___worldSpaceDefaultPos.rotation;
 
             MakeCursorHidden();
+        }
+
+        private void UnloadGame()
+        {
+            gameLevelManagement.UnloadAndReturnToDefaultScene();
         }
 
         private void MakeCursorHidden()

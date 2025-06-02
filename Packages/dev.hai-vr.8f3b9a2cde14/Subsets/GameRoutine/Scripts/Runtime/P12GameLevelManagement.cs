@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -44,10 +45,34 @@ namespace Subsets.GameRoutine.Scripts.Runtime
             };
 
             var loadedLevel = await _h12BasisGameRoutineBlindSpots.LoadEmbeddedGameLevel(level, true, basisProgressReport, LoadSceneMode.Additive);
+
+            await TetrahedralizeProbes();
+
             _hasLevel = true;
 
             _isActivelyLoadingLevel = false;
             _level = loadedLevel;
+        }
+
+        public async Task UnloadAndReturnToDefaultScene()
+        {
+            if (!_hasLevel) return;
+
+            await _h12BasisGameRoutineBlindSpots.UnloadGameLevel(_level);
+            _hasLevel = false;
+
+            defaultSceneElements.SetActive(true);
+        }
+
+        private static async Task TetrahedralizeProbes()
+        {
+            // TODO: Is doing all that await stuff even necessary?
+            var tetrahedralizationTask = new TaskCompletionSource<bool>();
+            Action tetraFn = () => tetrahedralizationTask.SetResult(true);
+            LightProbes.tetrahedralizationCompleted += tetraFn;
+            LightProbes.TetrahedralizeAsync();
+            await tetrahedralizationTask.Task;
+            LightProbes.tetrahedralizationCompleted -= tetraFn;
         }
     }
 }
