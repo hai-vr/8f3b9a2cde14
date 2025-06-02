@@ -1,5 +1,5 @@
 {
-    "name": "Hai.Project12.UserInterfaceElements.Runtime",
+    "name": "Hai.Project12.GameRoutine.Runtime",
     "rootNamespace": "",
     "references": [
         "Unity.TextMeshPro",
@@ -7,8 +7,8 @@
         "Basis",
         "BasisAddressableDriver",
         "Unity.Addressables",
-        "Hai.Project12.GameRoutine.Runtime",
-        "BasisSDK"
+        "BasisSDK",
+        "BasisDebug"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,14 +1,12 @@
 {
-    "name": "Hai.Project12.UserInterfaceElements.Runtime",
+    "name": "Hai.Project12.InteractionElements.Runtime",
     "rootNamespace": "",
     "references": [
         "Unity.TextMeshPro",
         "BattlePhazeSettingsManger",
         "Basis",
         "BasisAddressableDriver",
-        "Unity.Addressables",
-        "Hai.Project12.GameRoutine.Runtime",
-        "BasisSDK"
+        "Unity.Addressables"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

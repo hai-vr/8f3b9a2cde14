@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using BattlePhaze.SettingsManager;
+using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements
 {
@@ -17,8 +18,9 @@ namespace Hai.Project12.UserInterfaceElements
             option.SelectedValue = newValue.ToString(CultureInfo.InvariantCulture);
             SettingsManagerStorageManagement.Save(BPMgr);
 
-            // HACK: SendOption requires editing the original sliders
-            var bpInput = SettingsManager.Instance.Options[option.OptionIndex].ObjectInput;
+            // HACK: SendOption may require accessing the original sliders
+            var options = SettingsManager.Instance.Options;
+            var bpInput = option.OptionIndex >= options.Count ? options[option.OptionIndex].ObjectInput : null;
             if (bpInput is UnityEngine.UI.Slider slider)
             {
                 slider.value = newValue;

@@ -162,7 +162,6 @@ namespace Hai.Project12.UserInterfaceElements
             dropdown.onValueChanged.AddListener(newIndex =>
             {
                 var realNewValue = bpOptionTemp.RealValues[newIndex];
-                Debug.Log($"value changed to {newIndex} ({realNewValue})");
                 line.SetValue($"{realNewValue}");
                 setter(realNewValue);
                 AnyValueChanged?.Invoke();
@@ -224,7 +223,6 @@ namespace Hai.Project12.UserInterfaceElements
             dropdown.onValueChanged.AddListener(newTruthness =>
             {
                 var realNewValue = bpOptionTemp.RealValues[newTruthness ? 0 : 1];
-                Debug.Log($"value changed to {newTruthness} ({realNewValue})");
                 line.SetValue(newTruthness ? EnglishOnLabel : EnglishOffLabel);
                 setter(realNewValue);
                 AnyValueChanged?.Invoke();

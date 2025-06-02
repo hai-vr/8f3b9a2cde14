@@ -34,10 +34,6 @@ namespace Hai.Project12.UserInterfaceElements
         private void Start()
         {
             SettingsManager.Instance.Initalize(true);
-            Debug.Log(string.Join(",", SettingsManager.Instance.Options
-                .Where(input => input.Type == SettingsManagerEnums.IsType.Dynamic)
-                .Select(input => input.Name)
-            ));
 
             _h12BattlePhazeSettings = new H12BattlePhazeSettingsHandler(SettingsManager.Instance);
             _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
@@ -90,7 +86,6 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void Click(P12ExampleCategory exampleCategory)
         {
-            Debug.Log($"Clicked on {exampleCategory}");
             foreach (var comp in layoutGroupHolder.GetComponentsInChildren<P12UILine>())
             {
                 if (comp) Destroy(comp.gameObject);
