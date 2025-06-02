@@ -9,7 +9,9 @@
         "Unity.Addressables",
         "Hai.Project12.GameRoutine.Runtime",
         "BasisSDK",
-        "BasisDebug"
+        "BasisDebug",
+        "Unity.InputSystem",
+        "SettingsManagerModules"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -91,7 +91,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void NewGame()
         {
-            gameLevelManagement.Load(P12GameLevelManagement.SampleEmbeddedLevel, (UniqueID, progress, eventDescription) =>
+            gameLevelManagement.Load(P12GameLevelManagement.SampleEmbeddedLevel1, (UniqueID, progress, eventDescription) =>
             {
                 if (progress == 100f)
                 {

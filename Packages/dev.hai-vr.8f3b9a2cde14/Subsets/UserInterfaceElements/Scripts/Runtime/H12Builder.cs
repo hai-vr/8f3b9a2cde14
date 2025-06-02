@@ -132,7 +132,7 @@ namespace Hai.Project12.UserInterfaceElements
             });
         }
 
-        internal void P12DropdownElement(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp)
+        internal P12UILine P12DropdownElement(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp_nullable)
         {
             string Getter() => settableChoice.storedValue;
             void Setter(string newValue) => settableChoice.storedValue = newValue;
@@ -148,24 +148,35 @@ namespace Hai.Project12.UserInterfaceElements
             var dropdown = ours.GetComponentInChildren<TMP_Dropdown>(true);
 
             var dropdownOptions = new List<TMP_Dropdown.OptionData>();
-            foreach (var realValue in bpOptionTemp.RealValues)
+            if (bpOptionTemp_nullable != null)
             {
-                dropdownOptions.Add(new TMP_Dropdown.OptionData(realValue));
+                foreach (var realValue in bpOptionTemp_nullable.RealValues)
+                {
+                    dropdownOptions.Add(new TMP_Dropdown.OptionData(realValue));
+                }
             }
             dropdown.options = dropdownOptions;
 
             var current = getter();
 
-            dropdown.SetValueWithoutNotify(bpOptionTemp.RealValues.IndexOf(settableChoice.storedValue));
+            if (bpOptionTemp_nullable != null)
+            {
+                dropdown.SetValueWithoutNotify(bpOptionTemp_nullable.RealValues.IndexOf(settableChoice.storedValue));
+            }
             line.SetValue($"{current}");
 
-            dropdown.onValueChanged.AddListener(newIndex =>
+            if (bpOptionTemp_nullable != null)
             {
-                var realNewValue = bpOptionTemp.RealValues[newIndex];
-                line.SetValue($"{realNewValue}");
-                setter(realNewValue);
-                AnyValueChanged?.Invoke();
-            });
+                dropdown.onValueChanged.AddListener(newIndex =>
+                {
+                    var realNewValue = bpOptionTemp_nullable.RealValues[newIndex];
+                    line.SetValue($"{realNewValue}");
+                    setter(realNewValue);
+                    AnyValueChanged?.Invoke();
+                });
+            }
+
+            return line;
         }
 
         internal void P12ToggleForFloat(P12SettableFloatElement settableChoice)

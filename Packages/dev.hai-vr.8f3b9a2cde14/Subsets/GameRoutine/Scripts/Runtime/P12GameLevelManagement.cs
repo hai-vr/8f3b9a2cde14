@@ -7,7 +7,8 @@ namespace Subsets.GameRoutine.Scripts.Runtime
 {
     public class P12GameLevelManagement : MonoBehaviour
     {
-        public const string SampleEmbeddedLevel = "Assets/_Hai_BasisCyanKey/BasisCyanKey.unity";
+        public const string SampleEmbeddedLevel1 = "Assets/_Hai_BasisCyanKey/BasisCyanKey.unity";
+        public const string SampleEmbeddedLevel2 = "Assets/_Hai_BasisCyanKey/BasisCyanKey_Level2.unity";
 
         [SerializeField] private GameObject defaultSceneElements;
 

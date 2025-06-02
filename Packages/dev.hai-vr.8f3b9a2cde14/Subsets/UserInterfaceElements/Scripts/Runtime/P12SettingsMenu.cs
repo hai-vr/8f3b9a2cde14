@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Basis.Scripts.Addressable_Driver;
 using Basis.Scripts.Addressable_Driver.Enums;
 using Basis.Scripts.Device_Management;
 using Basis.Scripts.UI.UI_Panels;
 using BattlePhaze.SettingsManager;
+using TMPro;
 using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements
@@ -12,6 +14,7 @@ namespace Hai.Project12.UserInterfaceElements
     {
         private const string SpecialPrefix = "//SPECIAL/";
         private const string SpecialSnapTurn = SpecialPrefix + "SnapTurn";
+        private const string SpecialMicrophone = SpecialPrefix + "Microphone";
         private const string Settings_SnapTurnAngle_Key = "Snap Turn Angle"; // This is not a localization label.
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
         [SerializeField] private Transform layoutGroupHolder;
@@ -37,12 +40,23 @@ namespace Hai.Project12.UserInterfaceElements
             _h12BattlePhazeSettings = new H12BattlePhazeSettingsHandler(SettingsManager.Instance);
             _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
 
+            // TODO:
+            // - Microphone Source
+            // Is Dynamic:
+            // - Monitor
+            // - Resolution
+            // - ScreenMode
+
+            BasisDebug.Log(string.Join(",", SettingsManager.Instance.Options
+                .Select(input => $"{input.Name}({input.Type})")));
+
             _audioOptions = new List<string>(new[]
             {
                 "Main Audio", // Slider
                 "Menus Volume", // Slider
                 "World Volume", // Slider
                 "Player Volume", // Slider
+                SpecialMicrophone, // Special
                 "Microphone Denoiser", // Dropdown
                 "Microphone Volume", // Slider
                 "Microphone Range", // Slider
@@ -73,6 +87,12 @@ namespace Hai.Project12.UserInterfaceElements
 
                 "Foveated Rendering Level", // Slider
                 "Field Of View", // Slider
+
+                "Memory Allocation", // Dropdown
+
+                "Resolution", // Dynamic
+                "ScreenMode", // Dynamic
+                "Monitor", // Dynamic
             });
 
             _lineGadgets = _h12Builder.P12TitleButton("Gadgets", () => Click(P12ExampleCategory.Gadgets));
@@ -200,6 +220,17 @@ namespace Hai.Project12.UserInterfaceElements
                         _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, 0f);
                     });
                 }
+                else if (optionName == SpecialMicrophone)
+                {
+                    var stringElement = ScriptableObject.CreateInstance<P12SettableStringElement>();
+                    stringElement.englishTitle = "Microphone";
+                    var line = _h12Builder.P12DropdownElement(stringElement, null);
+
+                    line.gameObject.SetActive(false);
+                    var micSelector = line.gameObject.AddComponent<P12UIMicrophoneSelector>();
+                    micSelector.Dropdown = line.GetComponentInChildren<TMP_Dropdown>();
+                    line.gameObject.SetActive(true);
+                }
             }
 
             var option = _h12BattlePhazeSettings.FindOptionByNameOrNull(optionName);
@@ -239,7 +270,7 @@ namespace Hai.Project12.UserInterfaceElements
 
                 _h12Builder.P12SliderElement(so);
             }
-            else if (option.Type == SettingsManagerEnums.IsType.DropDown)
+            else if (option.Type == SettingsManagerEnums.IsType.DropDown || option.Type == SettingsManagerEnums.IsType.Dynamic)
             {
                 var so = ScriptableObject.CreateInstance<P12SettableStringElement>();
                 so.englishTitle = $"{option.Name}";
