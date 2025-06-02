@@ -11,11 +11,11 @@ namespace Hai.Project12.UserInterfaceElements
 {
     public class P12MainMenu : MonoBehaviour
     {
-        private const string SampleEmbeddedLevel = "Assets/_Hai_BasisCyanKey/BasisCyanKey.unity";
         [SerializeField] private GameObject temp___sceneElements; // TEMP: We'll need a way to clean the scene, so that the directional light in it doesn't interfere.
         [SerializeField] private Transform temp___worldSpaceDefaultPos; // TEMP: The UI system will need a manager on its own.
         [SerializeField] private Transform temp___worldSpaceUICenter; // TEMP: The UI system will need a manager on its own.
 
+        [SerializeField] private P12GameLevelManagement gameLevelManagement;
         [SerializeField] private RectTransform rootTransform;
 
         [SerializeField] private RectTransform mainPos;
@@ -37,11 +37,9 @@ namespace Hai.Project12.UserInterfaceElements
         private H12Builder _h12builder;
 
         private bool _weMadeCursorVisible;
-        private H12BasisGameRoutineBlindSpots _h12BasisGameRoutineBlindSpots;
 
         private void Start()
         {
-            _h12BasisGameRoutineBlindSpots = new H12BasisGameRoutineBlindSpots();
             _h12builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
 
             MakeMenu();
@@ -92,23 +90,21 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void NewGame()
         {
-            var basisProgressReport = new BasisProgressReport();
-            basisProgressReport.OnProgressReport += (string UniqueID, float progress, string eventDescription) =>
+            gameLevelManagement.Load(P12GameLevelManagement.SampleEmbeddedLevel, (UniqueID, progress, eventDescription) =>
             {
                 if (progress == 100f)
                 {
                     MakeMenu();
-                    temp___sceneElements.SetActive(false);
                 }
                 else
                 {
                     MakeLoading(progress);
                 }
-            };
-            _h12BasisGameRoutineBlindSpots.LoadEmbeddedGameLevel(SampleEmbeddedLevel, true, basisProgressReport, LoadSceneMode.Additive);
+            });
 
             temp___worldSpaceUICenter.position = temp___worldSpaceDefaultPos.position;
             temp___worldSpaceUICenter.rotation = temp___worldSpaceDefaultPos.rotation;
+
             MakeCursorHidden();
         }
 

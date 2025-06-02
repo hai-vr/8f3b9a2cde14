@@ -1,0 +1,53 @@
+﻿using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+namespace Subsets.GameRoutine.Scripts.Runtime
+{
+    public class P12GameLevelManagement : MonoBehaviour
+    {
+        public const string SampleEmbeddedLevel = "Assets/_Hai_BasisCyanKey/BasisCyanKey.unity";
+
+        [SerializeField] private GameObject defaultSceneElements;
+
+        private H12BasisGameRoutineBlindSpots _h12BasisGameRoutineBlindSpots;
+        private bool _isActivelyLoadingLevel;
+
+        private bool _hasLevel;
+        private Scene _level;
+
+        private void Start()
+        {
+            _h12BasisGameRoutineBlindSpots = new H12BasisGameRoutineBlindSpots();
+        }
+
+        public async Task Load(string level, BasisProgressReport.ProgressReportState progressReportStateFn)
+        {
+            if (_hasLevel)
+            {
+                await _h12BasisGameRoutineBlindSpots.UnloadGameLevel(_level);
+                _hasLevel = false;
+            }
+
+            // TODO: Prevent multi loads
+            _isActivelyLoadingLevel = true;
+
+            var basisProgressReport = new BasisProgressReport();
+            basisProgressReport.OnProgressReport += (string UniqueID, float progress, string eventDescription) =>
+            {
+                if (progress == 100f)
+                {
+                    defaultSceneElements.SetActive(false);
+                }
+
+                progressReportStateFn.Invoke(UniqueID, progress, eventDescription);
+            };
+
+            var loadedLevel = await _h12BasisGameRoutineBlindSpots.LoadEmbeddedGameLevel(level, true, basisProgressReport, LoadSceneMode.Additive);
+            _hasLevel = true;
+
+            _isActivelyLoadingLevel = false;
+            _level = loadedLevel;
+        }
+    }
+}

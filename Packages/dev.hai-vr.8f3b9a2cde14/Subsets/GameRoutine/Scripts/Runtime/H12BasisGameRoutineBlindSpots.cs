@@ -49,5 +49,10 @@ namespace Subsets.GameRoutine.Scripts.Runtime
 
             return new Scene();
         }
+
+        public async Task UnloadGameLevel(Scene loadedLevelNullable)
+        {
+            await SceneManager.UnloadSceneAsync(loadedLevelNullable);
+        }
     }
 }
