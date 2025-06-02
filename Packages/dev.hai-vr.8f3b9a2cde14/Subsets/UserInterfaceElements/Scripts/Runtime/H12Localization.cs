@@ -4,6 +4,8 @@ namespace Hai.Project12.UserInterfaceElements
 {
     internal class H12Localization
     {
+        public const bool DebugShowKeysOnly = false;
+
         private static readonly Dictionary<string, string> LocalizationKeyToP12Name = new Dictionary<string, string>()
         {
             { "ui.settings.option.ambient_occlusion", "Ambient Occlusion" },
@@ -63,15 +65,25 @@ namespace Hai.Project12.UserInterfaceElements
             { "ui.settings.action.snap_turn", "Snap Turn" },
             { "ui.settings.action.smooth_turn", "Smooth Turn" },
             { "ui.settings.action.no_turn", "Do Not Turn" },
+            //
+            { "ui.main_menu.new_game", "New game" },
+            { "ui.main_menu.load_game", "Load game" },
+            { "ui.main_menu.coop", "Co-op" },
+            { "ui.main_menu.settings", "Settings" },
+            { "ui.main_menu.sandbox", "Back to Sandbox" },
         };
 
         public static string _L(string key)
         {
+            if (DebugShowKeysOnly) return $"{{{key}}}";
+
             return Localize(key, null);
         }
 
         public static string LocalizeUserProvidedString(string key, string otherwise)
         {
+            if (DebugShowKeysOnly) return $"{{{key}}}";
+
             return LocalizationKeyToP12Name.GetValueOrDefault(key, otherwise);
         }
 

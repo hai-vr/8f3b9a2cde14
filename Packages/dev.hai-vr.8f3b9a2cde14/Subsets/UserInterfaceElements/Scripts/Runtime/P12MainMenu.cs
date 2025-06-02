@@ -2,6 +2,7 @@
 using Basis.Scripts.UI.UI_Panels;
 using Subsets.GameRoutine.Scripts.Runtime;
 using UnityEngine;
+using static Hai.Project12.UserInterfaceElements.H12Localization;
 
 namespace Hai.Project12.UserInterfaceElements
 {
@@ -45,10 +46,10 @@ namespace Hai.Project12.UserInterfaceElements
         private void MakeMenu()
         {
             Clear();
-            _h12builder.P12CenteredButton("New Game", NewGame);
-            _h12builder.P12CenteredButton("Load Game", UnloadGame);
-            _h12builder.P12CenteredButton("Co-op", () => { });
-            _h12builder.P12CenteredButton("Settings", () =>
+            _h12builder.P12CenteredButton(_L("ui.main_menu.new_game"), NewGame);
+            _h12builder.P12CenteredButton(_L("ui.main_menu.load_game"), UnloadGame);
+            _h12builder.P12CenteredButton(_L("ui.main_menu.coop"), () => { });
+            _h12builder.P12CenteredButton(_L("ui.main_menu.settings"), () =>
             {
                 var newActive = !settings.activeSelf;
                 settings.SetActive(newActive);
@@ -64,7 +65,7 @@ namespace Hai.Project12.UserInterfaceElements
                     // rootTransform.localPosition = mainPos.localPosition;
                 }
             });
-            _h12builder.P12CenteredButton("Back to Sandbox", () =>
+            _h12builder.P12CenteredButton(_L("ui.main_menu.sandbox"), () =>
             {
                 settings.SetActive(false);
                 MakeCursorHidden();
