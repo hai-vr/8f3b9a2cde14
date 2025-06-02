@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Basis.Scripts.Addressable_Driver;
 using Basis.Scripts.Addressable_Driver.Enums;
 using Basis.Scripts.Device_Management;
@@ -9,7 +8,7 @@ using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements
 {
-    public class P12Example : MonoBehaviour
+    public class P12SettingsMenu : MonoBehaviour
     {
         private const string SpecialPrefix = "//SPECIAL/";
         private const string SpecialSnapTurn = SpecialPrefix + "SnapTurn";

@@ -16,6 +16,7 @@ namespace Hai.Project12.UserInterfaceElements
         [SerializeField] private Transform temp___worldSpaceUICenter; // TEMP: The UI system will need a manager on its own.
 
         [SerializeField] private P12GameLevelManagement gameLevelManagement;
+        [SerializeField] private P12HijackBasisPointRaycaster hijackRaycaster;
         [SerializeField] private RectTransform rootTransform;
 
         [SerializeField] private RectTransform mainPos;
@@ -118,6 +119,7 @@ namespace Hai.Project12.UserInterfaceElements
             if (_weMadeCursorVisible)
             {
                 BasisCursorManagement.LockCursor(nameof(P12MainMenu));
+                hijackRaycaster.ReturnMask();
                 _weMadeCursorVisible = false;
             }
         }
@@ -127,6 +129,7 @@ namespace Hai.Project12.UserInterfaceElements
             if (!_weMadeCursorVisible)
             {
                 BasisCursorManagement.UnlockCursor(nameof(P12MainMenu));
+                hijackRaycaster.HijackMask();
                 _weMadeCursorVisible = true;
             }
         }
