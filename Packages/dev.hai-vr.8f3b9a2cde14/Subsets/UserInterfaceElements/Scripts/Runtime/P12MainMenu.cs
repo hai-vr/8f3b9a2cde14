@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using Basis.Scripts.UI.UI_Panels;
-using BattlePhaze.SettingsManager;
 using Subsets.GameRoutine.Scripts.Runtime;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Hai.Project12.UserInterfaceElements
 {
@@ -91,6 +87,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void NewGame()
         {
+            settings.SetActive(false);
             gameLevelManagement.Load(P12GameLevelManagement.SampleEmbeddedLevel1, (UniqueID, progress, eventDescription) =>
             {
                 if (progress == 100f)
@@ -111,6 +108,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void UnloadGame()
         {
+            settings.SetActive(false);
             gameLevelManagement.UnloadAndReturnToDefaultScene();
         }
 

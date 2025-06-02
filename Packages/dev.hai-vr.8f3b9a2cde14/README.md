@@ -25,7 +25,7 @@ The following items will need to be enacted:
 Code that was copied from Basis in order to derive functionality. May have to be pushed to upstream if relevant.
 
 - There is no built-in Basis method to load a scene from a non-bundle. I am adding a method to load a level from a scene path,
-  but that scene path is not yet processed (e.g. audio mixer, and possible probe tetrahydralization?)
+  but that scene path is not yet processed (e.g. audio mixer, and possible probe tetrahedralization?)
 
 ### Hijacked code
 

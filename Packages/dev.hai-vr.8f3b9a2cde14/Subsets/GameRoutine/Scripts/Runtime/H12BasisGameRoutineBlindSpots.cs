@@ -8,6 +8,7 @@ namespace Subsets.GameRoutine.Scripts.Runtime
     {
         // From BasisBundleLoadAsset.
 
+        /// Load scene without a bundle. Calling this does not auto-re-tetrahedralize probes.
         public async Task<Scene> LoadEmbeddedGameLevel(string scenePath, bool MakeActiveScene, BasisProgressReport progressCallback, LoadSceneMode loadSceneMode)
         {
             string UniqueID = BasisGenerateUniqueID.GenerateUniqueID();
@@ -50,6 +51,7 @@ namespace Subsets.GameRoutine.Scripts.Runtime
             return new Scene();
         }
 
+        /// Unload provided scene. Calling this does not auto-re-tetrahedralize probes.
         public async Task UnloadGameLevel(Scene loadedLevelNullable)
         {
             await SceneManager.UnloadSceneAsync(loadedLevelNullable);

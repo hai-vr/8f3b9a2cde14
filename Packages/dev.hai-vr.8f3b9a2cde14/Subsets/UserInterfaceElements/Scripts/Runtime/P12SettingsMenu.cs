@@ -7,6 +7,7 @@ using Basis.Scripts.UI.UI_Panels;
 using BattlePhaze.SettingsManager;
 using TMPro;
 using UnityEngine;
+using static Hai.Project12.UserInterfaceElements.H12Localization;
 
 namespace Hai.Project12.UserInterfaceElements
 {
@@ -95,11 +96,11 @@ namespace Hai.Project12.UserInterfaceElements
                 "Monitor", // Dynamic
             });
 
-            _lineGadgets = _h12Builder.P12TitleButton("Gadgets", () => Click(P12ExampleCategory.Gadgets));
-            _lineActions = _h12Builder.P12TitleButton("Actions", () => Click(P12ExampleCategory.Actions));
-            _lineAudio = _h12Builder.P12TitleButton("Audio", () => Click(P12ExampleCategory.Audio));
-            _lineVideo = _h12Builder.P12TitleButton("Video", () => Click(P12ExampleCategory.Video));
-            _lineControls = _h12Builder.P12TitleButton("Controls", () => Click(P12ExampleCategory.Controls));
+            _lineGadgets = _h12Builder.P12TitleButton(_L("ui.settings.menu.gadgets"), () => Click(P12ExampleCategory.Gadgets));
+            _lineActions = _h12Builder.P12TitleButton(_L("ui.settings.menu.actions"), () => Click(P12ExampleCategory.Actions));
+            _lineAudio = _h12Builder.P12TitleButton(_L("ui.settings.menu.audio"), () => Click(P12ExampleCategory.Audio));
+            _lineVideo = _h12Builder.P12TitleButton(_L("ui.settings.menu.video"), () => Click(P12ExampleCategory.Video));
+            _lineControls = _h12Builder.P12TitleButton(_L("ui.settings.menu.controls"), () => Click(P12ExampleCategory.Controls));
             Click(P12ExampleCategory.Audio);
         }
 
@@ -144,39 +145,47 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void CreateGadgets()
         {
-            _h12Builder.P12ToggleForFloat(SettableFloatElement("Eye Tracking", 1f));
-            _h12Builder.P12ToggleForFloat(SettableFloatElement("Face Tracking", 0f));
-            _h12Builder.P12SliderElement(SettableFloatElement("Unlit", 0f));
-            _h12Builder.P12SliderElement(SettableFloatElement("Blush", 0.6f));
-            _h12Builder.P12SingularButton("Send Netmessage Test", "Trigger", () => { });
+            _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement("Eye Tracking", 1f));
+            _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement("Face Tracking", 0f));
+            _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Unlit", 0f));
+            _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Blush", 0.6f));
+            _h12Builder.P12SingularButton(_L_With_Unlocalizable("ui.settings.extra.send_netmessage_test", "Send Netmessage Test"), _L("ui.settings.extra.trigger"), () => { });
         }
 
-        private static P12SettableFloatElement SettableFloatElement(string englishTitle, float storedValue)
+        private static P12SettableFloatElement UserProvided_SettableFloatElement(string battlePhazeName, float storedValue)
         {
+            var localizationKey = BattlePhazeNameToLocalizationKey(battlePhazeName);
+
             var result = ScriptableObject.CreateInstance<P12SettableFloatElement>();
-            result.englishTitle = englishTitle;
+            result.locKey = localizationKey;
+            result.englishTitle = _L_With_Unlocalizable(result.locKey, battlePhazeName);
             result.storedValue = storedValue;
             return result;
         }
 
+        private static string BattlePhazeNameToLocalizationKey(string battlePhazeName)
+        {
+            return H12BattlePhazeNameToLocalizationKey.GetKeyOrNull(battlePhazeName) ?? $"ui.unknown.gen.{battlePhazeName.Replace(" ", "").ToLowerInvariant()}";
+        }
+
         private void CreateActions()
         {
-            _h12Builder.P12SingularButton("VR Mode", "Switch to VR", () =>
+            _h12Builder.P12SingularButton(_L("ui.settings.option.vr_mode"), _L("ui.settings.action.switch_to_vr"), () =>
             {
                 BasisDeviceManagement.Instance.SwitchMode("OpenVRLoader");
             });
-            _h12Builder.P12SingularButton("Desktop Mode", "Switch to Desktop", () =>
+            _h12Builder.P12SingularButton(_L("ui.settings.option.desktop_mode"), _L("ui.settings.action.switch_to_desktop"), () =>
             {
                 BasisDeviceManagement.Instance.SwitchMode(BasisDeviceManagement.Desktop);
             });
-            _h12Builder.P12SingularButton("Debug", "Open Console", () =>
+            _h12Builder.P12SingularButton(_L("ui.settings.option.debug"), _L("ui.settings.action.open_console"), () =>
             {
                 // See class: BasisUISettings
                 BasisUIManagement.CloseAllMenus();
                 AddressableGenericResource resource = new AddressableGenericResource("LoggerUI", AddressableExpectedResult.SingleItem);
                 BasisUIBase.OpenMenuNow(resource);
             });
-            _h12Builder.P12SingularButton("Moderation", "Open Admin Panel", () =>
+            _h12Builder.P12SingularButton(_L("ui.settings.option.moderation"), _L("ui.settings.action.open_admin_panel"), () =>
             {
 
                 BasisUIManagement.CloseAllMenus();
@@ -202,7 +211,7 @@ namespace Hai.Project12.UserInterfaceElements
                     var snapTurnAngleOption = _h12BattlePhazeSettings.FindOptionByNameOrNull(Settings_SnapTurnAngle_Key);
                     // TODO: Clicking these buttons should reflect back on the slider. Need event listeners
 
-                    _h12Builder.P12SingularButton("Turn", "Snap Turn", () =>
+                    _h12Builder.P12SingularButton(_L("ui.settings.option.turn"), _L("ui.settings.action.snap_turn"), () =>
                     {
                         var currentValue = _h12BattlePhazeSettings.ParseFloat(snapTurnAngleOption.SelectedValue);
                         if (currentValue <= 0f)
@@ -211,11 +220,11 @@ namespace Hai.Project12.UserInterfaceElements
                             _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, defaultValue);
                         }
                     });
-                    _h12Builder.P12SingularButton("", "Smooth Turn", () =>
+                    _h12Builder.P12SingularButton("", _L("ui.settings.action.smooth_turn"), () =>
                     {
                         _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, -1f);
                     });
-                    _h12Builder.P12SingularButton("", "Do Not Turn", () =>
+                    _h12Builder.P12SingularButton("", _L("ui.settings.action.no_turn"), () =>
                     {
                         _h12BattlePhazeSettings.SaveAndSubmitFloatToBPManager(snapTurnAngleOption, 0f);
                     });
@@ -223,7 +232,8 @@ namespace Hai.Project12.UserInterfaceElements
                 else if (optionName == SpecialMicrophone)
                 {
                     var stringElement = ScriptableObject.CreateInstance<P12SettableStringElement>();
-                    stringElement.englishTitle = "Microphone";
+                    stringElement.locKey = "ui.settings.option.microphone";
+                    stringElement.englishTitle = _L("ui.settings.option.microphone");
                     var line = _h12Builder.P12DropdownElement(stringElement, null);
 
                     line.gameObject.SetActive(false);
@@ -242,6 +252,8 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void CreateLineFor(SettingsMenuInput option)
         {
+            var localizationKey = BattlePhazeNameToLocalizationKey(option.Name);
+            var englishTitle = _L(localizationKey);
             if (option.Type == SettingsManagerEnums.IsType.Slider)
             {
                 var minValue = _h12BattlePhazeSettings.ParseFloat(option.SliderMinValue);
@@ -253,7 +265,8 @@ namespace Hai.Project12.UserInterfaceElements
                 var isAngle = maxValue == 90f;
 
                 var so = ScriptableObject.CreateInstance<P12SettableFloatElement>();
-                so.englishTitle = $"{option.Name}";
+                so.locKey = localizationKey;
+                so.englishTitle = englishTitle;
                 so.min = minValue;
                 so.max = maxValue;
                 so.defaultValue = _h12BattlePhazeSettings.ParseFloat(option.ValueDefault);
@@ -273,7 +286,8 @@ namespace Hai.Project12.UserInterfaceElements
             else if (option.Type == SettingsManagerEnums.IsType.DropDown || option.Type == SettingsManagerEnums.IsType.Dynamic)
             {
                 var so = ScriptableObject.CreateInstance<P12SettableStringElement>();
-                so.englishTitle = $"{option.Name}";
+                so.locKey = localizationKey;
+                so.englishTitle = englishTitle;
                 so.defaultValue = option.ValueDefault;
 
                 so.storedValue = option.SelectedValue;
