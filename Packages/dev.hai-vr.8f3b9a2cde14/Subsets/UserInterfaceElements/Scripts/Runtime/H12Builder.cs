@@ -13,18 +13,20 @@ namespace Hai.Project12.UserInterfaceElements
     internal class H12Builder
     {
         private readonly P12UIEScriptedPrefabs _prefabs;
+        private readonly P12UIHaptics _haptics;
         private readonly Transform _layoutGroupHolder;
         private readonly Transform _titleGroupHolder;
         private readonly float _controlExpansion;
 
         public event Action AnyValueChanged;
 
-        public H12Builder(P12UIEScriptedPrefabs prefabs, Transform layoutGroupHolder, Transform titleGroupHolder, float controlExpansion)
+        public H12Builder(P12UIEScriptedPrefabs prefabs, Transform layoutGroupHolder, Transform titleGroupHolder, float controlExpansion, P12UIHaptics haptics)
         {
             _prefabs = prefabs;
             _layoutGroupHolder = layoutGroupHolder;
             _titleGroupHolder = titleGroupHolder;
             _controlExpansion = controlExpansion;
+            _haptics = haptics;
         }
 
         private void SetupLine(P12UILine line)
@@ -46,6 +48,7 @@ namespace Hai.Project12.UserInterfaceElements
             {
                 clickFn();
                 PlayClickAudio();
+                _haptics.Click();
             });
 
             return line;
@@ -62,7 +65,11 @@ namespace Hai.Project12.UserInterfaceElements
             SetupLine(line);
 
             var btn = ours.GetComponentInChildren<Button>();
-            btn.onClick.AddListener(() => clickFn());
+            btn.onClick.AddListener(() =>
+            {
+                clickFn();
+                _haptics.Click();
+            });
 
             return line;
         }
@@ -84,6 +91,7 @@ namespace Hai.Project12.UserInterfaceElements
             {
                 clickFn();
                 PlayClickAudio();
+                _haptics.Click();
             });
 
             return line;
@@ -221,8 +229,6 @@ namespace Hai.Project12.UserInterfaceElements
 
         internal void P12ToggleForDropdown(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp)
         {
-            // TODO: Items within the dropdown need to be localized.
-
             string Getter() => settableChoice.storedValue;
             void Setter(string newValue) => settableChoice.storedValue = newValue;
 
@@ -234,16 +240,16 @@ namespace Hai.Project12.UserInterfaceElements
             line.SetTitle(settableChoice.localizedTitle);
             SetupLine(line);
 
-            var dropdown = ours.GetComponentInChildren<Toggle>(true);
+            var toggle = ours.GetComponentInChildren<Toggle>(true);
 
             var current = getter();
 
             var truthness = current == "true";
 
-            dropdown.SetIsOnWithoutNotify(truthness);
+            toggle.SetIsOnWithoutNotify(truthness);
             line.SetValue(truthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
 
-            dropdown.onValueChanged.AddListener(newTruthness =>
+            toggle.onValueChanged.AddListener(newTruthness =>
             {
                 var realNewValue = bpOptionTemp.RealValues[newTruthness ? 0 : 1];
                 line.SetValue(newTruthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));

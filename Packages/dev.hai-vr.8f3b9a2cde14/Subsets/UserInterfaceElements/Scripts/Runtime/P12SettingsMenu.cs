@@ -18,6 +18,7 @@ namespace Hai.Project12.UserInterfaceElements
         private const string SpecialMicrophone = SpecialPrefix + "Microphone";
         private const string Settings_SnapTurnAngle_Key = "Snap Turn Angle"; // This is not a localization label.
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
+        [SerializeField] private P12UIHaptics haptics;
         [SerializeField] private Transform layoutGroupHolder;
         [SerializeField] private Transform titleGroupHolder;
 
@@ -42,7 +43,7 @@ namespace Hai.Project12.UserInterfaceElements
             SettingsManager.Instance.Initalize(true);
 
             _h12BattlePhazeSettings = new H12BattlePhazeSettingsHandler(SettingsManager.Instance);
-            _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
+            _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, P12MainMenu.StandardControlExpansion, haptics);
 
             // TODO:
             // - Microphone Source
@@ -257,6 +258,7 @@ namespace Hai.Project12.UserInterfaceElements
                     stringElement.locKey = "ui.settings.option.microphone";
                     stringElement.localizedTitle = _L("ui.settings.option.microphone");
                     var line = _h12Builder.P12DropdownElement(stringElement, null, false);
+                    line.SetControlExpansion(P12MainMenu.StandardControlExpansion * 1.75f);
 
                     line.gameObject.SetActive(false);
                     var micSelector = line.gameObject.AddComponent<P12UIMicrophoneSelector>();
@@ -307,8 +309,6 @@ namespace Hai.Project12.UserInterfaceElements
             }
             else if (option.Type == SettingsManagerEnums.IsType.DropDown || option.Type == SettingsManagerEnums.IsType.Dynamic)
             {
-                // TODO: Items within the dropdown need to be localized.
-
                 var so = ScriptableObject.CreateInstance<P12SettableStringElement>();
                 so.locKey = localizationKey;
                 so.localizedTitle = localizedTitle;

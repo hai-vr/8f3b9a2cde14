@@ -17,7 +17,7 @@ and independent of the HMD refresh rate (which is a behaviour that differs from 
 
 This is a good thing, that constant project-wide, means at least the damage done should remain consistent.
 
-The constant is not currently chosen intentionally. I think it should be set to 60, but it's half that at the moment.
+The constant is not currently chosen intentionally. It is currently set at 50 per second (0.02s timestep).
 
 Other apps set it to be the same as the HMD refresh rate, probably due to an old article posted by Valve on the Steam forums.
 

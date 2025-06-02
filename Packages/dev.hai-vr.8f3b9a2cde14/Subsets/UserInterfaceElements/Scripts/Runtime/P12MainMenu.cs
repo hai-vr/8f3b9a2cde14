@@ -8,6 +8,8 @@ namespace Hai.Project12.UserInterfaceElements
 {
     public class P12MainMenu : MonoBehaviour
     {
+        public const float StandardControlExpansion = 1.75f;
+
         [SerializeField] private GameObject temp___sceneElements; // TEMP: We'll need a way to clean the scene, so that the directional light in it doesn't interfere.
         [SerializeField] private Transform temp___worldSpaceDefaultPos; // TEMP: The UI system will need a manager on its own.
         [SerializeField] private Transform temp___worldSpaceUICenter; // TEMP: The UI system will need a manager on its own.
@@ -22,6 +24,7 @@ namespace Hai.Project12.UserInterfaceElements
         [SerializeField] private BasisUIMovementDriver uiMovementDriver;
 
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
+        [SerializeField] private P12UIHaptics haptics;
         [SerializeField] private Transform layoutGroupHolder;
         [SerializeField] private Transform titleGroupHolder;
         [SerializeField] private GameObject settings;
@@ -38,7 +41,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void Start()
         {
-            _h12builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, 1.75f);
+            _h12builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, StandardControlExpansion, haptics);
 
             MakeMenu();
         }

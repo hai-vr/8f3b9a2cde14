@@ -17,7 +17,7 @@ namespace Hai.Project12.RigidbodyAdditions
             _ourRigidbody = GetComponent<Rigidbody>();
             if (_ourRigidbody.interpolation == RigidbodyInterpolation.None)
             {
-                Debug.LogWarning($"Rigidbody {gameObject} interpolation is set to None. This may cause visible stuttering at high-framerate, as the physics timestep is locked in Basis (as opposed to some other apps). See: https://docs.hai-vr.dev/docs/basis/physics-timestep");
+                Debug.LogWarning($"Rigidbody {gameObject} interpolation is set to None. This may cause visible stuttering at high-framerate, as the physics timestep is locked in Basis (as opposed to some other apps). Consider setting the Rigidbody interpolation type to Interpolate. See: https://docs.hai-vr.dev/docs/basis/physics-timestep");
             }
         }
 
