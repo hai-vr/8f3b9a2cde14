@@ -4,9 +4,9 @@ namespace Hai.Project12.UserInterfaceElements
 {
     internal class H12Localization
     {
-        public const bool DebugShowKeysOnly = false;
+        public static bool DebugShowKeysOnly = false;
 
-        private static readonly Dictionary<string, string> LocalizationKeyToP12Name = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> LocalizationKeyToP12English = new Dictionary<string, string>()
         {
             { "ui.settings.option.ambient_occlusion", "Ambient Occlusion" },
             { "ui.settings.option.antialiasing", "Antialiasing" },
@@ -55,10 +55,13 @@ namespace Hai.Project12.UserInterfaceElements
             { "ui.settings.action.open_console", "Open Console" },
             { "ui.settings.action.open_admin_panel", "Open Admin Panel" },
             //
+            { "ui.settings.option.language", "Language" },
+            //
             { "ui.settings.menu.gadgets", "Gadgets" },
             { "ui.settings.menu.actions", "Actions" },
             { "ui.settings.menu.audio", "Audio" },
             { "ui.settings.menu.video", "Video" },
+            { "ui.settings.menu.interface", "Interface" },
             { "ui.settings.menu.controls", "Controls" },
             //
             { "ui.settings.option.turn", "Turn" },
@@ -71,6 +74,25 @@ namespace Hai.Project12.UserInterfaceElements
             { "ui.main_menu.coop", "Co-op" },
             { "ui.main_menu.settings", "Settings" },
             { "ui.main_menu.sandbox", "Back to Sandbox" },
+            //
+            { "ui.settings.dropdown.ultra", "Ultra" },
+            { "ui.settings.dropdown.high", "High" },
+            { "ui.settings.dropdown.medium", "Medium" },
+            { "ui.settings.dropdown.low", "Low" },
+            { "ui.settings.dropdown.very_low", "Very low" },
+            { "ui.settings.dropdown.auto", "Auto" },
+            //
+            { "ui.settings.dropdown.dynamic", "Dynamic" },
+            { "ui.settings.dropdown.fullscreen", "Fullscreen" },
+            { "ui.settings.dropdown.maximized_window", "Maximized window" },
+            { "ui.settings.dropdown.windowed", "Windowed" },
+            { "ui.settings.dropdown.off", "OFF" },
+            { "ui.settings.dropdown.on", "ON" },
+            { "ui.settings.dropdown.normal", "Normal" },
+            { "ui.settings.dropdown.linear_upscaling", "Linear upscaling" },
+            { "ui.settings.dropdown.point_upscaling", "Point upscaling" },
+            { "ui.settings.dropdown.fsr_upscaling", "FSR upscaling" },
+            { "ui.settings.dropdown.spatial_temporal_upscaling", "Spatial temporal upscaling" },
         };
 
         public static string _L(string key)
@@ -84,13 +106,13 @@ namespace Hai.Project12.UserInterfaceElements
         {
             if (DebugShowKeysOnly) return $"{{{key}}}";
 
-            return LocalizationKeyToP12Name.GetValueOrDefault(key, otherwise);
+            return LocalizationKeyToP12English.GetValueOrDefault(key, otherwise);
         }
 
         // This function was split into two (without using optional params) to identify the callers of the functions.
         private static string Localize(string key, string englishNameNullable)
         {
-            if (LocalizationKeyToP12Name.TryGetValue(key, out var value)) return value;
+            if (LocalizationKeyToP12English.TryGetValue(key, out var value)) return value;
 
             if (englishNameNullable != null) return $"{englishNameNullable} {{{key}}}";
 

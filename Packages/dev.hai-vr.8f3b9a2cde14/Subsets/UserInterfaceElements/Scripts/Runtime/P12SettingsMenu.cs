@@ -23,12 +23,15 @@ namespace Hai.Project12.UserInterfaceElements
 
         private List<string> _audioOptions;
         private List<string> _controlsOptions;
+        private List<string> _interfaceOptions;
         private List<string> _videoOptions;
 
+        private P12UILine[] _lines;
         private P12UILine _lineGadgets;
         private P12UILine _lineActions;
         private P12UILine _lineAudio;
         private P12UILine _lineVideo;
+        private P12UILine _lineInterface;
         private P12UILine _lineControls;
 
         private H12Builder _h12Builder;
@@ -63,16 +66,9 @@ namespace Hai.Project12.UserInterfaceElements
                 "Microphone Range", // Slider
                 "Hearing Range", // Slider
             });
-            _controlsOptions = new List<string>(new[]
-            {
-                "Controller DeadZone", // Slider
-                SpecialSnapTurn, // Special
-                "Snap Turn Angle" // Slider
-            });
             _videoOptions = new List<string>(new[]
             {
                 "Maximum Avatar Distance", // Slider
-                "Debug Visuals", // Slider
 
                 "Render Resolution", // Slider
 
@@ -95,12 +91,32 @@ namespace Hai.Project12.UserInterfaceElements
                 "ScreenMode", // Dynamic
                 "Monitor", // Dynamic
             });
+            _interfaceOptions = new List<string>(new[]
+            {
+                "Debug Visuals", // Slider
+            });
+            _controlsOptions = new List<string>(new[]
+            {
+                "Controller DeadZone", // Slider
+                SpecialSnapTurn, // Special
+                "Snap Turn Angle" // Slider
+            });
 
             _lineGadgets = _h12Builder.P12TitleButton(_L("ui.settings.menu.gadgets"), () => Click(P12ExampleCategory.Gadgets));
             _lineActions = _h12Builder.P12TitleButton(_L("ui.settings.menu.actions"), () => Click(P12ExampleCategory.Actions));
             _lineAudio = _h12Builder.P12TitleButton(_L("ui.settings.menu.audio"), () => Click(P12ExampleCategory.Audio));
             _lineVideo = _h12Builder.P12TitleButton(_L("ui.settings.menu.video"), () => Click(P12ExampleCategory.Video));
+            _lineInterface = _h12Builder.P12TitleButton(_L("ui.settings.menu.interface"), () => Click(P12ExampleCategory.Interface));
             _lineControls = _h12Builder.P12TitleButton(_L("ui.settings.menu.controls"), () => Click(P12ExampleCategory.Controls));
+            _lines = new[]
+            {
+                _lineGadgets,
+                _lineActions,
+                _lineAudio,
+                _lineVideo,
+                _lineInterface,
+                _lineControls,
+            };
             Click(P12ExampleCategory.Audio);
         }
 
@@ -111,12 +127,10 @@ namespace Hai.Project12.UserInterfaceElements
                 if (comp) Destroy(comp.gameObject);
             }
 
-            // TODO: Iterate
-            _lineGadgets.SetFocused(false);
-            _lineActions.SetFocused(false);
-            _lineAudio.SetFocused(false);
-            _lineVideo.SetFocused(false);
-            _lineControls.SetFocused(false);
+            foreach (var line in _lines)
+            {
+                line.SetFocused(false);
+            }
 
             switch (exampleCategory)
             {
@@ -124,21 +138,25 @@ namespace Hai.Project12.UserInterfaceElements
                     _lineGadgets.SetFocused(true);
                     CreateGadgets();
                     break;
+                case P12ExampleCategory.Actions:
+                    _lineActions.SetFocused(true);
+                    CreateActions();
+                    break;
                 case P12ExampleCategory.Audio:
                     _lineAudio.SetFocused(true);
                     CreateOptionsFor(_audioOptions);
-                    break;
-                case P12ExampleCategory.Controls:
-                    _lineControls.SetFocused(true);
-                    CreateOptionsFor(_controlsOptions);
                     break;
                 case P12ExampleCategory.Video:
                     _lineVideo.SetFocused(true);
                     CreateOptionsFor(_videoOptions);
                     break;
-                case P12ExampleCategory.Actions:
-                    _lineActions.SetFocused(true);
-                    CreateActions();
+                case P12ExampleCategory.Interface:
+                    _lineInterface.SetFocused(true);
+                    CreateOptionsFor(_interfaceOptions);
+                    break;
+                case P12ExampleCategory.Controls:
+                    _lineControls.SetFocused(true);
+                    CreateOptionsFor(_controlsOptions);
                     break;
             }
         }
@@ -158,7 +176,7 @@ namespace Hai.Project12.UserInterfaceElements
 
             var result = ScriptableObject.CreateInstance<P12SettableFloatElement>();
             result.locKey = localizationKey;
-            result.englishTitle = LocalizeUserProvidedString(result.locKey, battlePhazeName);
+            result.localizedTitle = LocalizeUserProvidedString(result.locKey, battlePhazeName);
             result.storedValue = storedValue;
             return result;
         }
@@ -233,8 +251,8 @@ namespace Hai.Project12.UserInterfaceElements
                 {
                     var stringElement = ScriptableObject.CreateInstance<P12SettableStringElement>();
                     stringElement.locKey = "ui.settings.option.microphone";
-                    stringElement.englishTitle = _L("ui.settings.option.microphone");
-                    var line = _h12Builder.P12DropdownElement(stringElement, null);
+                    stringElement.localizedTitle = _L("ui.settings.option.microphone");
+                    var line = _h12Builder.P12DropdownElement(stringElement, null, false);
 
                     line.gameObject.SetActive(false);
                     var micSelector = line.gameObject.AddComponent<P12UIMicrophoneSelector>();
@@ -253,7 +271,7 @@ namespace Hai.Project12.UserInterfaceElements
         private void CreateLineFor(SettingsMenuInput option)
         {
             var localizationKey = BattlePhazeNameToLocalizationKey(option.Name);
-            var englishTitle = _L(localizationKey);
+            var localizedTitle = _L(localizationKey);
             if (option.Type == SettingsManagerEnums.IsType.Slider)
             {
                 var minValue = _h12BattlePhazeSettings.ParseFloat(option.SliderMinValue);
@@ -266,7 +284,7 @@ namespace Hai.Project12.UserInterfaceElements
 
                 var so = ScriptableObject.CreateInstance<P12SettableFloatElement>();
                 so.locKey = localizationKey;
-                so.englishTitle = englishTitle;
+                so.localizedTitle = localizedTitle;
                 so.min = minValue;
                 so.max = maxValue;
                 so.defaultValue = _h12BattlePhazeSettings.ParseFloat(option.ValueDefault);
@@ -289,7 +307,7 @@ namespace Hai.Project12.UserInterfaceElements
 
                 var so = ScriptableObject.CreateInstance<P12SettableStringElement>();
                 so.locKey = localizationKey;
-                so.englishTitle = englishTitle;
+                so.localizedTitle = localizedTitle;
                 so.defaultValue = option.ValueDefault;
 
                 so.storedValue = option.SelectedValue;
@@ -303,7 +321,7 @@ namespace Hai.Project12.UserInterfaceElements
                 }
                 else
                 {
-                    _h12Builder.P12DropdownElement(so, option);
+                    _h12Builder.P12DropdownElement(so, option, option.Type == SettingsManagerEnums.IsType.Dynamic);
                 }
             }
         }
@@ -313,8 +331,9 @@ namespace Hai.Project12.UserInterfaceElements
     {
         Gadgets,
         Actions,
-        Controls,
         Audio,
-        Video
+        Interface,
+        Video,
+        Controls,
     }
 }

@@ -6,7 +6,7 @@ namespace Hai.Project12.UserInterfaceElements
     public class P12SettableStringElement : ScriptableObject
     {
         public string locKey;
-        public string englishTitle;
+        public string localizedTitle;
 
         public string defaultValue;
 

@@ -43,6 +43,24 @@ namespace Hai.Project12.UserInterfaceElements
             { "Vertical Sync", "ui.settings.option.vertical_sync" },
             { "Volumetric Quality", "ui.settings.option.volumetric_quality" },
             { "World Volume", "ui.settings.option.world_volume" },
+            //
+            { "ultra", "ui.settings.dropdown.ultra" },
+            { "high", "ui.settings.dropdown.high" },
+            { "medium", "ui.settings.dropdown.medium" },
+            { "low", "ui.settings.dropdown.low" },
+            { "very low", "ui.settings.dropdown.very_low" },
+            { "auto", "ui.settings.dropdown.auto" },
+            { "dynamic", "ui.settings.dropdown.dynamic" },
+            { "fullscreen", "ui.settings.dropdown.fullscreen" },
+            { "maximized window", "ui.settings.dropdown.maximized_window" },
+            { "windowed", "ui.settings.dropdown.windowed" },
+            { "off", "ui.settings.dropdown.off" },
+            { "on", "ui.settings.dropdown.on" },
+            { "normal", "ui.settings.dropdown.normal" },
+            { "linear upscaling", "ui.settings.dropdown.linear_upscaling" },
+            { "point upscaling", "ui.settings.dropdown.point_upscaling" },
+            { "fsr upscaling", "ui.settings.dropdown.fsr_upscaling" },
+            { "spatial temporal upscaling", "ui.settings.dropdown.spatial_temporal_upscaling" },
         };
 
         public static string GetKeyOrNull(string battlePhazeName)

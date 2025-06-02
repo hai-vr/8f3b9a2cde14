@@ -7,7 +7,7 @@ namespace Hai.Project12.UserInterfaceElements
     public class P12SettableIntElement : ScriptableObject
     {
         public string locKey;
-        public string englishTitle;
+        public string localizedTitle;
         public int min = 0;
         public int max = 10;
 

@@ -95,7 +95,7 @@ namespace Hai.Project12.UserInterfaceElements
             float Getter() => settableFloat.storedValue;
             void Setter(float newValue) => settableFloat.storedValue = newValue;
 
-            Internal_SetupSlider(Getter, Setter, settableFloat.englishTitle, settableFloat.min, settableFloat.max, false, settableFloat.displayAs);
+            Internal_SetupSlider(Getter, Setter, settableFloat.localizedTitle, settableFloat.min, settableFloat.max, false, settableFloat.displayAs);
         }
 
         internal void P12SliderElement(P12SettableIntElement settableInt)
@@ -103,7 +103,7 @@ namespace Hai.Project12.UserInterfaceElements
             float Getter() => settableInt.storedValue;
             void Setter(float newValue) => settableInt.storedValue = (int)newValue;
 
-            Internal_SetupSlider(Getter, Setter, settableInt.englishTitle, settableInt.min, settableInt.max, true, P12SettableFloatElement.P12UnitDisplayKind.ArbitraryFloat);
+            Internal_SetupSlider(Getter, Setter, settableInt.localizedTitle, settableInt.min, settableInt.max, true, P12SettableFloatElement.P12UnitDisplayKind.ArbitraryFloat);
         }
 
         private void Internal_SetupSlider(Func<float> getter, Action<float> setter, string rawString, float min, float max, bool wholeNumbers, P12SettableFloatElement.P12UnitDisplayKind displayAs)
@@ -132,10 +132,8 @@ namespace Hai.Project12.UserInterfaceElements
             });
         }
 
-        internal P12UILine P12DropdownElement(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp_nullable)
+        internal P12UILine P12DropdownElement(P12SettableStringElement settableChoice, SettingsMenuInput bpOptionTemp_nullable, bool ignoreIncompleteLocalization)
         {
-            // TODO: Items within the dropdown need to be localized.
-
             string Getter() => settableChoice.storedValue;
             void Setter(string newValue) => settableChoice.storedValue = newValue;
 
@@ -144,7 +142,7 @@ namespace Hai.Project12.UserInterfaceElements
             var ours = UnityEngine.Object.Instantiate(_prefabs.dropdown, _layoutGroupHolder);
 
             var line = ours.GetComponent<P12UILine>();
-            line.SetTitle(settableChoice.englishTitle);
+            line.SetTitle(settableChoice.localizedTitle);
             SetupLine(line);
 
             var dropdown = ours.GetComponentInChildren<TMP_Dropdown>(true);
@@ -152,9 +150,20 @@ namespace Hai.Project12.UserInterfaceElements
             var dropdownOptions = new List<TMP_Dropdown.OptionData>();
             if (bpOptionTemp_nullable != null)
             {
-                foreach (var realValue in bpOptionTemp_nullable.RealValues)
+                foreach (var battlePhazeName in bpOptionTemp_nullable.RealValues)
                 {
-                    dropdownOptions.Add(new TMP_Dropdown.OptionData(realValue));
+                    var locKeyNullableWhenLocalizationIncomplete = H12BattlePhazeNameToLocalizationKey.GetKeyOrNull(battlePhazeName);
+                    string dropdownTitle;
+                    if (locKeyNullableWhenLocalizationIncomplete == null)
+                    {
+                        if (!ignoreIncompleteLocalization && !int.TryParse(battlePhazeName, out _)) BasisDebug.LogError($"Localization is incomplete: {battlePhazeName} has no match.");
+                        dropdownTitle = battlePhazeName;
+                    }
+                    else
+                    {
+                        dropdownTitle = H12Localization._L(locKeyNullableWhenLocalizationIncomplete);
+                    }
+                    dropdownOptions.Add(new TMP_Dropdown.OptionData(dropdownTitle));
                 }
             }
             dropdown.options = dropdownOptions;
@@ -191,7 +200,7 @@ namespace Hai.Project12.UserInterfaceElements
             var ours = UnityEngine.Object.Instantiate(_prefabs.toggle, _layoutGroupHolder);
 
             var line = ours.GetComponent<P12UILine>();
-            line.SetTitle(settableChoice.englishTitle);
+            line.SetTitle(settableChoice.localizedTitle);
             SetupLine(line);
 
             var dropdown = ours.GetComponentInChildren<Toggle>(true);
@@ -223,7 +232,7 @@ namespace Hai.Project12.UserInterfaceElements
             var ours = UnityEngine.Object.Instantiate(_prefabs.toggle, _layoutGroupHolder);
 
             var line = ours.GetComponent<P12UILine>();
-            line.SetTitle(settableChoice.englishTitle);
+            line.SetTitle(settableChoice.localizedTitle);
             SetupLine(line);
 
             var dropdown = ours.GetComponentInChildren<Toggle>(true);

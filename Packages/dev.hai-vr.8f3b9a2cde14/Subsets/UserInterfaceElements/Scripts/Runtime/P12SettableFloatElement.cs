@@ -6,7 +6,7 @@ namespace Hai.Project12.UserInterfaceElements
     public class P12SettableFloatElement : ScriptableObject
     {
         public string locKey;
-        public string englishTitle;
+        public string localizedTitle;
         public float min = 0f;
         public float max = 1f;
         public P12UnitDisplayKind displayAs = P12UnitDisplayKind.ArbitraryFloat;
