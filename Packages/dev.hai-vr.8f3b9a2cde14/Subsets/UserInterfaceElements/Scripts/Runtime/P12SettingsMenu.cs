@@ -124,11 +124,19 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void CreateGadgets()
         {
-            _h12Builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Eye Tracking", storedValue = 1f});
-            _h12Builder.P12ToggleForFloat(new P12SettableFloatElement { englishTitle = "Face Tracking", storedValue = 0f});
-            _h12Builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Unlit" });
-            _h12Builder.P12SliderElement(new P12SettableFloatElement { englishTitle = "Blush", storedValue = 0.6f });
+            _h12Builder.P12ToggleForFloat(SettableFloatElement("Eye Tracking", 1f));
+            _h12Builder.P12ToggleForFloat(SettableFloatElement("Face Tracking", 0f));
+            _h12Builder.P12SliderElement(SettableFloatElement("Unlit", 0f));
+            _h12Builder.P12SliderElement(SettableFloatElement("Blush", 0.6f));
             _h12Builder.P12SingularButton("Send Netmessage Test", "Trigger", () => { });
+        }
+
+        private static P12SettableFloatElement SettableFloatElement(string englishTitle, float storedValue)
+        {
+            var result = ScriptableObject.CreateInstance<P12SettableFloatElement>();
+            result.englishTitle = englishTitle;
+            result.storedValue = storedValue;
+            return result;
         }
 
         private void CreateActions()

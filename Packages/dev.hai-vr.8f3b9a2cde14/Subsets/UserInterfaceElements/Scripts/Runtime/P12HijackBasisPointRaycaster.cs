@@ -32,6 +32,7 @@ namespace Hai.Project12.UserInterfaceElements
             if (_basisPointRaycasterLateInit == null) return;
 
             _basisPointRaycasterLateInit.Mask = _maskForOnlyUiLayer;
+            BasisDebug.Log("P12 BasisPointRaycaster now uses the UI mask to prevent world geometry from interfering.", BasisDebug.LogTag.Input);
         }
 
         public void ReturnMask()
@@ -39,6 +40,7 @@ namespace Hai.Project12.UserInterfaceElements
             if (_basisPointRaycasterLateInit == null) return;
 
             _basisPointRaycasterLateInit.Mask = _defaultMask;
+            BasisDebug.Log("P12 BasisPointRaycaster now uses the default mask.", BasisDebug.LogTag.Input);
         }
     }
 }

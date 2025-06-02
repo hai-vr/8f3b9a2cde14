@@ -8,7 +8,8 @@
         "BasisAddressableDriver",
         "Unity.Addressables",
         "Hai.Project12.GameRoutine.Runtime",
-        "BasisSDK"
+        "BasisSDK",
+        "BasisDebug"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

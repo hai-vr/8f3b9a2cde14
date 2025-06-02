@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using BattlePhaze.SettingsManager;
-using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements
 {
