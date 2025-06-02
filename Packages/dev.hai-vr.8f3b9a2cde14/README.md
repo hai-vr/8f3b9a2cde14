@@ -17,8 +17,9 @@ The following items will need to be enacted:
 - We will need to change the action of the Escape button to open our own Pause menu.
   - It is currently unclear how to change basic behaviour of Basis with minimal modification of the framework; if that is even a framework goal to achieve.
 - We will need to figure out a way to open the Pause menu in desktop mode on first join, so that the cursor always works there.
-- We will need to change the physics timestep of the project to 60 physics updates per second.
+- ~~We will need to change the physics timestep of the project to 60 physics updates per second.~~
   - (All Rigidbodies will need to be set to Interpolate, see the README.md inside RigidbodyAdditions/)
+  - EDIT: It is already set to 50 physics updates per second, this is good enough.
 
 ### Separated code
 
