@@ -14,7 +14,7 @@ namespace Hai.Project12.UserInterfaceElements
         [SerializeField] private Button lower;
         [SerializeField] private Button higher;
 
-        private void Start()
+        private void Awake()
         {
             lower.onClick.AddListener(LowerClicked);
             higher.onClick.AddListener(HigherClicked);

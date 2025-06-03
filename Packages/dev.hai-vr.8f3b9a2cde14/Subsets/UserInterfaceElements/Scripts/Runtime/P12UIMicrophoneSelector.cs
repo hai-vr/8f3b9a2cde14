@@ -11,7 +11,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         public TMP_Dropdown Dropdown;
 
-        public void Start()
+        public void Awake()
         {
             Dropdown.onValueChanged.AddListener(ApplyChanges);
             BasisDeviceManagement.OnBootModeChanged += OnBootModeChanged;

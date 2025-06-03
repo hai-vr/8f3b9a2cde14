@@ -15,9 +15,15 @@ namespace Hai.Project12.UserInterfaceElements
                 if (_debugShowKeysOnly != value)
                 {
                     _debugShowKeysOnly = value;
-                    OnLocalizationChanged?.Invoke();
+                    PublishLocalizationChangeEvent();
                 }
             }
+        }
+
+        private static void PublishLocalizationChangeEvent()
+        {
+            BasisDebug.Log("Localization changed.");
+            OnLocalizationChanged?.Invoke();
         }
 
         private static readonly Dictionary<string, string> LocalizationKeyToP12English = new Dictionary<string, string>()

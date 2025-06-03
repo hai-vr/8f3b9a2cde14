@@ -18,5 +18,11 @@ namespace Hai.Project12.InteractionElements
         {
             _repository.Remove(menuItem);
         }
+
+        // TODO: Give a read-only view of that list
+        public List<P12GadgetMenuItem> GadgetView()
+        {
+            return _repository;
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace Hai.Project12.UserInterfaceElements
         private BasisPointRaycaster _basisPointRaycasterLateInit;
         private LayerMask _defaultMask;
 
-        private void Start()
+        private void Awake()
         {
             _maskForOnlyUiLayer = 1 << LayerMask.NameToLayer("UI");
         }

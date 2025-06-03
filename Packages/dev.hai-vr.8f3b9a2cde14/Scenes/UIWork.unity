@@ -888,6 +888,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prefabs: {fileID: 2461762438293783449, guid: ec1dfc1b2258d0c4b83d5f0ef91b21e1, type: 3}
   haptics: {fileID: 1050427268}
+  gadgetRepository: {fileID: 1204451992}
   layoutGroupHolder: {fileID: 1696257411}
   titleGroupHolder: {fileID: 1985203709}
 --- !u!1 &506377042

@@ -5,21 +5,21 @@ namespace Hai.Project12.HaiSystems.Supporting
 {
     public static class H12Debug
     {
-        public static void LogError(string message, LogTag logTag = LogTag.System)
+        public static void LogError(string message, LogTag logTag = LogTag.Project12)
         {
             Debug.unityLogger.LogError("",FormatMessage(message, logTag, MessageType.Error));
         }
-        public static void LogError(Exception message, LogTag logTag = LogTag.System)
+        public static void LogError(Exception message, LogTag logTag = LogTag.Project12)
         {
             Debug.unityLogger.LogError("", FormatMessage($"{message.Message} {message.StackTrace}", logTag, MessageType.Error));
         }
 
-        public static void LogWarning(string message, LogTag logTag = LogTag.System)
+        public static void LogWarning(string message, LogTag logTag = LogTag.Project12)
         {
             LogInternal(message, logTag, MessageType.Warning);
         }
 
-        public static void Log(string message, LogTag logTag = LogTag.System)
+        public static void Log(string message, LogTag logTag = LogTag.Project12)
         {
             LogInternal(message, logTag, MessageType.Info);
         }
@@ -48,7 +48,7 @@ namespace Hai.Project12.HaiSystems.Supporting
                 LogTag.SteamNetworking => "#32CD32",            // Lime Green
                 // LogTag.Core => "#FFD700",          // Gold
                 // LogTag.Event => "#FF4500",         // Orange Red
-                // LogTag.System => "#9370DB",        // Medium Purple
+                LogTag.Project12 => "#9370DB",        // Medium Purple
                 // LogTag.Device => "#00CED1",        // Dark Turquoise
                 // LogTag.Avatar => "#8B0000",        // Dark Red
                 // LogTag.Input => "#808000",         // Olive
@@ -83,7 +83,7 @@ namespace Hai.Project12.HaiSystems.Supporting
 
         public enum LogTag
         {
-            System,
+            Project12,
             ListenNetworking,
             SteamNetworking,
         }

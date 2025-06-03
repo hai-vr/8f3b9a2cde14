@@ -40,7 +40,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private bool _weMadeCursorVisible;
 
-        private void Start()
+        private void Awake()
         {
             _h12builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, StandardControlExpansion, haptics);
 

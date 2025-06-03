@@ -18,7 +18,7 @@ namespace Subsets.GameRoutine.Scripts.Runtime
         private bool _hasLevel;
         private Scene _level;
 
-        private void Start()
+        private void Awake()
         {
             _h12BasisGameRoutineBlindSpots = new H12BasisGameRoutineBlindSpots();
         }

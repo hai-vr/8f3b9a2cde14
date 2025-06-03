@@ -5,6 +5,7 @@ using Basis.Scripts.Addressable_Driver.Enums;
 using Basis.Scripts.Device_Management;
 using Basis.Scripts.UI.UI_Panels;
 using BattlePhaze.SettingsManager;
+using Hai.Project12.InteractionElements;
 using TMPro;
 using UnityEngine;
 using static Hai.Project12.UserInterfaceElements.H12Localization;
@@ -20,6 +21,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
         [SerializeField] private P12UIHaptics haptics;
+        [SerializeField] private P12GadgetRepository gadgetRepository;
         [SerializeField] private Transform layoutGroupHolder;
         [SerializeField] private Transform titleGroupHolder;
 
@@ -39,7 +41,7 @@ namespace Hai.Project12.UserInterfaceElements
         private H12Builder _h12Builder;
         private H12BattlePhazeSettingsHandler _h12BattlePhazeSettings;
 
-        private void Start()
+        private void Awake()
         {
             SettingsManager.Instance.Initalize(true);
 
@@ -201,6 +203,11 @@ namespace Hai.Project12.UserInterfaceElements
             _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Unlit", 0f));
             _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Blush", 0.6f));
             _h12Builder.P12SingularButton(LocalizeUserProvidedString("ui.settings.extra.send_netmessage_test", "Send Netmessage Test"), _L("ui.settings.extra.trigger"), () => { });
+
+            foreach (var gadget in gadgetRepository.GadgetView())
+            {
+                _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement($"{gadget.name}", 0f));
+            }
         }
 
         private static P12SettableFloatElement UserProvided_SettableFloatElement(string battlePhazeName, float storedValue)

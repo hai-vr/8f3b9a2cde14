@@ -14,10 +14,6 @@ namespace Hai.Project12.UserInterfaceElements
         private float _originalFontSize = -1;
         private float _initialMinWidth = -1;
 
-        private void Start()
-        {
-        }
-
         public void SetTitle(string rawString)
         {
             title.text = rawString;
