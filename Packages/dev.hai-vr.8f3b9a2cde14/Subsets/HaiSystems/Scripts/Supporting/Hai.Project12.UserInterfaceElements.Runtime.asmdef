@@ -1,15 +1,7 @@
 {
-    "name": "Hai.Project12.GameRoutine.Runtime",
+    "name": "Hai.Project12.HaiSystems.Supporting",
     "rootNamespace": "",
     "references": [
-        "Unity.TextMeshPro",
-        "BattlePhazeSettingsManger",
-        "Basis",
-        "BasisAddressableDriver",
-        "Unity.Addressables",
-        "BasisSDK",
-        "BasisDebug",
-        "Hai.Project12.HaiSystems.Supporting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

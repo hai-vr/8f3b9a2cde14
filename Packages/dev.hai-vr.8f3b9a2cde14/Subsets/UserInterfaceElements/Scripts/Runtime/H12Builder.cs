@@ -18,7 +18,8 @@ namespace Hai.Project12.UserInterfaceElements
         private readonly Transform _titleGroupHolder;
         private readonly float _controlExpansion;
 
-        public event Action AnyValueChanged;
+        public event ValueChanged OnAnyValueChanged;
+        public delegate void ValueChanged();
 
         public H12Builder(P12UIEScriptedPrefabs prefabs, Transform layoutGroupHolder, Transform titleGroupHolder, float controlExpansion, P12UIHaptics haptics)
         {
@@ -135,7 +136,7 @@ namespace Hai.Project12.UserInterfaceElements
             {
                 line.SetValue(ToDisplay(newValue, displayAs));
                 setter(newValue);
-                AnyValueChanged?.Invoke();
+                OnAnyValueChanged?.Invoke();
             });
         }
 
@@ -190,7 +191,7 @@ namespace Hai.Project12.UserInterfaceElements
                     var realNewValue = bpOptionTemp_nullable.RealValues[newIndex];
                     line.SetValue($"{realNewValue}");
                     setter(realNewValue);
-                    AnyValueChanged?.Invoke();
+                    OnAnyValueChanged?.Invoke();
                 });
             }
 
@@ -223,7 +224,7 @@ namespace Hai.Project12.UserInterfaceElements
             {
                 line.SetValue(newTruthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
                 setter(newTruthness);
-                AnyValueChanged?.Invoke();
+                OnAnyValueChanged?.Invoke();
             });
         }
 
@@ -254,7 +255,7 @@ namespace Hai.Project12.UserInterfaceElements
                 var realNewValue = bpOptionTemp.RealValues[newTruthness ? 0 : 1];
                 line.SetValue(newTruthness ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off"));
                 setter(realNewValue);
-                AnyValueChanged?.Invoke();
+                OnAnyValueChanged?.Invoke();
             });
         }
 

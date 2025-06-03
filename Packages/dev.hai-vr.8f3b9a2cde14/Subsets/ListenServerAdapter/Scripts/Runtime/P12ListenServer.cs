@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Net;
 using Basis.Scripts.Networking;
+using Hai.Project12.HaiSystems.Supporting;
 using Lavender.Systems;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace Hai.Project12.ListenServer.Runtime
                 _pid = StartExternalProcess.Start(_serverProcessPath, Directory.GetCurrentDirectory());
                 debug_pid = _pid;
 
-                BasisDebug.Log($"Basis server started, PID is {_pid}", BasisDebug.LogTag.Networking);
+                H12Debug.Log($"Basis server started, PID is {_pid}", H12Debug.LogTag.ListenNetworking);
 
                 // TODO: Linkup listen server
                 // TODO: Load local client into that local server
@@ -41,7 +42,7 @@ namespace Hai.Project12.ListenServer.Runtime
             }
             else
             {
-                BasisDebug.LogError($"Basis server could not be found at {_serverProcessPath}.", BasisDebug.LogTag.Networking);
+                H12Debug.LogError($"Basis server could not be found at {_serverProcessPath}.", H12Debug.LogTag.ListenNetworking);
             }
         }
 
@@ -57,6 +58,11 @@ namespace Hai.Project12.ListenServer.Runtime
         }
 
         private void OnDisable()
+        {
+            KillServer();
+        }
+
+        private void OnApplicationQuit()
         {
             KillServer();
         }
@@ -79,15 +85,15 @@ namespace Hai.Project12.ListenServer.Runtime
                 }
 
                 // TODO: Clean shutdown
-                BasisDebug.Log($"Killing server at PID {_pid}", BasisDebug.LogTag.Networking);
+                H12Debug.Log($"Killing server at PID {_pid}", H12Debug.LogTag.ListenNetworking);
                 try
                 {
                     StartExternalProcess.KillProcess(_pid);
-                    BasisDebug.Log("Killed server.", BasisDebug.LogTag.Networking);
+                    H12Debug.Log("Killed server.", H12Debug.LogTag.ListenNetworking);
                 }
                 catch (Exception e)
                 {
-                    BasisDebug.LogError("Failed to kill server.", BasisDebug.LogTag.Networking);
+                    H12Debug.LogError("Failed to kill server.", H12Debug.LogTag.ListenNetworking);
                 }
                 _pid = 0;
             }

@@ -4,7 +4,21 @@ namespace Hai.Project12.UserInterfaceElements
 {
     internal class H12Localization
     {
-        public static bool DebugShowKeysOnly = false;
+        public static event LocalizationChanged OnLocalizationChanged;
+        public delegate void LocalizationChanged();
+
+        public static bool DebugShowKeysOnly
+        {
+            get => _debugShowKeysOnly;
+            set
+            {
+                if (_debugShowKeysOnly != value)
+                {
+                    _debugShowKeysOnly = value;
+                    OnLocalizationChanged?.Invoke();
+                }
+            }
+        }
 
         private static readonly Dictionary<string, string> LocalizationKeyToP12English = new Dictionary<string, string>()
         {
@@ -63,7 +77,7 @@ namespace Hai.Project12.UserInterfaceElements
             { "ui.settings.menu.gadgets", "Gadgets" },
             { "ui.settings.menu.actions", "Actions" },
             { "ui.settings.menu.audio", "Audio" },
-            { "ui.settings.menu.video", "Video" },
+            { "ui.settings.menu.graphics", "Graphics" },
             { "ui.settings.menu.interface", "Interface" },
             { "ui.settings.menu.controls", "Controls" },
             //
@@ -97,6 +111,8 @@ namespace Hai.Project12.UserInterfaceElements
             { "ui.settings.dropdown.fsr_upscaling", "FSR upscaling" },
             { "ui.settings.dropdown.spatial_temporal_upscaling", "Spatial temporal upscaling" },
         };
+
+        private static bool _debugShowKeysOnly = false;
 
         public static string _L(string key)
         {

@@ -2,6 +2,7 @@
 
 - P12 are MonoBehaviours and ScriptableObjects, including serializable structs and enums referenced by MonoBehaviours and ScriptableObjects.
 - H12 are non-MonoBehaviours.
+- Custom attributes belong in the Supporting package, and shouldn't have prefixes.
 
 ## Basis modifications for our app
 

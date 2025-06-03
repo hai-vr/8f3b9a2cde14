@@ -17,6 +17,7 @@ namespace Hai.Project12.UserInterfaceElements
         private const string SpecialSnapTurn = SpecialPrefix + "SnapTurn";
         private const string SpecialMicrophone = SpecialPrefix + "Microphone";
         private const string Settings_SnapTurnAngle_Key = "Snap Turn Angle"; // This is not a localization label.
+
         [SerializeField] private P12UIEScriptedPrefabs prefabs;
         [SerializeField] private P12UIHaptics haptics;
         [SerializeField] private Transform layoutGroupHolder;
@@ -103,10 +104,20 @@ namespace Hai.Project12.UserInterfaceElements
                 "Snap Turn Angle" // Slider
             });
 
+            RebuildTitle();
+            Click(P12SettingsCategory.Audio);
+        }
+
+        private void RebuildTitle()
+        {
+            foreach (var comp in titleGroupHolder.GetComponentsInChildren<P12UILine>())
+            {
+                if (comp) Destroy(comp.gameObject);
+            }
             _lineGadgets = _h12Builder.P12TitleButton(_L("ui.settings.menu.gadgets"), () => Click(P12SettingsCategory.Gadgets));
             _lineActions = _h12Builder.P12TitleButton(_L("ui.settings.menu.actions"), () => Click(P12SettingsCategory.Actions));
             _lineAudio = _h12Builder.P12TitleButton(_L("ui.settings.menu.audio"), () => Click(P12SettingsCategory.Audio));
-            _lineVideo = _h12Builder.P12TitleButton(_L("ui.settings.menu.video"), () => Click(P12SettingsCategory.Video));
+            _lineVideo = _h12Builder.P12TitleButton(_L("ui.settings.menu.graphics"), () => Click(P12SettingsCategory.Graphics));
             _lineInterface = _h12Builder.P12TitleButton(_L("ui.settings.menu.interface"), () => Click(P12SettingsCategory.Interface));
             _lineControls = _h12Builder.P12TitleButton(_L("ui.settings.menu.controls"), () => Click(P12SettingsCategory.Controls));
             _lines = new[]
@@ -118,7 +129,24 @@ namespace Hai.Project12.UserInterfaceElements
                 _lineInterface,
                 _lineControls,
             };
-            Click(P12SettingsCategory.Audio);
+        }
+
+        private void OnEnable()
+        {
+            H12Localization.OnLocalizationChanged -= OnLocalizationChanged;
+            H12Localization.OnLocalizationChanged += OnLocalizationChanged;
+        }
+
+        private void OnDisable()
+        {
+            H12Localization.OnLocalizationChanged -= OnLocalizationChanged;
+        }
+
+        private void OnLocalizationChanged()
+        {
+            // TODO: Track state of the menu, so that we remake the correct part of it.
+            RebuildTitle();
+            Click(P12SettingsCategory.Interface);
         }
 
         private void Click(P12SettingsCategory settingsCategory)
@@ -147,7 +175,7 @@ namespace Hai.Project12.UserInterfaceElements
                     _lineAudio.SetFocused(true);
                     CreateOptionsFor(_audioOptions);
                     break;
-                case P12SettingsCategory.Video:
+                case P12SettingsCategory.Graphics:
                     _lineVideo.SetFocused(true);
                     CreateOptionsFor(_videoOptions);
                     break;
@@ -157,7 +185,6 @@ namespace Hai.Project12.UserInterfaceElements
                     _h12Builder.P12SingularButton(_L("ui.settings.option.localization"), _L("ui.settings.action.toggle_localization"), () =>
                     {
                         DebugShowKeysOnly = !DebugShowKeysOnly;
-                        Click(P12SettingsCategory.Interface);
                     });
                     break;
                 case P12SettingsCategory.Controls:
@@ -337,7 +364,7 @@ namespace Hai.Project12.UserInterfaceElements
         Actions,
         Audio,
         Interface,
-        Video,
+        Graphics,
         Controls,
     }
 }

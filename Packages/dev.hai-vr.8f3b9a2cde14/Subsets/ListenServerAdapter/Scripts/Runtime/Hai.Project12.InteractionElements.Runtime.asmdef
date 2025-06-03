@@ -8,7 +8,8 @@
         "BasisDebug",
         "BasisNetworkClient",
         "LiteNetLib",
-        "BasisNetworkCore"
+        "BasisNetworkCore",
+        "Hai.Project12.HaiSystems.Supporting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

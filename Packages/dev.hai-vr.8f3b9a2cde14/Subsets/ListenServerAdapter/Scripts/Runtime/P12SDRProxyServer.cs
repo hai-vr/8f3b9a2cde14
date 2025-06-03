@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Basis.Network.Core;
+using Hai.Project12.HaiSystems.Supporting;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using Steamworks;
@@ -18,31 +19,45 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
         public const uint RVRAppId = 2_212_290;
 
         private SocketManager _socket;
+        private static bool _isShutdown;
 
         private void OnEnable()
         {
             var appId = RVRAppId;
             if (!SteamClient.IsValid) SteamClient.Init(appId);
-            BasisDebug.Log($"Steam: Initialized SteamClient with appID {appId}.", BasisDebug.LogTag.Networking);
+            H12Debug.Log($"Initialized SteamClient with appID {appId}.", H12Debug.LogTag.SteamNetworking);
 
             _socket = SteamNetworkingSockets.CreateRelaySocket<SocketManager>();
             _socket.Interface = new P12SDRProxyServerManager(P12ListenServer.Port);
-            BasisDebug.Log("Steam: Created a relay socket.", BasisDebug.LogTag.Networking);
+            H12Debug.Log("Created a relay socket.", H12Debug.LogTag.SteamNetworking);
         }
 
         private void OnDisable()
         {
             if (_socket != null)
             {
-                BasisDebug.Log("Steam: Closing relay socket.", BasisDebug.LogTag.Networking);
+                H12Debug.Log("Closing relay socket.", H12Debug.LogTag.SteamNetworking);
                 _socket.Close();
-                BasisDebug.Log("Steam: Closed relay socket.", BasisDebug.LogTag.Networking);
+                H12Debug.Log("Closed relay socket.", H12Debug.LogTag.SteamNetworking);
                 _socket = null;
             }
         }
 
+        private void OnApplicationQuit()
+        {
+            Shutdown();
+        }
+
         public void Dispose()
         {
+            Shutdown();
+        }
+
+        private static void Shutdown()
+        {
+            if (_isShutdown) return;
+
+            _isShutdown = true;
             SteamClient.Shutdown();
         }
     }
@@ -110,13 +125,13 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
             // Incoming SDR --> Listen server
             if (channel > 255)
             {
-                BasisDebug.LogError($"Networking error, channel too big {channel}. Closing connection.");
+                H12Debug.LogError($"Networking error, channel too big {channel}. Closing connection.");
                 _connectionToPeer[connection].Disconnect();
                 return;
             }
             if (size > MaximumMessageLength)
             {
-                BasisDebug.LogError("Networking error, message length received through SDR is longer than what we can handle. Closing connection.");
+                H12Debug.LogError("Networking error, message length received through SDR is longer than what we can handle. Closing connection.");
                 _connectionToPeer[connection].Disconnect();
                 return;
             }

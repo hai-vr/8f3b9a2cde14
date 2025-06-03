@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Basis.Scripts.UI.UI_Panels;
 using Subsets.GameRoutine.Scripts.Runtime;
 using UnityEngine;
@@ -43,6 +44,23 @@ namespace Hai.Project12.UserInterfaceElements
         {
             _h12builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, StandardControlExpansion, haptics);
 
+            MakeMenu();
+        }
+
+        private void OnEnable()
+        {
+            H12Localization.OnLocalizationChanged -= OnLocalizationChanged;
+            H12Localization.OnLocalizationChanged += OnLocalizationChanged;
+        }
+
+        private void OnDisable()
+        {
+            H12Localization.OnLocalizationChanged -= OnLocalizationChanged;
+        }
+
+        private void OnLocalizationChanged()
+        {
+            // TODO: Track state of the menu, so that we remake the correct part of it.
             MakeMenu();
         }
 

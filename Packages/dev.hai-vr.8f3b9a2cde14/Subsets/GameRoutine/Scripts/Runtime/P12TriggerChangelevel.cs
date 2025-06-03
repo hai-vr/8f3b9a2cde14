@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Hai.Project12.HaiSystems.Supporting;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Subsets.GameRoutine.Scripts.Runtime
@@ -6,13 +7,12 @@ namespace Subsets.GameRoutine.Scripts.Runtime
     public class P12TriggerChangelevel : MonoBehaviour
     {
         [SerializeField] private Object asset;
-        [SerializeField] private P12GameLevelManagement gameLevelManagement;
 
-        private void Start()
+        [LateInjectable] [SerializeField] private P12GameLevelManagement gameLevelManagement;
+
+        private void Awake()
         {
-            // FIXME: We need gameLevelManagement to be injected on load.
-            // Maybe we need to use some service locator/injector right when the scene loads.
-            gameLevelManagement = Object.FindAnyObjectByType<P12GameLevelManagement>();
+            H12LateInjector.InjectDependenciesInto(this);
         }
 
         private void OnTriggerEnter(Collider other)
