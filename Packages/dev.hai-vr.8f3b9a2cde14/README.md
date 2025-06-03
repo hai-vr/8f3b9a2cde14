@@ -35,3 +35,15 @@ May have to be reimplemented as native upstream (if relevant).
 
 - We are currently hijacking the BasisPointRaycaster to ignore the world geometry if we're interacting with a non-world menu that intersects with world geometry.
     - In-world UIs may still affect the operation of the main menu, this may need some consultation on layer management.
+
+## Adaptations
+
+The following things don't modify Basis, but may still affect the behaviour of the app.
+
+Things to keep in mind while building scenes:
+
+- All Rigidbodies need to have interpolation set to Interpolate. This is because the physics update rate is lower than the HMD update rate,
+  which makes it different from what some of us may be used to in apps where the physics update rate matched the HMD update rate.
+  - Having a known physics update rate makes it better for consistent rigidbody physics damage, so we value this consistency over that.
+- Unlike the Basis default UI, all of our UI uses a custom shader that derives from UI/Default, and a custom TextMeshPro-derived shader, which
+  crushes Z so that our UI shows on top of *most* of the world geometry. This is to allow opening the UI in cramped spaces.

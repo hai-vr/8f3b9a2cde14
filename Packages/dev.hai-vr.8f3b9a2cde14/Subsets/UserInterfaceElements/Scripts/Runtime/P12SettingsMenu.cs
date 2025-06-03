@@ -103,12 +103,12 @@ namespace Hai.Project12.UserInterfaceElements
                 "Snap Turn Angle" // Slider
             });
 
-            _lineGadgets = _h12Builder.P12TitleButton(_L("ui.settings.menu.gadgets"), () => Click(P12ExampleCategory.Gadgets));
-            _lineActions = _h12Builder.P12TitleButton(_L("ui.settings.menu.actions"), () => Click(P12ExampleCategory.Actions));
-            _lineAudio = _h12Builder.P12TitleButton(_L("ui.settings.menu.audio"), () => Click(P12ExampleCategory.Audio));
-            _lineVideo = _h12Builder.P12TitleButton(_L("ui.settings.menu.video"), () => Click(P12ExampleCategory.Video));
-            _lineInterface = _h12Builder.P12TitleButton(_L("ui.settings.menu.interface"), () => Click(P12ExampleCategory.Interface));
-            _lineControls = _h12Builder.P12TitleButton(_L("ui.settings.menu.controls"), () => Click(P12ExampleCategory.Controls));
+            _lineGadgets = _h12Builder.P12TitleButton(_L("ui.settings.menu.gadgets"), () => Click(P12SettingsCategory.Gadgets));
+            _lineActions = _h12Builder.P12TitleButton(_L("ui.settings.menu.actions"), () => Click(P12SettingsCategory.Actions));
+            _lineAudio = _h12Builder.P12TitleButton(_L("ui.settings.menu.audio"), () => Click(P12SettingsCategory.Audio));
+            _lineVideo = _h12Builder.P12TitleButton(_L("ui.settings.menu.video"), () => Click(P12SettingsCategory.Video));
+            _lineInterface = _h12Builder.P12TitleButton(_L("ui.settings.menu.interface"), () => Click(P12SettingsCategory.Interface));
+            _lineControls = _h12Builder.P12TitleButton(_L("ui.settings.menu.controls"), () => Click(P12SettingsCategory.Controls));
             _lines = new[]
             {
                 _lineGadgets,
@@ -118,10 +118,10 @@ namespace Hai.Project12.UserInterfaceElements
                 _lineInterface,
                 _lineControls,
             };
-            Click(P12ExampleCategory.Audio);
+            Click(P12SettingsCategory.Audio);
         }
 
-        private void Click(P12ExampleCategory exampleCategory)
+        private void Click(P12SettingsCategory settingsCategory)
         {
             foreach (var comp in layoutGroupHolder.GetComponentsInChildren<P12UILine>())
             {
@@ -133,34 +133,34 @@ namespace Hai.Project12.UserInterfaceElements
                 line.SetFocused(false);
             }
 
-            switch (exampleCategory)
+            switch (settingsCategory)
             {
-                case P12ExampleCategory.Gadgets:
+                case P12SettingsCategory.Gadgets:
                     _lineGadgets.SetFocused(true);
                     CreateGadgets();
                     break;
-                case P12ExampleCategory.Actions:
+                case P12SettingsCategory.Actions:
                     _lineActions.SetFocused(true);
                     CreateActions();
                     break;
-                case P12ExampleCategory.Audio:
+                case P12SettingsCategory.Audio:
                     _lineAudio.SetFocused(true);
                     CreateOptionsFor(_audioOptions);
                     break;
-                case P12ExampleCategory.Video:
+                case P12SettingsCategory.Video:
                     _lineVideo.SetFocused(true);
                     CreateOptionsFor(_videoOptions);
                     break;
-                case P12ExampleCategory.Interface:
+                case P12SettingsCategory.Interface:
                     _lineInterface.SetFocused(true);
                     CreateOptionsFor(_interfaceOptions);
                     _h12Builder.P12SingularButton(_L("ui.settings.option.localization"), _L("ui.settings.action.toggle_localization"), () =>
                     {
                         DebugShowKeysOnly = !DebugShowKeysOnly;
-                        Click(P12ExampleCategory.Interface);
+                        Click(P12SettingsCategory.Interface);
                     });
                     break;
-                case P12ExampleCategory.Controls:
+                case P12SettingsCategory.Controls:
                     _lineControls.SetFocused(true);
                     CreateOptionsFor(_controlsOptions);
                     break;
@@ -331,7 +331,7 @@ namespace Hai.Project12.UserInterfaceElements
         }
     }
 
-    internal enum P12ExampleCategory
+    internal enum P12SettingsCategory
     {
         Gadgets,
         Actions,
