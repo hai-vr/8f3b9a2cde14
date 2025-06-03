@@ -40,6 +40,7 @@ namespace Hai.Project12.UserInterfaceElements
 
         private H12Builder _h12Builder;
         private H12BattlePhazeSettingsHandler _h12BattlePhazeSettings;
+        private bool _watchGadgets;
 
         private void Awake()
         {
@@ -153,16 +154,14 @@ namespace Hai.Project12.UserInterfaceElements
 
         private void Click(P12SettingsCategory settingsCategory)
         {
-            foreach (var comp in layoutGroupHolder.GetComponentsInChildren<P12UILine>())
-            {
-                if (comp) Destroy(comp.gameObject);
-            }
+            ClearLines();
 
             foreach (var line in _lines)
             {
                 line.SetFocused(false);
             }
 
+            _watchGadgets = false;
             switch (settingsCategory)
             {
                 case P12SettingsCategory.Gadgets:
@@ -196,8 +195,23 @@ namespace Hai.Project12.UserInterfaceElements
             }
         }
 
+        private void ClearLines()
+        {
+            foreach (var comp in layoutGroupHolder.GetComponentsInChildren<P12UILine>())
+            {
+                if (comp) Destroy(comp.gameObject);
+            }
+        }
+
         private void CreateGadgets()
         {
+            if (!_watchGadgets)
+            {
+                _watchGadgets = true;
+                gadgetRepository.OnGadgetListChanged -= OnGadgetListChanged;
+                gadgetRepository.OnGadgetListChanged += OnGadgetListChanged;
+            }
+
             _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement("Eye Tracking", 1f));
             _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement("Face Tracking", 0f));
             _h12Builder.P12SliderElement(UserProvided_SettableFloatElement("Unlit", 0f));
@@ -207,6 +221,15 @@ namespace Hai.Project12.UserInterfaceElements
             foreach (var gadget in gadgetRepository.GadgetView())
             {
                 _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement($"{gadget.name}", 0f));
+            }
+        }
+
+        private void OnGadgetListChanged()
+        {
+            if (_watchGadgets)
+            {
+                ClearLines();
+                CreateGadgets();
             }
         }
 

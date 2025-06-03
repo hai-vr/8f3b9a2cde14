@@ -19,7 +19,7 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
         public const uint RVRAppId = 2_212_290;
 
         private SocketManager _socket;
-        private static bool _isShutdown;
+        private bool _isShutdown;
 
         private void OnEnable()
         {
@@ -53,10 +53,11 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
             Shutdown();
         }
 
-        private static void Shutdown()
+        private void Shutdown()
         {
             if (_isShutdown) return;
 
+            H12Debug.Log("Shutting down SteamClient instance.", H12Debug.LogTag.SteamNetworking);
             _isShutdown = true;
             SteamClient.Shutdown();
         }
