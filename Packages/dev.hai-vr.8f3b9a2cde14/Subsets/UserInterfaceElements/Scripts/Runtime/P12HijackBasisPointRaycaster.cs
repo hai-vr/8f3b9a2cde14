@@ -1,7 +1,7 @@
 ﻿using Basis.Scripts.UI;
 using UnityEngine;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     public class P12HijackBasisPointRaycaster : MonoBehaviour
     {

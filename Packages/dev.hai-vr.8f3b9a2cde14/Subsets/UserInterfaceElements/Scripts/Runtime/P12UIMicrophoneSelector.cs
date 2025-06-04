@@ -3,7 +3,7 @@ using Basis.Scripts.Device_Management;
 using TMPro;
 using UnityEngine;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     public class P12UIMicrophoneSelector : MonoBehaviour
     {

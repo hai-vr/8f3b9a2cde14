@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using BattlePhaze.SettingsManager;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     public class H12BattlePhazeSettingsHandler
     {

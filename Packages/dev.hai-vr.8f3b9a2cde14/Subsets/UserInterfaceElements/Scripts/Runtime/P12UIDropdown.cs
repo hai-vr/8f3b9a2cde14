@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     public class P12UIDropdown : MonoBehaviour
     {

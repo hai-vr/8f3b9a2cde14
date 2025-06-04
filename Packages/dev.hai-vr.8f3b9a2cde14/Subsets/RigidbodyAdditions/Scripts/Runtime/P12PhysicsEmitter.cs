@@ -1,7 +1,7 @@
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Hai.Project12.RigidbodyAdditions
+namespace Hai.Project12.RigidbodyAdditions.Runtime
 {
     public class P12PhysicsEmitter : MonoBehaviour
     {

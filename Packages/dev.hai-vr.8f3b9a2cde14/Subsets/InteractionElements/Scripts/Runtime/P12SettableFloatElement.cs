@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     [CreateAssetMenu(fileName = "P12SettableFloatElement", menuName = "HVR.Basis/P12/Settable Float Element")]
     public class P12SettableFloatElement : ScriptableObject

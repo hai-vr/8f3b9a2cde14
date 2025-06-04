@@ -56,3 +56,5 @@ Things to keep in mind while building scenes:
 ## Bugs in Basis
 
 - BootManager will occasionally get added to the main scene while in Edit Mode. Repro steps not yet known.
+- `BasisLocalInputActions.Instance` may instantiate too late for some dependents to hook into it, and there does not appear to be
+  an initialization callback.

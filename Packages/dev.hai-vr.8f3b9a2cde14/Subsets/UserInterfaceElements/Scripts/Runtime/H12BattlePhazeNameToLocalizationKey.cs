@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     public class H12BattlePhazeNameToLocalizationKey
     {

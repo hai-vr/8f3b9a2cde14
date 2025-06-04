@@ -5,10 +5,10 @@ using BattlePhaze.SettingsManager;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static Hai.Project12.UserInterfaceElements.H12Localization;
+using static Hai.Project12.UserInterfaceElements.Runtime.H12Localization;
 using Object = UnityEngine.Object;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     internal class H12Builder
     {

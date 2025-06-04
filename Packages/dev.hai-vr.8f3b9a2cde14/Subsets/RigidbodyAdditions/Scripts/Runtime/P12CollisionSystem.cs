@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Hai.Project12.RigidbodyAdditions
+namespace Hai.Project12.RigidbodyAdditions.Runtime
 {
     public class P12CollisionSystem : MonoBehaviour
     {

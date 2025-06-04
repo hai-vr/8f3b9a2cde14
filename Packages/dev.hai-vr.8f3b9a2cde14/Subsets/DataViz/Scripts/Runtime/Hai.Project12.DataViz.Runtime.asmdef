@@ -1,0 +1,28 @@
+{
+    "name": "Hai.Project12.DataViz.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "Unity.TextMeshPro",
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "BasisSDK",
+        "BasisDebug",
+        "Hai.Project12.HaiSystems.Supporting"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.basis.sdk",
+            "expression": "",
+            "define": "HVR_IS_BASIS"
+        }
+    ],
+    "noEngineReferences": false
+}

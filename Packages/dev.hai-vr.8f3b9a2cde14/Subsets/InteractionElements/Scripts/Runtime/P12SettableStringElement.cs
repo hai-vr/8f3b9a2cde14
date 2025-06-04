@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     [CreateAssetMenu(fileName = "P12SettableStringElement", menuName = "HVR.Basis/P12/Settable String Element")]
     public class P12SettableStringElement : ScriptableObject

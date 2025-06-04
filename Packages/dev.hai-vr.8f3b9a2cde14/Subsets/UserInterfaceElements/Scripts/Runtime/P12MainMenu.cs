@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Basis.Scripts.UI.UI_Panels;
 using Subsets.GameRoutine.Scripts.Runtime;
 using UnityEngine;
-using static Hai.Project12.UserInterfaceElements.H12Localization;
+using static Hai.Project12.UserInterfaceElements.Runtime.H12Localization;
 
-namespace Hai.Project12.UserInterfaceElements
+namespace Hai.Project12.UserInterfaceElements.Runtime
 {
     public class P12MainMenu : MonoBehaviour
     {
