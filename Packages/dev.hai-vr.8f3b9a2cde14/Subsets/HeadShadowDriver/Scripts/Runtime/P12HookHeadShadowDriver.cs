@@ -35,6 +35,8 @@ namespace Hai.Project12.ListenServer.Runtime
 
         private void OnLocalPlayerCreatedAndReady()
         {
+            BasisLocalPlayer.OnLocalPlayerCreatedAndReady -= OnLocalPlayerCreatedAndReady;
+
             BasisLocalPlayer.Instance.OnLocalAvatarChanged -= OnLocalAvatarChanged;
             BasisLocalPlayer.Instance.OnLocalAvatarChanged += OnLocalAvatarChanged;
             OnLocalAvatarChanged();
