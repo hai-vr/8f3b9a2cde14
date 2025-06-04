@@ -12,7 +12,7 @@ namespace Hai.Project12.ListenServer.Runtime
     /// WARNING: Having this class enabled in your scene will:
     /// - Start the Basis server as a separate process (BasisNetworkConsole.exe), and
     /// - Make you join that server.
-    public class P12ListenServer : MonoBehaviour, IDisposable
+    public class P12ListenServer : MonoBehaviour
     {
         public const int Port = 4296;
         public uint debug_pid = 0;
@@ -62,12 +62,7 @@ namespace Hai.Project12.ListenServer.Runtime
             KillServer();
         }
 
-        private void OnApplicationQuit()
-        {
-            KillServer();
-        }
-
-        public void Dispose()
+        private void OnDestroy()
         {
             KillServer();
         }

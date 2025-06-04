@@ -1,0 +1,20 @@
+{
+    "name": "Hai.Project12.HeadShadowDriver.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "Basis",
+        "BasisAddressableDriver",
+        "BasisSDK",
+        "Unity.Addressables",
+        "Hai.Project12.HaiSystems.Supporting"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -27,6 +27,12 @@ Code that was copied from Basis in order to derive functionality. May have to be
 - There is no built-in Basis method to load a scene from a non-bundle. I am adding a method to load a level from a scene path,
   but that scene path is not yet processed (e.g. audio mixer, and possible probe tetrahedralization?)
 
+### Hooked code
+
+Code that listens to standard Basis events, probably for their intended purpose.
+- We are currently adding an event listener to the BasisLocalInputActions to detect right-click on desktop for our telekinesis action (grab at a distance).
+- We are listening to a few avatar-loading and camera rendering hooks to render the head shadow in first person.
+
 ### Hijacked code
 
 Code that modifies the behaviour of stock Basis components beyond their intended purpose, which may be considered a hack.
@@ -34,7 +40,6 @@ May have to be reimplemented as native upstream (if relevant).
 
 - We are currently hijacking the BasisPointRaycaster to ignore the world geometry if we're interacting with a non-world menu that intersects with world geometry.
     - In-world UIs may still affect the operation of the main menu, this may need some consultation on layer management.
-- We are currently adding an event listener to the BasisLocalInputActions to detect right-click on desktop for our telekinesis action (grab at a distance).
 
 ## Adaptations
 
@@ -47,3 +52,7 @@ Things to keep in mind while building scenes:
   - Having a known physics update rate makes it better for consistent rigidbody physics damage, so we value this consistency over that.
 - Unlike the Basis default UI, all of our UI uses a custom shader that derives from UI/Default, and a custom TextMeshPro-derived shader, which
   crushes Z so that our UI shows on top of *most* of the world geometry. This is to allow opening the UI in cramped spaces.
+
+## Bugs in Basis
+
+- BootManager will occasionally get added to the main scene while in Edit Mode. Repro steps not yet known.

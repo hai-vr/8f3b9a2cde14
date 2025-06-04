@@ -14,7 +14,7 @@ using UnityEngine;
 namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
 {
     /// SDR Relay socket acting as a proxy server.
-    public class P12SDRProxyServer : MonoBehaviour, IDisposable
+    public class P12SDRProxyServer : MonoBehaviour
     {
         public const uint RVRAppId = 2_212_290;
 
@@ -43,12 +43,7 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
             }
         }
 
-        private void OnApplicationQuit()
-        {
-            Shutdown();
-        }
-
-        public void Dispose()
+        private void OnDestroy()
         {
             Shutdown();
         }

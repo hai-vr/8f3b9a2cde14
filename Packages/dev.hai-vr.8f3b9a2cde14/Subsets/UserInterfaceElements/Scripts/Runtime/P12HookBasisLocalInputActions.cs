@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 
 namespace Hai.Project12.UserInterfaceElements
 {
-    public class P12HijackBasisLocalInputActions : MonoBehaviour
+    public class P12HookBasisLocalInputActions : MonoBehaviour
     {
         private void OnEnable()
         {
