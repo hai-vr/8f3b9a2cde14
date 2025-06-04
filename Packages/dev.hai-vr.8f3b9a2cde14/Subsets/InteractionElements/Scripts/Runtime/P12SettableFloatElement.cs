@@ -19,8 +19,11 @@ namespace Hai.Project12.UserInterfaceElements
             get => _storedValue;
             set
             {
-                _storedValue = value;
-                OnValueChanged?.Invoke(_storedValue);
+                if (_storedValue != value)
+                {
+                    _storedValue = value;
+                    OnValueChanged?.Invoke(_storedValue);
+                }
             }
         }
 
@@ -42,6 +45,7 @@ namespace Hai.Project12.UserInterfaceElements
             InGameRangeUnityUnits,
             RealWorldPhysicalSpaceMetricUnits,
             RealWorldPhysicalSpaceImperialUnits,
+            Toggle
         }
     }
 }

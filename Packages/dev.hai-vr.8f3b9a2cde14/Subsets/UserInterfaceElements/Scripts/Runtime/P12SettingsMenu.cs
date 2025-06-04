@@ -49,16 +49,6 @@ namespace Hai.Project12.UserInterfaceElements
             _h12BattlePhazeSettings = new H12BattlePhazeSettingsHandler(SettingsManager.Instance);
             _h12Builder = new H12Builder(prefabs, layoutGroupHolder, titleGroupHolder, P12MainMenu.StandardControlExpansion, haptics);
 
-            // TODO:
-            // - Microphone Source
-            // Is Dynamic:
-            // - Monitor
-            // - Resolution
-            // - ScreenMode
-
-            BasisDebug.Log(string.Join(",", SettingsManager.Instance.Options
-                .Select(input => $"{input.Name}({input.Type})")));
-
             _audioOptions = new List<string>(new[]
             {
                 "Main Audio", // Slider
@@ -220,7 +210,17 @@ namespace Hai.Project12.UserInterfaceElements
 
             foreach (var gadget in gadgetRepository.GadgetView())
             {
-                _h12Builder.P12ToggleForFloat(UserProvided_SettableFloatElement($"{gadget.name}", 0f));
+                if (gadget is P12SettableFloatElement floatElement)
+                {
+                    if (floatElement.displayAs == P12SettableFloatElement.P12UnitDisplayKind.Toggle)
+                    {
+                        _h12Builder.P12ToggleForFloat(floatElement);
+                    }
+                    else
+                    {
+                        _h12Builder.P12SliderElement(floatElement);
+                    }
+                }
             }
         }
 

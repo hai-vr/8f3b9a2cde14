@@ -201,7 +201,7 @@ namespace Hai.Project12.UserInterfaceElements
         internal void P12ToggleForFloat(P12SettableFloatElement settableChoice)
         {
             bool Getter() => settableChoice.storedValue >= 1f;
-            void Setter(bool newValue) => settableChoice.storedValue = newValue ? 0f : 1f;
+            void Setter(bool newValue) => settableChoice.storedValue = newValue ? 1f : 0f;
 
             Func<bool> getter = Getter;
             Action<bool> setter = Setter;
@@ -282,6 +282,8 @@ namespace Hai.Project12.UserInterfaceElements
                     return $"{value:0.0}m";
                 case P12SettableFloatElement.P12UnitDisplayKind.RealWorldPhysicalSpaceImperialUnits:
                     return $"{value:0.0}TODO-ft";
+                case P12SettableFloatElement.P12UnitDisplayKind.Toggle:
+                    return value >= 1f ? _L("ui.settings.dropdown.on") : _L("ui.settings.dropdown.off");
                 default:
                     throw new ArgumentOutOfRangeException(nameof(displayAs), displayAs, null);
             }

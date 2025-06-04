@@ -10,19 +10,19 @@ namespace Hai.Project12.HaiSystems.Supporting
     {
         // TODO: Some of the requested objects might become destroyed, but this puts the object lifecycle of the dependents into question.
         private static readonly Dictionary<Type, Object> RequestedTypeToObjectDict = new Dictionary<Type, Object>();
-        private static P12LateInjectorMarker lateInjectorMarker; // May become destroyed
+        private static P12LateInjectorMarker _lateInjectorMarker; // May become destroyed
 
         /// Fills non-null fields marked with the LateInjectable attribute with any instance of it found in any scene. Call this on Awake().
         public static void InjectDependenciesInto(Component toInjectTo)
         {
-            if (!lateInjectorMarker)
+            if (!_lateInjectorMarker)
             {
                 H12Debug.Log("Initializing injector.");
-                lateInjectorMarker = new GameObject
+                _lateInjectorMarker = new GameObject
                 {
                     name = "P12LateInjectorMarker"
                 }.AddComponent<P12LateInjectorMarker>();
-                Object.DontDestroyOnLoad(lateInjectorMarker);
+                Object.DontDestroyOnLoad(_lateInjectorMarker);
 
                 RequestedTypeToObjectDict.Clear();
             }
