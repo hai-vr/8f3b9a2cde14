@@ -14,9 +14,10 @@ framework itself.
 Unsolved issues that may require a modification, separation, or hijack.
 
 The following items will need to be enacted:
-- We will need to add some form of support for the right-click action on desktop for our telekinesis action (grab at a distance).
 - We will need to change the action of the Escape button to open our own Pause menu.
+  - This is currently prevented because the default Escape behaviour cannot be unhooked from BasisLocalInputActions.
   - It is currently unclear how to change basic behaviour of Basis with minimal modification of the framework; if that is even a framework goal to achieve.
+  - After discussion, the default Escape button action may be made public, so that it can be unhooked.
 - We will need to figure out a way to open the Pause menu in desktop mode on first join, so that the cursor always works there.
 
 ### Separated code
@@ -33,6 +34,7 @@ May have to be reimplemented as native upstream (if relevant).
 
 - We are currently hijacking the BasisPointRaycaster to ignore the world geometry if we're interacting with a non-world menu that intersects with world geometry.
     - In-world UIs may still affect the operation of the main menu, this may need some consultation on layer management.
+- We are currently adding an event listener to the BasisLocalInputActions to detect right-click on desktop for our telekinesis action (grab at a distance).
 
 ## Adaptations
 
