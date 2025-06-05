@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using Basis.Scripts.Device_Management.Devices.Desktop;
 using UnityEngine;
 using UnityEngine.InputSystem;

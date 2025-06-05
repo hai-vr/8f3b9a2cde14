@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Basis.Scripts.Addressable_Driver;
 using Basis.Scripts.Addressable_Driver.Enums;
 using Basis.Scripts.Device_Management;
 using Basis.Scripts.UI.UI_Panels;
 using BattlePhaze.SettingsManager;
-using Hai.Project12.InteractionElements;
+using Hai.Project12.InteractionElements.Runtime;
 using TMPro;
 using UnityEngine;
 using static Hai.Project12.UserInterfaceElements.Runtime.H12Localization;

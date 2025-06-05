@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Hai.Project12.InteractionElements
+namespace Hai.Project12.InteractionElements.Runtime
 {
     public class P12Action : MonoBehaviour
     {

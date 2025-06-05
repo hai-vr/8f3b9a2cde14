@@ -1,6 +1,6 @@
 {
     "name": "Hai.Project12.InteractionElements.Runtime",
-    "rootNamespace": "",
+    "rootNamespace": "Hai.Project12.InteractionElements.Runtime",
     "references": [
         "Unity.TextMeshPro",
         "BattlePhazeSettingsManger",

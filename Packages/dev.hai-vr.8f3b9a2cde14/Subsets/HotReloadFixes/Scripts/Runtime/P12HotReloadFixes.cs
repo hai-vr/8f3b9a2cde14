@@ -1,9 +1,8 @@
-﻿using Basis.Scripts.Boot_Sequence;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 using Valve.VR;
 
-namespace Subsets.HotReloadFixes.Scripts.Runtime
+namespace Hai.Project12.HotReloadFixes.Runtime
 {
     public class P12HotReloadFixes : MonoBehaviour
     {

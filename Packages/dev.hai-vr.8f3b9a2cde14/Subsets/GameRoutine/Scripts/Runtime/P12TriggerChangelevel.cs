@@ -2,7 +2,7 @@
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Subsets.GameRoutine.Scripts.Runtime
+namespace Hai.Project12.GameRoutine.Runtime
 {
     public class P12TriggerChangelevel : MonoBehaviour
     {

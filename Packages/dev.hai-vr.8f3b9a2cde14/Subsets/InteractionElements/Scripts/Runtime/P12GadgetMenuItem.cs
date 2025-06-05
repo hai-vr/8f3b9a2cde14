@@ -2,7 +2,7 @@
 using Hai.Project12.UserInterfaceElements.Runtime;
 using UnityEngine;
 
-namespace Hai.Project12.InteractionElements
+namespace Hai.Project12.InteractionElements.Runtime
 {
     public class P12GadgetMenuItem : MonoBehaviour
     {
