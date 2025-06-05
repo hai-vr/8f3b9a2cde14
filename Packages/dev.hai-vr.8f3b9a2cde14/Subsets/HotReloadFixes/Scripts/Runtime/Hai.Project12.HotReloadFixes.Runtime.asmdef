@@ -1,0 +1,22 @@
+{
+    "name": "Hai.Project12.HotReloadFixes.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "Basis",
+        "BasisAddressableDriver",
+        "BasisSDK",
+        "Unity.Addressables",
+        "Hai.Project12.HaiSystems.Supporting",
+        "SteamVR",
+        "Unity.XR.OpenVR"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

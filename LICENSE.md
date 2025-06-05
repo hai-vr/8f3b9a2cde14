@@ -6,8 +6,9 @@ such as interaction with the Steam API.
 
 **The LICENSE file of each subdirectory only apply to the files contained within that subdirectory.**
 
-The following subdirectories are under a different MIT License each:
+The following subdirectories are under a separate MIT License each:
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/HaiSystems/` : *View [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/Subsets/HaiSystems/LICENSE) file*
+- `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/DataViz/` : *View [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/Subsets/DataViz/LICENSE) file*
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/HeadShadowDriver/` : *View [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/Subsets/HeadShadowDriver/LICENSE) file*
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/InteractionElements/` : *View [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/Subsets/InteractionElements/LICENSE) file*
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/UserInterfaceElements/` : *View [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/Subsets/UserInterfaceElements/LICENSE) file*

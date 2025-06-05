@@ -56,5 +56,7 @@ Things to keep in mind while building scenes:
 ## Bugs in Basis
 
 - BootManager will occasionally get added to the main scene while in Edit Mode. Repro steps not yet known.
+  - There is a good chance `BootSequence.cs`'s async is bleeding out of Play Mode.
 - `BasisLocalInputActions.Instance` may instantiate too late for some dependents to hook into it, and there does not appear to be
   an initialization callback.
+- In `BasisOpenVRManagement`, StopSDK is not compatible with domain reload OFF between Play Mode sessions. A fix has been applied in P12HotReloadFixes/.
