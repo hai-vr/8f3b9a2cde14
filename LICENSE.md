@@ -1,3 +1,5 @@
+THIS DOCUMENT IS NOT A LICENSE FILE.
+
 Due to the parallel project subsets in this project, a different LICENSE file is
 attached to each subset subdirectory, but not all of them have a license attached yet.
 
@@ -15,8 +17,10 @@ The following subdirectories are under a separate MIT License each:
 
 The following subdirectories are [NOT open source due to a lack of license file](https://choosealicense.com/no-permission/), but this may change in the future:
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/GameRoutine/` : No license file yet.
+- `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/HotReloadFixes/` : No license file yet.
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/ListenServerAdapter/` : No license file yet.
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/RigidbodyAdditions/` : No license file yet.
+- `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/Vixxy/` : No license file yet.
 
 The following subdirectories contains third-party assets which are subject to a separate license, and are NOT open source:
 - `Packages/dev.hai-vr.8f3b9a2cde14/ThirdPartyAudio/FromSonnissGdcBundle/` : *View informative [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/ThirdPartyAudio/FromSonnissGdcBundle/LICENSE.md) document*

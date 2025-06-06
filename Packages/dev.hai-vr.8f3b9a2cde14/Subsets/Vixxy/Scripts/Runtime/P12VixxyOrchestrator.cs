@@ -15,6 +15,8 @@ namespace Hai.Project12.Vixxy.Runtime
         // - When all data arrived, and we're starting the update cycle, we wake up all aggregators of that data.
 
         [SerializeField] private AcquisitionService acquisitionService; // This is not injectable, because AcquisitionService gets created on demand
+        [SerializeField] private Transform context; // Can be null. If it is null, the orchestrator *is* the context.
+
         private readonly HashSet<I12VixxyAggregator> _aggregatorsToUpdateThisTick = new();
         private readonly HashSet<I12VixxyActuator> _actuatorsToUpdateThisTick = new();
         private bool _anythingNeedsUpdating;
@@ -28,6 +30,11 @@ namespace Hai.Project12.Vixxy.Runtime
         private void Awake()
         {
             if (!acquisitionService) acquisitionService = AcquisitionService.SceneInstance;
+        }
+
+        public Transform Context()
+        {
+            return context != null ? context : transform;
         }
 
         public void PassAddressUpdated(string address)

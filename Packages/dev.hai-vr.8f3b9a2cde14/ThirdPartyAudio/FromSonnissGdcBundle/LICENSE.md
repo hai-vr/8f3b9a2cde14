@@ -12,9 +12,10 @@ Please be aware of the various restrictions of that license, which includes prob
 
 
 ---
+```text
 The License – #GameAudioGDC Bundle
 UNLIMITED USER LICENSE
-All of the sound effects contained within the #GameAudioGDC bundle are licensed to the end-user. By downloading and using any of the sound effects, you acknowledge and agree to be bound by the terms and conditions laid out within this document. 
+All of the sound effects contained within the #GameAudioGDC bundle are licensed to the end-user. By downloading and using any of the sound effects, you acknowledge and agree to be bound by the terms and conditions laid out within this document.
 
 
 THE #GAMEAUDIOGDC BUNDLE LICENSING AGREEMENT
@@ -61,3 +62,4 @@ GOT QUESTIONS? NO PROBLEM! GET IN TOUCH
 Whether you need 1 license or 1000, commercial or just personal, we can create custom licenses to match your unique and specific requirements.
 
 Email: timothy@sonniss.com
+```
