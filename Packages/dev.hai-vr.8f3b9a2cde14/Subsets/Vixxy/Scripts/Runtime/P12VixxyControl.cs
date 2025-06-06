@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
 using UnityEngine;
 
@@ -25,10 +28,81 @@ namespace Hai.Project12.Vixxy.Runtime
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
 
+        private readonly Dictionary<string, Type> _typeCache = new();
+        // private readonly HashSet<MPBApplier> _stagedBlocks = new();
+
         public void Awake()
         {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
             _context = orchestrator.Context();
-            // TODO: Resolve properties.
+            for (var i = 0; i < subjects.Length; i++)
+            {
+                var subject = subjects[i];
+                subject.BakeAffectedObjects(_context);
+                subjects[i] = subject;
+
+                var isAnyPropertyDependentOnMaterialPropertyBlock = false;
+
+                // TODO: Bake for other properties too.
+                for (var index = 0; index < subject.propertiesForVector4.Length; index++)
+                {
+                    var property = subject.propertiesForVector4[index];
+                    if (TryGetType(assemblies, property.fullClassName, out var foundType))
+                    {
+                        property.IsApplicable = true;
+                        property.FoundType = foundType;
+                    }
+                    else
+                    {
+                        property.IsApplicable = false;
+                        property.FoundType = null;
+                    }
+
+                    if (!isAnyPropertyDependentOnMaterialPropertyBlock && property.propertyName.StartsWith("material."))
+                    {
+                        isAnyPropertyDependentOnMaterialPropertyBlock = true;
+                    }
+
+                    subject.propertiesForVector4[index] = property;
+                }
+
+                if (isAnyPropertyDependentOnMaterialPropertyBlock)
+                {
+                    foreach (var bakedObject in subject.BakedObjects)
+                    {
+                        orchestrator.RequireMaterialPropertyBlock(bakedObject);
+                    }
+                }
+            }
+        }
+
+        private bool TryGetType(Assembly[] assemblies, string propertyFullClassName, out Type foundType)
+        {
+            if (_typeCache.TryGetValue(propertyFullClassName, out var type))
+            {
+                foundType = type;
+                return true;
+            }
+
+            foreach (var assembly in assemblies)
+            {
+                foreach (var thatType in assembly.GetTypes())
+                {
+                    if (thatType.FullName == propertyFullClassName)
+                    {
+                        _typeCache.Add(propertyFullClassName, thatType);
+
+                        foundType = thatType;
+                        return true;
+                    }
+                }
+            }
+
+            _typeCache.Add(propertyFullClassName, null);
+
+            foundType = null;
+            return false;
         }
 
         private void OnEnable()
@@ -55,6 +129,12 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             // FIXME: We really need to figure out how actuators sample values from their dependents.
             float value = sample.storedValue;
+            ActuateActivations(value);
+            ActuateSubjects(value);
+        }
+
+        private void ActuateActivations(float value)
+        {
             foreach (var activation in activations)
             {
                 switch (activation.threshold)
@@ -69,6 +149,61 @@ namespace Hai.Project12.Vixxy.Runtime
                         throw new ArgumentOutOfRangeException();
                 }
             }
+        }
+
+        private void ActuateSubjects(float value)
+        {
+            foreach (var subject in subjects)
+            {
+                foreach (var property in subject.propertiesForVector4)
+                {
+                    if (property.IsApplicable)
+                    {
+                        var color = Color.Lerp(property.unbound, property.bound, value);
+                        foreach (var bakedObject in subject.BakedObjects)
+                        {
+                            // FIXME: This is slow. Bake it into the property itself in Awake.
+                            var component = bakedObject.GetComponent(property.FoundType);
+                            if (property.propertyName.StartsWith("material."))
+                            {
+                                var suffix = property.propertyName.Substring("material.".Length);
+                                // TODO: We need to store MPBs for each object in the orchestrator itself,
+                                // in case multiple controls change the MPB for the same object.
+
+                                if (component is Renderer ourRenderer)
+                                {
+                                    var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(bakedObject);
+
+                                    materialPropertyBlock.SetColor(suffix, color);
+
+                                    orchestrator.StagePropertyBlock(bakedObject);
+                                }
+                            }
+                            else
+                            {
+                                var fields = property.FoundType.GetFields();
+                                foreach (var fieldInfo in fields)
+                                {
+                                    if (fieldInfo.Name == property.propertyName)
+                                    {
+                                        // TODO: Cast to the type that this field expects
+                                        fieldInfo.SetValue(component, color);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // if (_stagedBlocks.Count > 0)
+            // {
+                // foreach (var stagedBlock in _stagedBlocks)
+                // {
+                    // stagedBlock.renderer.SetPropertyBlock(stagedBlock.materialPropertyBlock);
+                // }
+                // _stagedBlocks.Clear();
+            // }
         }
 
         private void Toggle(Component component, bool isOn)
@@ -119,6 +254,14 @@ namespace Hai.Project12.Vixxy.Runtime
         public P12VixxyProperty<Material>[] propertiesForMaterial;
         public P12VixxyProperty<Transform>[] propertiesForTransform;
         public P12VixxyProperty<Texture>[] propertiesForTexture;
+
+        [NonSerialized] internal List<GameObject> BakedObjects;
+
+        public void BakeAffectedObjects(Transform context)
+        {
+            BakedObjects = new List<GameObject>();
+            BakedObjects.AddRange(targets);
+        }
     }
 
     public enum P12VixxySelection
@@ -139,5 +282,9 @@ namespace Hai.Project12.Vixxy.Runtime
         public bool flip;
         public T bound;
         public T unbound;
+
+        // Runtime only
+        [NonSerialized] internal bool IsApplicable;
+        [NonSerialized] internal Type FoundType;
     }
 }

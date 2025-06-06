@@ -1184,7 +1184,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acquisitionService: {fileID: 0}
-  context: {fileID: 0}
+  context: {fileID: 1154253538}
 --- !u!1 &191686566
 GameObject:
   m_ObjectHideFlags: 0
@@ -2906,7 +2906,22 @@ MonoBehaviour:
   - component: {fileID: 1280096505}
     threshold: 0
     target: 1
-  subjects: []
+  subjects:
+  - selection: 0
+    targets:
+    - {fileID: 1280096501}
+    childrenOf: []
+    exceptions: []
+    propertiesForFloat: []
+    propertiesForVector4:
+    - fullClassName: UnityEngine.MeshRenderer
+      propertyName: material._BaseColor
+      flip: 0
+      bound: {x: 0, y: 1, z: 0, w: 1}
+      unbound: {x: 1, y: 1, z: 1, w: 1}
+    propertiesForMaterial: []
+    propertiesForTransform: []
+    propertiesForTexture: []
 --- !u!4 &400168027 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8224631541272572913, guid: aea3d39e9e497da40b6a1240365555a1, type: 3}
@@ -10307,7 +10322,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1574254417
 Transform:
   m_ObjectHideFlags: 0

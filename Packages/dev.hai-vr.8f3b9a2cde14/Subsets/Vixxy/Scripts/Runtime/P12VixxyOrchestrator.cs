@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
+    [DefaultExecutionOrder(-10)] // FIXME: acquisitionService can be null if the dependents become awake before this
     /// There is one instance of this **per avatar** or **per world object**.
     public class P12VixxyOrchestrator : MonoBehaviour
     {
@@ -14,7 +15,7 @@ namespace Hai.Project12.Vixxy.Runtime
         // - When data arrives, we mark the aggregators and the actuators of that data.
         // - When all data arrived, and we're starting the update cycle, we wake up all aggregators of that data.
 
-        [SerializeField] private AcquisitionService acquisitionService; // This is not injectable, because AcquisitionService gets created on demand
+        [SerializeField] private AcquisitionService acquisitionService;
         [SerializeField] private Transform context; // Can be null. If it is null, the orchestrator *is* the context.
 
         private readonly HashSet<I12VixxyAggregator> _aggregatorsToUpdateThisTick = new();
@@ -24,6 +25,9 @@ namespace Hai.Project12.Vixxy.Runtime
         // TODO: Don't do string lookup tables!
         private readonly Dictionary<string, HashSet<I12VixxyAggregator>> _addressToAggregators = new();
         private readonly Dictionary<string, HashSet<I12VixxyActuator>> _addressToActuators = new();
+        private readonly Dictionary<GameObject, MaterialPropertyBlock> _objectToMaterialPropertyBlock = new();
+        private readonly Dictionary<GameObject, Renderer> _objectToRenderer = new();
+        private readonly HashSet<GameObject> _stagedBlocks = new(); // FIXME: We should really just be binding tuples into _objectToMaterialPropertyBlock
 
         private readonly HashSet<I12VixxyAggregator> _workAggregators = new();
 
@@ -117,6 +121,16 @@ namespace Hai.Project12.Vixxy.Runtime
 
                 _actuatorsToUpdateThisTick.Clear();
             }
+
+            if (_stagedBlocks.Count > 0)
+            {
+                foreach (var stagedBlock in _stagedBlocks)
+                {
+                    // No ContainsKey checks: The objects should always exist in the dictionaries. If they don't, it's a design error.
+                    _objectToRenderer[stagedBlock].SetPropertyBlock(_objectToMaterialPropertyBlock[stagedBlock]);
+                }
+                _stagedBlocks.Clear();
+            }
         }
 
         public H12ActuatorRegistrationToken RegisterActuator(string address, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
@@ -174,6 +188,36 @@ namespace Hai.Project12.Vixxy.Runtime
         public void UnregisterAggregator(string address, I12VixxyAggregator aggregator)
         {
             if (_addressToAggregators.TryGetValue(address, out var existingActuator)) existingActuator.Remove(aggregator);
+        }
+
+        public void RequireMaterialPropertyBlock(GameObject bakedObject)
+        {
+            if (!_objectToMaterialPropertyBlock.ContainsKey(bakedObject))
+            {
+                _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
+                _objectToRenderer.Add(bakedObject, bakedObject.GetComponent<Renderer>());
+            }
+        }
+
+        public MaterialPropertyBlock GetMaterialPropertyBlockForBakedObject(GameObject bakedObject)
+        {
+            // If the key doesn't exist, it is a design error. Callers should only call GetMaterialPropertyBlockFor
+            // if that subject is guaranteed to have a MaterialPropertyBlock declared, as it is required by Awake.
+            // (Live edits not currently supported)
+            if (!_objectToMaterialPropertyBlock.ContainsKey(bakedObject))
+            {
+                // DEFENSIVE for live edits only. This condition should not be entered by design.
+                H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a design error, or the user is currently doing a live edit.");
+                _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
+                _objectToRenderer.Add(bakedObject, bakedObject.GetComponent<Renderer>());
+            }
+
+            return _objectToMaterialPropertyBlock[bakedObject];
+        }
+
+        public void StagePropertyBlock(GameObject bakedObject)
+        {
+            _stagedBlocks.Add(bakedObject);
         }
     }
 }
