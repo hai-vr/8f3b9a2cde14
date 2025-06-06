@@ -14,7 +14,7 @@ namespace Hai.Project12.Vixxy.Runtime
         // - When data arrives, we mark the aggregators and the actuators of that data.
         // - When all data arrived, and we're starting the update cycle, we wake up all aggregators of that data.
 
-        [LateInjectable] [SerializeField] private AcquisitionService acquisitionService;
+        [SerializeField] private AcquisitionService acquisitionService; // This is not injectable, because AcquisitionService gets created on demand
         private readonly HashSet<I12VixxyAggregator> _aggregatorsToUpdateThisTick = new();
         private readonly HashSet<I12VixxyActuator> _actuatorsToUpdateThisTick = new();
         private bool _anythingNeedsUpdating;
@@ -24,18 +24,10 @@ namespace Hai.Project12.Vixxy.Runtime
         private readonly Dictionary<string, HashSet<I12VixxyActuator>> _addressToActuators = new();
 
         private readonly HashSet<I12VixxyAggregator> _workAggregators = new();
-        // private readonly List<(string, AcquisitionService.AddressUpdated)> _acquisitionServiceRegistrationTracker = new List<(string, AcquisitionService.AddressUpdated)>();
 
         private void Awake()
         {
             if (!acquisitionService) acquisitionService = AcquisitionService.SceneInstance;
-
-            // In AcquisitionService, acquisition events are raised as soon as the data arrives.
-            // We don't want to process that new data when it arrives, instead we want to process
-            // only after all data has arrived for that frame, all at once.
-
-            // TODO: Register addresses to listen to based on the aggregators and actuators we have registered.
-            // TEMP__RegisterAddressesToAcquisition(P12VixxySubmitSettableToAcquisition.TestAddress);
         }
 
         public void PassAddressUpdated(string address)
@@ -49,6 +41,12 @@ namespace Hai.Project12.Vixxy.Runtime
             var aggregators = AggregatorsOf(address);
             var actuators = ActuatorsOf(address);
 
+            // In AcquisitionService, acquisition events are raised as soon as the data arrives.
+            // We don't want to process that new data when it arrives, instead we want to process
+            // only after all data has arrived for that frame, all at once.
+
+            // FIXME: AcquisitionService "OnAddressUpdated" fires when ANY data is received on that line.
+            // The value may have not changed. We need to track it.
             _aggregatorsToUpdateThisTick.UnionWith(aggregators);
             _actuatorsToUpdateThisTick.UnionWith(actuators);
             _anythingNeedsUpdating = true;
@@ -64,6 +62,11 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             if (_addressToActuators.TryGetValue(address, out var results)) return results;
             return Enumerable.Empty<I12VixxyActuator>();
+        }
+
+        public void ProvideValue(string address, float result)
+        {
+            // FIXME: This bleeds the value type to the orchestrator. It would be nice to avoid that.
         }
 
         // TODO: This update loop must only run after the services that submit to AcquisitionService have run.
@@ -109,7 +112,7 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
-        public void RegisterActuator(string address, I12VixxyActuator actuator)
+        public H12ActuatorRegistrationToken RegisterActuator(string address, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
         {
             if (_addressToActuators.TryGetValue(address, out var existingActuators))
             {
@@ -124,11 +127,24 @@ namespace Hai.Project12.Vixxy.Runtime
             // When an actuator is added, it is scheduled to be updated for initialization purposes.
             _anythingNeedsUpdating = true;
             _actuatorsToUpdateThisTick.Add(actuator);
+
+            acquisitionService.RegisterAddresses(new []{ address }, addressUpdatedFn);
+
+            return new H12ActuatorRegistrationToken
+            {
+                registeredAddress = address,
+                registeredCallback = addressUpdatedFn,
+                registeredActuator = actuator
+            };
         }
 
-        public void UnregisterActuator(string address, I12VixxyActuator actuator)
+        public void UnregisterActuator(H12ActuatorRegistrationToken actuatorRegistrationToken)
         {
-            if (_addressToActuators.TryGetValue(address, out var existingActuator)) existingActuator.Remove(actuator);
+            if (_addressToActuators.TryGetValue(actuatorRegistrationToken.registeredAddress, out var existingActuator))
+            {
+                existingActuator.Remove(actuatorRegistrationToken.registeredActuator);
+            }
+            acquisitionService.UnregisterAddresses(new []{ actuatorRegistrationToken.registeredAddress }, actuatorRegistrationToken.registeredCallback);
         }
 
         public void RegisterAggregator(string address, I12VixxyAggregator actuator)

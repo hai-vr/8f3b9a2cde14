@@ -13,28 +13,34 @@ namespace Hai.Project12.Vixxy.Runtime
         [LateInjectable] public AcquisitionService acquisitionService;
 
         // Cannot change after the component gets enabled.
-        public string address = "";
+        [SerializeField] private string address = "";
+        [SerializeField] private Color whenInactive = Color.white;
+        [SerializeField] private Color whenActive = Color.green;
 
         private MaterialPropertyBlock _propertyBlock;
-        private string _registeredAddress;
+        private H12ActuatorRegistrationToken _registeredActuator;
 
         private void Awake()
         {
             _propertyBlock = new MaterialPropertyBlock();
             acquisitionService = AcquisitionService.SceneInstance;
+
+            if (string.IsNullOrEmpty(address))
+            {
+                H12Debug.LogWarning($"{nameof(P12VixxySampleActuator)} actuator named \"{name}\" has no address defined. It will be disabled.", H12Debug.LogTag.Vixxy);
+                enabled = false;
+            }
         }
 
         private void OnEnable()
         {
-            _registeredAddress = address;
-            orchestrator.RegisterActuator(_registeredAddress, this);
-            acquisitionService.RegisterAddresses(new []{ _registeredAddress }, OnAddressUpdated);
+            _registeredActuator = orchestrator.RegisterActuator(address, this, OnAddressUpdated);
         }
 
         private void OnDisable()
         {
-            orchestrator.UnregisterActuator(_registeredAddress, this);
-            acquisitionService.UnregisterAddresses(new []{ _registeredAddress }, OnAddressUpdated);
+            orchestrator.UnregisterActuator(_registeredActuator);
+            _registeredActuator = default;
         }
 
         private void OnAddressUpdated(string whichAddress, float value)
@@ -48,10 +54,9 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void Actuate()
         {
-            var color = Color.Lerp(Color.white, Color.green, sample.storedValue);
+            var color = Color.Lerp(whenInactive, whenActive, sample.storedValue);
             _propertyBlock.SetColor(Shader.PropertyToID("_BaseColor"), color);
             renderer.SetPropertyBlock(_propertyBlock);
-            // BasisDebug.Log($"Setting color to {H12Debug.ColorAsStartTag(color)}this color</color>.");
         }
     }
 }
