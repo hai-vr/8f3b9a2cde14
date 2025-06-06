@@ -6,21 +6,25 @@ namespace Hai.Project12.InteractionElements.Runtime
 {
     public class P12GadgetMenuItem : MonoBehaviour
     {
+        [EarlyInjectable] public P12SettableFloatElement element;
         [LateInjectable] [SerializeField] private P12GadgetRepository repository;
         public bool isToggle;
 
-        private P12SettableFloatElement _element;
+        // private P12SettableFloatElement _element;
 
         private void Awake()
         {
             H12LateInjector.InjectDependenciesInto(this);
 
-            _element = ScriptableObject.CreateInstance<P12SettableFloatElement>();
-            _element.localizedTitle = gameObject.name;
-            _element.min = 0f;
-            _element.max = 1f;
-            _element.OnValueChanged += OnValueChanged;
-            _element.displayAs = isToggle ? P12SettableFloatElement.P12UnitDisplayKind.Toggle : P12SettableFloatElement.P12UnitDisplayKind.Percentage01;
+            if (element == null)
+            {
+                element = ScriptableObject.CreateInstance<P12SettableFloatElement>();
+                element.localizedTitle = gameObject.name;
+                element.min = 0f;
+                element.max = 1f;
+                element.displayAs = isToggle ? P12SettableFloatElement.P12UnitDisplayKind.Toggle : P12SettableFloatElement.P12UnitDisplayKind.Percentage01;
+            }
+            element.OnValueChanged += OnValueChanged;
         }
 
         private void OnValueChanged(float newValue)
@@ -30,12 +34,17 @@ namespace Hai.Project12.InteractionElements.Runtime
 
         private void OnEnable()
         {
-            repository.Add(_element);
+            repository.Add(element);
         }
 
         private void OnDisable()
         {
-            repository.Remove(_element);
+            repository.Remove(element);
+        }
+
+        private void OnDestroy()
+        {
+            element.OnValueChanged -= OnValueChanged;
         }
     }
 }

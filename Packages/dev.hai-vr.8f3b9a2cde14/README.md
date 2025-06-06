@@ -40,6 +40,7 @@ May have to be reimplemented as native upstream (if relevant).
 
 - We are currently hijacking the BasisPointRaycaster to ignore the world geometry if we're interacting with a non-world menu that intersects with world geometry.
     - In-world UIs may still affect the operation of the main menu, this may need some consultation on layer management.
+    - TODO: Also do this for the hand controllers.
 
 ## Adaptations
 
@@ -52,11 +53,15 @@ Things to keep in mind while building scenes:
   - Having a known physics update rate makes it better for consistent rigidbody physics damage, so we value this consistency over that.
 - Unlike the Basis default UI, all of our UI uses a custom shader that derives from UI/Default, and a custom TextMeshPro-derived shader, which
   crushes Z so that our UI shows on top of *most* of the world geometry. This is to allow opening the UI in cramped spaces.
+  - TODO: Fix the VR controller laser shader to also crush Z.
 
 ## Bugs in Basis
 
+Issues related to domain reload OFF:
 - BootManager will occasionally get added to the main scene while in Edit Mode. Repro steps not yet known.
   - There is a good chance `BootSequence.cs`'s async is bleeding out of Play Mode.
+- If the avatar is non-default, entering Play Mode for the second time since last domain reload will fail.
+  - Current workaround is to start the default Basis app, and reset the avatar to the default avatar.
 - `BasisLocalInputActions.Instance` may instantiate too late for some dependents to hook into it, and there does not appear to be
   an initialization callback.
 - In `BasisOpenVRManagement`, StopSDK is not compatible with domain reload OFF between Play Mode sessions. A fix has been applied in P12HotReloadFixes/.

@@ -25,10 +25,13 @@ namespace Hai.Project12.HotReloadFixes.Runtime
     [InitializeOnLoad]
     public static class P12HotReloadFixesEditor
     {
-        private static int _totalAttempts;
         private const float ArtificialDelayPreventDoubleClickingPlayModeButton = 1.25f;
         private const int FailsafeAttempts = 3;
+
+        private const string MsgPlayModeCaution = "CAUTION: You are still in Play Mode.\nYou can only exit Play Mode in {0:0.0} seconds\nCheck your error logs to learn why.";
+
         private static float _enterPlayModeRealtime;
+        private static int _totalAttempts;
 
         static P12HotReloadFixesEditor()
         {
@@ -54,7 +57,7 @@ namespace Hai.Project12.HotReloadFixes.Runtime
                             " In other words, we are preventing you from double-clicking the Play Mode button by accident. For more information, see P12HotReloadFixes.cs." +
                             $" There is a failsafe: You can try to exit Play Mode {FailsafeAttempts - _totalAttempts} more times to force exiting Play Mode.";
                     H12Debug.LogError(msg);
-                    ShowEditorNotification($"CAUTION: You are still in Play Mode.\nYou can only exit Play Mode in {ArtificialDelayPreventDoubleClickingPlayModeButton - (Time.realtimeSinceStartup - _enterPlayModeRealtime):0.0} seconds\nCheck your error logs to know why.", 10f);
+                    ShowEditorNotification(string.Format(MsgPlayModeCaution, ArtificialDelayPreventDoubleClickingPlayModeButton - (Time.realtimeSinceStartup - _enterPlayModeRealtime)), 10f);
                     EditorApplication.isPlaying = true;
                 }
             }

@@ -17,3 +17,6 @@ The following subdirectories are [NOT open source due to a lack of license file]
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/GameRoutine/` : No license file yet.
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/ListenServerAdapter/` : No license file yet.
 - `Packages/dev.hai-vr.8f3b9a2cde14/Subsets/RigidbodyAdditions/` : No license file yet.
+
+The following subdirectories contains third-party assets which are subject to a separate license, and are NOT open source:
+- `Packages/dev.hai-vr.8f3b9a2cde14/ThirdPartyAudio/FromSonnissGdcBundle/` : *View informative [LICENSE](Packages/dev.hai-vr.8f3b9a2cde14/ThirdPartyAudio/FromSonnissGdcBundle/LICENSE.md) document*

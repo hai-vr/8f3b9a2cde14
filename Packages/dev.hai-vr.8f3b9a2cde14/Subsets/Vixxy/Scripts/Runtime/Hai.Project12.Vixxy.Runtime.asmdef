@@ -1,6 +1,6 @@
 {
-    "name": "Hai.Project12.InteractionElements.Runtime",
-    "rootNamespace": "Hai.Project12.InteractionElements.Runtime",
+    "name": "Hai.Project12.Vixxy.Runtime",
+    "rootNamespace": "Hai.Project12.Vixxy.Runtime",
     "references": [
         "Unity.TextMeshPro",
         "BattlePhazeSettingsManger",
@@ -8,7 +8,9 @@
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",
-        "Hai.Project12.HaiSystems.Supporting"
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.InteractionElements.Runtime",
+        "HVR.Basis.Comms"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
