@@ -26,7 +26,7 @@ namespace Hai.Project12.Vixxy.Runtime
         private readonly Dictionary<string, HashSet<I12VixxyAggregator>> _addressToAggregators = new();
         private readonly Dictionary<string, HashSet<I12VixxyActuator>> _addressToActuators = new();
         private readonly Dictionary<GameObject, MaterialPropertyBlock> _objectToMaterialPropertyBlock = new();
-        private readonly Dictionary<GameObject, Renderer> _objectToRenderer = new();
+        private readonly Dictionary<GameObject, Renderer> _objectToRenderer_mayContainNullObjects = new();
         private readonly HashSet<GameObject> _stagedBlocks = new(); // FIXME: We should really just be binding tuples into _objectToMaterialPropertyBlock
 
         private readonly HashSet<I12VixxyAggregator> _workAggregators = new();
@@ -127,7 +127,11 @@ namespace Hai.Project12.Vixxy.Runtime
                 foreach (var stagedBlock in _stagedBlocks)
                 {
                     // No ContainsKey checks: The objects should always exist in the dictionaries. If they don't, it's a design error.
-                    _objectToRenderer[stagedBlock].SetPropertyBlock(_objectToMaterialPropertyBlock[stagedBlock]);
+                    var stagedRenderer = _objectToRenderer_mayContainNullObjects[stagedBlock];
+                    if (stagedRenderer != null)
+                    {
+                        stagedRenderer.SetPropertyBlock(_objectToMaterialPropertyBlock[stagedBlock]);
+                    }
                 }
                 _stagedBlocks.Clear();
             }
@@ -195,7 +199,7 @@ namespace Hai.Project12.Vixxy.Runtime
             if (!_objectToMaterialPropertyBlock.ContainsKey(bakedObject))
             {
                 _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
-                _objectToRenderer.Add(bakedObject, bakedObject.GetComponent<Renderer>());
+                _objectToRenderer_mayContainNullObjects.Add(bakedObject, bakedObject.GetComponent<Renderer>());
             }
         }
 
@@ -209,7 +213,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 // DEFENSIVE for live edits only. This condition should not be entered by design.
                 H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a design error, or the user is currently doing a live edit.");
                 _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
-                _objectToRenderer.Add(bakedObject, bakedObject.GetComponent<Renderer>());
+                _objectToRenderer_mayContainNullObjects.Add(bakedObject, bakedObject.GetComponent<Renderer>());
             }
 
             return _objectToMaterialPropertyBlock[bakedObject];

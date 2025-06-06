@@ -28,7 +28,7 @@ namespace Hai.Project12.Vixxy.Runtime
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
 
-        private readonly Dictionary<string, Type> _typeCache = new();
+        private readonly Dictionary<string, Type> _typeCache_mayContainNullObjects = new();
         // private readonly HashSet<MPBApplier> _stagedBlocks = new();
 
         public void Awake()
@@ -79,10 +79,10 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private bool TryGetType(Assembly[] assemblies, string propertyFullClassName, out Type foundType)
         {
-            if (_typeCache.TryGetValue(propertyFullClassName, out var type))
+            if (_typeCache_mayContainNullObjects.TryGetValue(propertyFullClassName, out var typeNullable))
             {
-                foundType = type;
-                return true;
+                foundType = typeNullable;
+                return typeNullable != null;
             }
 
             foreach (var assembly in assemblies)
@@ -91,7 +91,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 {
                     if (thatType.FullName == propertyFullClassName)
                     {
-                        _typeCache.Add(propertyFullClassName, thatType);
+                        _typeCache_mayContainNullObjects.Add(propertyFullClassName, thatType);
 
                         foundType = thatType;
                         return true;
@@ -99,7 +99,8 @@ namespace Hai.Project12.Vixxy.Runtime
                 }
             }
 
-            _typeCache.Add(propertyFullClassName, null);
+            // We do cache null when we don't find that class, so that we don't try to find that again.
+            _typeCache_mayContainNullObjects.Add(propertyFullClassName, null);
 
             foundType = null;
             return false;
@@ -170,12 +171,10 @@ namespace Hai.Project12.Vixxy.Runtime
                                 // TODO: We need to store MPBs for each object in the orchestrator itself,
                                 // in case multiple controls change the MPB for the same object.
 
-                                if (component is Renderer ourRenderer)
+                                if (component is Renderer)
                                 {
                                     var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(bakedObject);
-
                                     materialPropertyBlock.SetColor(suffix, color);
-
                                     orchestrator.StagePropertyBlock(bakedObject);
                                 }
                             }
@@ -195,15 +194,6 @@ namespace Hai.Project12.Vixxy.Runtime
                     }
                 }
             }
-
-            // if (_stagedBlocks.Count > 0)
-            // {
-                // foreach (var stagedBlock in _stagedBlocks)
-                // {
-                    // stagedBlock.renderer.SetPropertyBlock(stagedBlock.materialPropertyBlock);
-                // }
-                // _stagedBlocks.Clear();
-            // }
         }
 
         private void Toggle(Component component, bool isOn)
