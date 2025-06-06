@@ -4,37 +4,34 @@ using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
-    public class P12VixxyLifecycleSampler : MonoBehaviour
+    public class P12VixxySampleActuator : MonoBehaviour, I12Actuator
     {
+        [EarlyInjectable] public P12VixxyOrchestrator orchestrator;
         [EarlyInjectable] public P12SettableFloatElement sample;
         [EarlyInjectable] public MeshRenderer renderer;
 
-        private bool _needsUpdateThisTick;
         private MaterialPropertyBlock _propertyBlock;
+        private string _registeredAddress;
 
         private void Awake()
         {
-            sample.OnValueChanged += OnValueChanged;
             _propertyBlock = new MaterialPropertyBlock();
-            _needsUpdateThisTick = true;
         }
 
-        private void OnValueChanged(float _)
+        private void OnEnable()
         {
-            _needsUpdateThisTick = true;
+            _registeredAddress = P12VixxySubmitSettableToAcquisition.TestAddress;
+            orchestrator.RegisterActuator(_registeredAddress, this);
         }
 
-        private void Update()
+        private void OnDisable()
         {
-            if (!_needsUpdateThisTick) return;
-            _needsUpdateThisTick = false;
-
-            Evaluate(sample.storedValue);
+            orchestrator.UnregisterActuator(_registeredAddress, this);
         }
 
-        private void Evaluate(float value01)
+        public void Actuate()
         {
-            var color = Color.Lerp(Color.white, Color.green, value01);
+            var color = Color.Lerp(Color.white, Color.green, sample.storedValue);
             _propertyBlock.SetColor(Shader.PropertyToID("_BaseColor"), color);
             renderer.SetPropertyBlock(_propertyBlock);
             BasisDebug.Log($"Setting color to <color=#{ColorUtility.ToHtmlStringRGB(color)}>this color</color>.");

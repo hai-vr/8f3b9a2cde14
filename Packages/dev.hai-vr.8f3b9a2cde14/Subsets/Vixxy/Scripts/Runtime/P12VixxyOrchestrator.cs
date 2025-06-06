@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Hai.Project12.HaiSystems.Supporting;
 using HVR.Basis.Comms;
 using UnityEngine;
@@ -15,18 +16,22 @@ namespace Hai.Project12.Vixxy.Runtime
 
         [LateInjectable] [SerializeField] private AcquisitionService acquisitionService;
         private readonly HashSet<P12Aggregator> _aggregatorsToUpdateThisTick = new HashSet<P12Aggregator>();
-        private readonly HashSet<P12Actuator> _actuatorsToUpdateThisTick = new HashSet<P12Actuator>();
+        private readonly HashSet<I12Actuator> _actuatorsToUpdateThisTick = new HashSet<I12Actuator>();
         private bool _anythingNeedsUpdating;
 
         private readonly HashSet<P12Aggregator> _workAggregators = new HashSet<P12Aggregator>();
+        private readonly Dictionary<string, HashSet<I12Actuator>> addressToActuators = new Dictionary<string, HashSet<I12Actuator>>();
 
         private void Awake()
         {
             if (!acquisitionService) acquisitionService = AcquisitionService.SceneInstance;
 
-            // TODO (CURRENTLY DOING): In AcquisitionService, acquisitors events are raised as soon as the data arrives.
-            // We need to deck all arrivals so that we only run the consumer aggregators once.
-            var addressIdentifier = "TestInput";
+            // In AcquisitionService, acquisition events are raised as soon as the data arrives.
+            // We don't want to process that new data when it arrives, instead we want to process
+            // only after all data has arrived for that frame, all at once.
+
+            // TODO: Properly handle addresses
+            var addressIdentifier = P12VixxySubmitSettableToAcquisition.TestAddress;
             acquisitionService.RegisterAddresses(new[] { addressIdentifier }, (address, value) =>
             {
                 // TODO: Store received addresses and value
@@ -40,24 +45,25 @@ namespace Hai.Project12.Vixxy.Runtime
             });
         }
 
-        private IEnumerable<P12Aggregator> TEMP_FindAggregatorsOf(string addressListener)
+        private IEnumerable<P12Aggregator> TEMP_FindAggregatorsOf(string address)
         {
             return new List<P12Aggregator>();
         }
 
-        private IEnumerable<P12Actuator> TEMP_FindActuatorsOf(string addressListener)
+        private IEnumerable<I12Actuator> TEMP_FindActuatorsOf(string address)
         {
-            return new List<P12Actuator>();
+            if (addressToActuators.TryGetValue(address, out var results)) return results;
+            return Enumerable.Empty<I12Actuator>();
         }
 
+        // TODO: This update loop must only run after the services that submit to AcquisitionService have run.
+        // Execution order may need tweaking.
         private void Update()
         {
-            // TODO: This update loop must only run after the services that submit to AcquisitionService have run.
-            // Execution order may need tweaking.
             if (!_anythingNeedsUpdating) return;
 
-            // Randomness in the number of iteration cycles tries to ensure we don't get implementation-specific behaviour that expects
-            // a specific number of cycles to happen.
+            // Randomness in the number of iteration cycles is an attempt to ensure we don't get implementation-specific
+            // behaviour that expects a specific number of cycles to happen.
             var randomIterations = UnityEngine.Random.Range(5, 10);
             while (randomIterations > 0 && _aggregatorsToUpdateThisTick.Count > 0)
             {
@@ -91,6 +97,28 @@ namespace Hai.Project12.Vixxy.Runtime
 
                 _actuatorsToUpdateThisTick.Clear();
             }
+        }
+
+        public void RegisterActuator(string address, I12Actuator actuator)
+        {
+            if (addressToActuators.TryGetValue(address, out var existingActuators))
+            {
+                existingActuators.Add(actuator);
+            }
+            else
+            {
+                var newActuators = new HashSet<I12Actuator> { actuator };
+                addressToActuators.Add(address, newActuators);
+            }
+
+            // When an actuator is added, it is scheduled to be updated for initialization purposes.
+            _anythingNeedsUpdating = true;
+            _actuatorsToUpdateThisTick.Add(actuator);
+        }
+
+        public void UnregisterActuator(string address, I12Actuator actuator)
+        {
+            if (addressToActuators.TryGetValue(address, out var existingActuator)) existingActuator.Remove(actuator);
         }
     }
 }

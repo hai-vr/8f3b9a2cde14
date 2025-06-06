@@ -389,6 +389,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2078894795669277670, guid: 611f0fcdc5c0dbd46b57c164aae7e08d, type: 3}
   m_PrefabInstance: {fileID: 898532220574136769}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &184113077
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 184113078}
+  - component: {fileID: 184113079}
+  m_Layer: 0
+  m_Name: P12VixxyOrchestrator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &184113078
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 184113077}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1154253538}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &184113079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 184113077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20f3a276dfbf4fedae1a7db4c290d3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  acquisitionService: {fileID: 0}
 --- !u!1 &191686566
 GameObject:
   m_ObjectHideFlags: 0
@@ -2717,7 +2762,7 @@ GameObject:
   - component: {fileID: 792869958}
   - component: {fileID: 792869959}
   m_Layer: 0
-  m_Name: VixxyLifecycle
+  m_Name: VixxyLifecycleSampler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2752,6 +2797,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sample: {fileID: 11400000, guid: c280c3d53f129a648a031a80e098743b, type: 2}
   renderer: {fileID: 1280096503}
+  acquisitionService: {fileID: 0}
 --- !u!114 &792869959
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3168,6 +3214,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 923142050}
   m_CullTransparentMesh: 1
+--- !u!1 &935513050
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 935513051}
+  m_Layer: 0
+  m_Name: P12VixxyLifecycle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &935513051
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935513050}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1154253538}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &961739749
 GameObject:
   m_ObjectHideFlags: 0
@@ -3577,6 +3654,9 @@ Transform:
   m_Children:
   - {fileID: 792869957}
   - {fileID: 1280096505}
+  - {fileID: 184113078}
+  - {fileID: 1574254417}
+  - {fileID: 935513051}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1174319648
@@ -4716,7 +4796,7 @@ GameObject:
   - component: {fileID: 1280096503}
   - component: {fileID: 1280096502}
   m_Layer: 0
-  m_Name: VixxyTest
+  m_Name: VixxyTestCube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6340,6 +6420,53 @@ Transform:
   m_Children: []
   m_Father: {fileID: 833081484}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1574254416
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1574254417}
+  - component: {fileID: 1574254418}
+  m_Layer: 0
+  m_Name: P12VixxySampleActuator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1574254417
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574254416}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1154253538}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1574254418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574254416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 103804b3e62440f882f2f6d5113b1b23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  orchestrator: {fileID: 184113079}
+  sample: {fileID: 11400000, guid: c280c3d53f129a648a031a80e098743b, type: 2}
+  renderer: {fileID: 1280096503}
 --- !u!224 &1613425663 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 2429326969290569345, guid: d81110ef3dba25d4ea483912792b069c, type: 3}
