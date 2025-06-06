@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements.Runtime
 {
-    [CreateAssetMenu(fileName = "P12SettableIntElement", menuName = "HVR.Basis/P12/Settable Int Element")]
+    [CreateAssetMenu(fileName = "P12SettableIntElement", menuName = "HVR.Basis/Project12/Settable Int Element")]
     public class P12SettableIntElement : ScriptableObject
     {
         public string locKey;

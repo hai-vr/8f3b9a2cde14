@@ -5,6 +5,11 @@ namespace Hai.Project12.HaiSystems.Supporting
 {
     public static class H12Debug
     {
+        public static string ColorAsStartTag(Color color)
+        {
+            return $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>";
+        }
+
         public static void LogError(string message, LogTag logTag = LogTag.Project12)
         {
             Debug.unityLogger.LogError("",FormatMessage(message, logTag, MessageType.Error));

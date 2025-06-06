@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements.Runtime
 {
-    [CreateAssetMenu(fileName = "P12SettableFloatElement", menuName = "HVR.Basis/P12/Settable Float Element")]
+    [CreateAssetMenu(fileName = "P12SettableFloatElement", menuName = "HVR.Basis/Project12/Settable Float Element")]
     public class P12SettableFloatElement : ScriptableObject
     {
         public string locKey;

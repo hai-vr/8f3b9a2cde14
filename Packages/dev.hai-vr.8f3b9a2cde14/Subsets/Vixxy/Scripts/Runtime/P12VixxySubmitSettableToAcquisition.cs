@@ -7,7 +7,7 @@ namespace Hai.Project12.Vixxy.Runtime
 {
     public class P12VixxySubmitSettableToAcquisition : MonoBehaviour
     {
-        public const string TestAddress = "TEST_ADDRESS";
+        public string address = "";
 
         [EarlyInjectable] public P12SettableFloatElement sample;
         [LateInjectable] public AcquisitionService acquisitionService;
@@ -20,7 +20,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void OnValueChanged(float value)
         {
-            acquisitionService.Submit(TestAddress, value);
+            acquisitionService.Submit(address, value);
         }
     }
 }
