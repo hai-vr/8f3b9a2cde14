@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
@@ -19,12 +20,16 @@ namespace Hai.Project12.Vixxy.Runtime
 
         /// The orchestrator defines the context that the subjects of this control will affect (e.g. Recursive Search).
         /// Vixxy is not an avatar-specific component, so it needs that limited context.
-        [SerializeField] private P12VixxyOrchestrator orchestrator;
-        [SerializeField] private string address;
-        [SerializeField] private P12SettableFloatElement sample;
+        [SerializeField] internal P12VixxyOrchestrator orchestrator;
+        [SerializeField] internal string address;
+        [SerializeField] internal P12SettableFloatElement sample;
 
-        [SerializeField] private P12VixxyActivations[] activations;
-        [SerializeField] private P12VixxySubject[] subjects;
+        [SerializeField] internal P12VixxyActivations[] activations;
+        [SerializeField] internal P12VixxySubject[] subjects;
+
+        public float lowerBound = 0f;
+        public float upperBound = 1f;
+        public AnimationCurve interpolationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
         // Runtime only
         private Transform _context;
@@ -57,11 +62,9 @@ namespace Hai.Project12.Vixxy.Runtime
                 var isAnyPropertyApplicable = false;
                 var isAnyPropertyDependentOnMaterialPropertyBlock = false;
 
-                // TODO: Bake for other properties too.
-                // FIXME: Having different property types is not maintainable, we need different loops that practically do the same thing.
-                for (var index = 0; index < subject.propertiesForVector4.Length; index++)
+                for (var index = 0; index < subject.properties.Count; index++)
                 {
-                    var property = subject.propertiesForVector4[index];
+                    var property = subject.properties[index];
                     if (TryGetType(assemblies, property.fullClassName, out var foundType))
                     {
                         // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
@@ -95,7 +98,6 @@ namespace Hai.Project12.Vixxy.Runtime
                                     property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
                                 }
 
-                                // FIXME: This can never be true unless we are passed false data. Blendshapes are floats, not Vector4s
                                 if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
                                 {
                                     property.SpecialMarker = P12SpecialMarker.BlendShape;
@@ -114,7 +116,7 @@ namespace Hai.Project12.Vixxy.Runtime
                         }
                         else
                         {
-                            // Not applicable: MPB with no Renderer.
+                            // Not applicable: Property requiring a MaterialPropertyBlock has no Renderer
                             property.IsApplicable = false;
                         }
                     }
@@ -124,7 +126,7 @@ namespace Hai.Project12.Vixxy.Runtime
                         property.IsApplicable = false;
                     }
 
-                    subject.propertiesForVector4[index] = property;
+                    subject.properties[index] = property;
                 }
 
                 if (isAnyPropertyDependentOnMaterialPropertyBlock)
@@ -193,22 +195,24 @@ namespace Hai.Project12.Vixxy.Runtime
         public void Actuate()
         {
             // FIXME: We really need to figure out how actuators sample values from their dependents.
-            float value = sample.storedValue;
-            ActuateActivations(value);
-            ActuateSubjects(value);
+            var linear01 = Mathf.InverseLerp(lowerBound, upperBound, sample.storedValue);
+            var active01 = interpolationCurve.Evaluate(linear01);
+            ActuateActivations(active01);
+            ActuateSubjects(active01);
         }
 
-        private void ActuateActivations(float value)
+        private void ActuateActivations(float active01)
         {
             foreach (var activation in activations)
             {
+                var target = activation.whenActive ? 1f : 0f;
                 switch (activation.threshold)
                 {
                     case ActivationThreshold.Blended:
-                        H12Utilities.SetToggleState(activation.component, Mathf.Abs(activation.target - value) < 1f);
+                        H12Utilities.SetToggleState(activation.component, Mathf.Abs(target - active01) < 1f);
                         break;
                     case ActivationThreshold.Strict:
-                        H12Utilities.SetToggleState(activation.component, Mathf.Approximately(activation.target, value));
+                        H12Utilities.SetToggleState(activation.component, Mathf.Approximately(target, active01));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -216,20 +220,25 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
-        private void ActuateSubjects(float value)
+        private void ActuateSubjects(float active01)
         {
             foreach (var subject in subjects)
             {
                 // TODO: Rather than do that check every time, only keep applicable subjects into an internal field.
                 if (!subject.IsApplicable) return;
 
-                foreach (var property in subject.propertiesForVector4)
+                foreach (var property in subject.properties)
                 {
                     // TODO: Rather than do that check every time, bake the applicable properties into an internal field.
                     if (!property.IsApplicable) continue;
 
                     var propertyNeedsCleanup = false;
-                    var lerpValue = Color.Lerp(property.unbound, property.bound, value);
+                    object lerpValue = property switch
+                    {
+                        P12VixxyProperty<float> valueFloat => Mathf.Lerp(valueFloat.unbound, valueFloat.bound, active01),
+                        P12VixxyProperty<Vector4> valueVector4 => Color.Lerp(valueVector4.unbound, valueVector4.bound, active01),
+                        _ => null
+                    };
                     foreach (var component in property.FoundComponents)
                     {
                         // Defensive check in case of external destruction.
@@ -238,57 +247,27 @@ namespace Hai.Project12.Vixxy.Runtime
                             if (property.AffectsMaterialPropertyBlock)
                             {
                                 var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
-                                materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpValue);
-                                orchestrator.StagePropertyBlock(component.gameObject);
-                            }
-                            else
-                            {
-                                // FIXME: This is slow. Bake it into the property itself in Awake.
-                                var fields = property.FoundType.GetFields();
-                                foreach (var fieldInfo in fields)
+                                if (lerpValue is Vector4 lerpVector4Value)
                                 {
-                                    if (fieldInfo.Name == property.propertyName)
-                                    {
-                                        // TODO: Cast to the type that this field expects
-                                        fieldInfo.SetValue(component, lerpValue);
-                                    }
+                                    materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value);
                                 }
-                            }
-                        }
-                        else
-                        {
-                            propertyNeedsCleanup = true;
-                        }
-                    }
-
-                    if (propertyNeedsCleanup) ConsiderCleaningUpProperty(property.FoundComponents);
-                }
-
-                // FIXME: Having a different foreach loop for each type is pure annoyance. This is not maintainable, find a way to bake it into one loop.
-                foreach (var property in subject.propertiesForFloat)
-                {
-                    // TODO: Rather than do that check every time, bake the applicable properties into an internal field.
-                    if (!property.IsApplicable) continue;
-
-                    var propertyNeedsCleanup = false;
-                    var lerpValue = Mathf.Lerp(property.unbound, property.bound, value);
-                    foreach (var component in property.FoundComponents)
-                    {
-                        // Defensive check in case of external destruction.
-                        if (null != component)
-                        {
-                            if (property.AffectsMaterialPropertyBlock)
-                            {
-                                var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
-                                materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpValue);
+                                else if (lerpValue is Color lerpColorValue)
+                                {
+                                    materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue);
+                                }
+                                // TODO: Other types
                                 orchestrator.StagePropertyBlock(component.gameObject);
                             }
                             else if (property.SpecialMarker == P12SpecialMarker.BlendShape)
                             {
-                                var smr = (SkinnedMeshRenderer)component;
-                                // FIXME: We need to cache this blendShape index
-                                var index = smr.sharedMesh.GetBlendShapeIndex(property.PropertySuffix);
-                                smr.SetBlendShapeWeight(index, lerpValue);
+                                if (lerpValue is float lerpFloatValue)
+                                {
+                                    var smr = (SkinnedMeshRenderer)component;
+                                    // FIXME: We need to cache this blendShape index
+                                    // Maybe all applicators need to be cached (float) => () lambdas in Awake or something.
+                                    var index = smr.sharedMesh.GetBlendShapeIndex(property.PropertySuffix);
+                                    smr.SetBlendShapeWeight(index, lerpFloatValue);
+                                }
                             }
                             else
                             {
@@ -317,7 +296,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private static void ConsiderCleaningUpProperty(List<Component> foundComponents)
         {
-            H12Utilities.RemoveNullsFromList(foundComponents);
+            H12Utilities.RemoveDestroyedFromList(foundComponents);
             // TODO: If the list becomes empty, then it may be relevant to make that property non-applicable,
             // but we can't do that while iterating it in a foreach.
         }
@@ -328,7 +307,7 @@ namespace Hai.Project12.Vixxy.Runtime
     {
         public Component component; // To toggle a GameObject, provide the Transform instead. It makes things easier as GameObject is not a component.
         public ActivationThreshold threshold;
-        public float target;
+        public bool whenActive;
     }
 
     public enum ActivationThreshold
@@ -358,12 +337,9 @@ namespace Hai.Project12.Vixxy.Runtime
         // We don't want to apply "ghost" properties that are not visible to the user in the UI.
         //
         // In the case of Vixxy (and not Vixen), we should just prune these properties at runtime.
-        public P12VixxyProperty<float>[] propertiesForFloat;
-        public P12VixxyProperty<Vector4>[] propertiesForVector4;
-        public P12VixxyProperty<Material>[] propertiesForMaterial;
-        public P12VixxyProperty<Transform>[] propertiesForTransform;
-        public P12VixxyProperty<Texture>[] propertiesForTexture;
+        [SerializeReference] public List<P12VixxyPropertyBase> properties;
 
+        // Runtime only
         [NonSerialized] internal List<GameObject> BakedObjects;
         [NonSerialized] internal bool IsApplicable;
 
@@ -382,7 +358,14 @@ namespace Hai.Project12.Vixxy.Runtime
     }
 
     [Serializable]
-    public struct P12VixxyProperty<T> : I12VixxyProperty
+    public class P12VixxyProperty<T> : P12VixxyPropertyBase
+    {
+        public T bound;
+        public T unbound;
+    }
+
+    [Serializable]
+    public class P12VixxyPropertyBase : I12VixxyProperty
     {
         // TODO: It might be relevant to use another approach than getting animatable properties,
         // since we have control over the system. It doesn't have to piggyback on the animation APIs.
@@ -390,8 +373,6 @@ namespace Hai.Project12.Vixxy.Runtime
         public string propertyName;
 
         public bool flip;
-        public T bound;
-        public T unbound;
 
         // Runtime only
         [NonSerialized] internal bool IsApplicable;

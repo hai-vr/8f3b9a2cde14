@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
-    [DefaultExecutionOrder(-10)] // FIXME: acquisitionService can be null if the dependents become awake before this
     /// There is one instance of this **per avatar** or **per world object**.
+    [DefaultExecutionOrder(-10)] // FIXME: acquisitionService can be null if the dependents become awake before this
     public class P12VixxyOrchestrator : MonoBehaviour
     {
         // TODO:
@@ -47,7 +47,10 @@ namespace Hai.Project12.Vixxy.Runtime
 
             // This cannot be cached outside of this lambda (unless we're smart about it),
             // as new aggregators and actuators may be added.
-            // Might need to add a baking phase so that we don't do the lookup every time.
+            // Might need to add a baking phase so that we don't do a string lookup every time
+            // (consider switching to an int lookup).
+
+            // var iddress = H12VixxyAddress.AddressToId(address); // TODO: This needs to be done and cacher earlier up the caller chain
 
             var aggregators = AggregatorsOf(address);
             var actuators = ActuatorsOf(address);

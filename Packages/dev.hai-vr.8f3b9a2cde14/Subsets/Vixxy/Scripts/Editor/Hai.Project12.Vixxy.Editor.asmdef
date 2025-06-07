@@ -1,0 +1,28 @@
+{
+    "name": "Hai.Project12.Vixxy.Editor",
+    "rootNamespace": "Hai.Project12.Vixxy.Editor",
+    "references": [
+        "Unity.TextMeshPro",
+        "BattlePhazeSettingsManger",
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "BasisDebug",
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.HaiSystems.Editor",
+        "Hai.Project12.InteractionElements.Runtime",
+        "Hai.Project12.Vixxy.Runtime",
+        "HVR.Basis.Comms"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

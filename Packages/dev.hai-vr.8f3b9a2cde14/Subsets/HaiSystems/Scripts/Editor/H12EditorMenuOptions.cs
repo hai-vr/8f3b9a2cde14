@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEditor.Compilation;
 
-namespace Hai.Project12.HaiSystems.Supporting
+namespace Hai.Project12.HaiSystems.Editor
 {
     [InitializeOnLoad]
     public class H12EditorMenuOptions

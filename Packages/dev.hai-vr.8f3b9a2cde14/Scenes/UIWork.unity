@@ -2905,23 +2905,63 @@ MonoBehaviour:
   activations:
   - component: {fileID: 1280096503}
     threshold: 0
-    target: 1
+    whenActive: 1
+  - component: {fileID: 1280096502}
+    threshold: 0
+    whenActive: 1
   subjects:
   - selection: 0
     targets:
     - {fileID: 1280096501}
     childrenOf: []
     exceptions: []
+    properties:
+    - rid: 4365713322413654131
     propertiesForFloat: []
     propertiesForVector4:
-    - fullClassName: UnityEngine.MeshRenderer
-      propertyName: material._BaseColor
-      flip: 0
-      bound: {x: 0, y: 1, z: 0, w: 1}
-      unbound: {x: 1, y: 1, z: 1, w: 1}
+    - rid: -2
     propertiesForMaterial: []
     propertiesForTransform: []
     propertiesForTexture: []
+  lowerBound: 0
+  upperBound: 1
+  interpolationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 4365713322413654131
+      type: {class: 'P12VixxyProperty`1[[UnityEngine.Vector4, UnityEngine.CoreModule]]', ns: Hai.Project12.Vixxy.Runtime, asm: Hai.Project12.Vixxy.Runtime}
+      data:
+        fullClassName: UnityEngine.MeshRenderer
+        propertyName: material._BaseColor
+        flip: 0
+        bound: {x: 0, y: 1, z: 0, w: 1}
+        unbound: {x: 1, y: 1, z: 1, w: 1}
 --- !u!4 &400168027 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8224631541272572913, guid: aea3d39e9e497da40b6a1240365555a1, type: 3}
@@ -8264,7 +8304,7 @@ Transform:
   m_GameObject: {fileID: 1280096501}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.33, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
