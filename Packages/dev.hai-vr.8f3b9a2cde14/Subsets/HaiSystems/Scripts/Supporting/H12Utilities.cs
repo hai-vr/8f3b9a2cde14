@@ -15,6 +15,16 @@ namespace Hai.Project12.HaiSystems.Supporting
                 }
             }
         }
+        public static void RemoveDestroyedFromList(List<GameObject> listToClean)
+        {
+            for (var i = listToClean.Count - 1; i >= 0; i--)
+            {
+                if (null == listToClean[i])
+                {
+                    listToClean.RemoveAt(i);
+                }
+            }
+        }
 
         /// Enables or disables a component, when applicable. If the component is a transform, then by convention, its GameObject is set active or inactive.
         /// If the component does not have a .enabled state, it is a no-op.

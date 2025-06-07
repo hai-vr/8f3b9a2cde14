@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
@@ -8,6 +7,12 @@ using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
+    /// UGC Rule: GameObjects and Components referenced by this class should be treated defensively as being UGC at runtime:<br/>
+    /// - There may be null values in the arrays, as they may be unreliable user input or removed as part of a build process (e.g. EditorOnly),<br/>
+    /// - Non-null values in the array may reference objects that will be destroyed later, so treat objects and components as potentially destroyable,<br/>
+    /// - Similarly to animation, it is fine for the user to define rules that cannot apply (i.e. setting a material property on a type that isn't a Renderer,
+    ///   referencing a field on a type that cannot exist, etc.); do not treat those as errors,<br/>
+    /// - Do not treat anything else defensively than the above points, which are expectations of this specific system.
     public class P12VixxyControl : MonoBehaviour, I12VixxyActuator
     {
         // Licensing notes:
@@ -18,6 +23,9 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private const string PropMaterialPrefix = "material.";
         private const string PropBlendShapePrefix = "blendShape.";
+
+        // static: Share this type cache across multiple controls
+        private static readonly Dictionary<string, Type> TypeCache_MayContainNullObjects = new();
 
         /// The orchestrator defines the context that the subjects of this control will affect (e.g. Recursive Search).
         /// Vixxy is not an avatar-specific component, so it needs that limited context.
@@ -36,8 +44,6 @@ namespace Hai.Project12.Vixxy.Runtime
         private int _iddress;
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
-
-        private readonly Dictionary<string, Type> _typeCache_mayContainNullObjects = new();
 
         public void Awake()
         {
@@ -65,76 +71,17 @@ namespace Hai.Project12.Vixxy.Runtime
                 var isAnyPropertyApplicable = false;
                 var isAnyPropertyDependentOnMaterialPropertyBlock = false;
 
-                for (var index = 0; index < subject.properties.Count; index++)
+                // (P12VixxyPropertyBase is no longer a struct, so we don't need to reassign the changes)
+                foreach (var property in subject.properties)
                 {
-                    var property = subject.properties[index];
-                    if (TryGetType(assemblies, property.fullClassName, out var foundType))
+                    var isApplicable = BakeProperty(property, assemblies, subject);
+                    property.IsApplicable = isApplicable;
+
+                    isAnyPropertyApplicable |= isApplicable;
+                    if (isApplicable && property.SpecialMarker == P12SpecialMarker.AffectsMaterialPropertyBlock)
                     {
-                        // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
-                        var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
-
-                        // This is just a sanity check:
-                        // - If it's not a material property block, it is OK.
-                        // - If it *is* a material property block, then the type must be a renderer, so that we can skip the type check at runtime.
-                        if (!affectsMaterialPropertyBlock || typeof(Renderer).IsAssignableFrom(foundType))
-                        {
-                            var foundComponents = new List<Component>();
-                            foreach (var bakedObject in subject.BakedObjects)
-                            {
-                                var component = bakedObject.GetComponent(foundType);
-                                if (component != null)
-                                {
-                                    foundComponents.Add(component);
-                                }
-                            }
-
-                            if (foundComponents.Count > 0)
-                            {
-                                isAnyPropertyApplicable = true;
-                                property.IsApplicable = true;
-                                property.FoundType = foundType;
-                                property.FoundComponents = foundComponents;
-                                if (affectsMaterialPropertyBlock)
-                                {
-                                    isAnyPropertyDependentOnMaterialPropertyBlock = true;
-                                    property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
-                                    property.SpecialMarker = P12SpecialMarker.AffectsMaterialPropertyBlock;
-                                }
-                                else if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
-                                {
-                                    property.SpecialMarker = P12SpecialMarker.BlendShape;
-                                }
-                                else
-                                {
-                                    // FIXME: If field is null, then this property is not applicable!
-                                    var fieldInfoNullable = GetFieldInfoOrNull(property);
-                                    property.FieldIfMarkedAsFieldAccess = fieldInfoNullable;
-                                    property.SpecialMarker = P12SpecialMarker.FieldAccess;
-
-                                    // FIXME: This is set to false late, we should be checking that earlier. This whole method could be turned into TryResolveProperty(out Property) or something.
-                                    property.IsApplicable = fieldInfoNullable != null;
-                                }
-                                property.PropertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
-                            }
-                            else
-                            {
-                                // Not applicable: No objects has that component
-                                property.IsApplicable = false;
-                            }
-                        }
-                        else
-                        {
-                            // Not applicable: Property requiring a MaterialPropertyBlock has no Renderer
-                            property.IsApplicable = false;
-                        }
+                        isAnyPropertyDependentOnMaterialPropertyBlock = true;
                     }
-                    else
-                    {
-                        // Not applicable: Type not found
-                        property.IsApplicable = false;
-                    }
-
-                    subject.properties[index] = property;
                 }
 
                 if (isAnyPropertyDependentOnMaterialPropertyBlock)
@@ -151,9 +98,61 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
+        private bool BakeProperty(P12VixxyPropertyBase property, Assembly[] assemblies, P12VixxySubject subject)
+        {
+            if (!TryGetType(assemblies, property.fullClassName, out var foundType)) return false; // // Not applicable: Type not found
+
+            // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
+            var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
+
+            // This is just a sanity check:
+            // - If it's not a material property block, it is OK.
+            // - If it *is* a material property block, then the type must be a renderer, so that we can skip the type check at runtime.
+            if (affectsMaterialPropertyBlock && !typeof(Renderer).IsAssignableFrom(foundType))
+            {
+                return false; // Not applicable: Property requiring a MaterialPropertyBlock has no Renderer
+            }
+
+            var foundComponents = new List<Component>();
+            foreach (var bakedObject in subject.BakedObjects)
+            {
+                var component = bakedObject.GetComponent(foundType);
+                if (component != null) // This is *NOT* UGC Rule. Some of the targets just may not have that component, especially the secondaries.
+                {
+                    foundComponents.Add(component);
+                }
+            }
+
+            if (foundComponents.Count <= 0) return false; // Not applicable: No objects has that component
+
+            if (affectsMaterialPropertyBlock)
+            {
+                property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
+                property.SpecialMarker = P12SpecialMarker.AffectsMaterialPropertyBlock;
+            }
+            else if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
+            {
+                property.SpecialMarker = P12SpecialMarker.BlendShape;
+            }
+            else
+            {
+                var fieldInfoNullable = GetFieldInfoOrNull(property);
+                if (fieldInfoNullable == null) return false; // Not applicable: No field.
+
+                property.FieldIfMarkedAsFieldAccess = fieldInfoNullable;
+                property.SpecialMarker = P12SpecialMarker.FieldAccess;
+            }
+
+            property.FoundType = foundType;
+            property.FoundComponents = foundComponents;
+            property.PropertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
+
+            return true;
+        }
+
         private bool TryGetType(Assembly[] assemblies, string propertyFullClassName, out Type foundType)
         {
-            if (_typeCache_mayContainNullObjects.TryGetValue(propertyFullClassName, out var typeNullable))
+            if (TypeCache_MayContainNullObjects.TryGetValue(propertyFullClassName, out var typeNullable))
             {
                 foundType = typeNullable;
                 return typeNullable != null;
@@ -165,7 +164,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 {
                     if (thatType.FullName == propertyFullClassName)
                     {
-                        _typeCache_mayContainNullObjects.Add(propertyFullClassName, thatType);
+                        TypeCache_MayContainNullObjects.Add(propertyFullClassName, thatType);
 
                         foundType = thatType;
                         return true;
@@ -174,7 +173,7 @@ namespace Hai.Project12.Vixxy.Runtime
             }
 
             // We do cache null when we don't find that class, so that we don't try to find that again.
-            _typeCache_mayContainNullObjects.Add(propertyFullClassName, null);
+            TypeCache_MayContainNullObjects.Add(propertyFullClassName, null);
 
             foundType = null;
             return false;
@@ -211,19 +210,24 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void ActuateActivations(float active01)
         {
+            // TODO: Bake activations in Awake, so that we may remove components that were destroyed without affecting the serialized state of the control.
             foreach (var activation in activations)
             {
-                var target = activation.whenActive ? 1f : 0f;
-                switch (activation.threshold)
+                // Defensive check in case of external destruction.
+                if (null != activation.component)
                 {
-                    case ActivationThreshold.Blended:
-                        H12Utilities.SetToggleState(activation.component, Mathf.Abs(target - active01) < 1f);
-                        break;
-                    case ActivationThreshold.Strict:
-                        H12Utilities.SetToggleState(activation.component, Mathf.Approximately(target, active01));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    var target = activation.whenActive ? 1f : 0f;
+                    switch (activation.threshold)
+                    {
+                        case ActivationThreshold.Blended:
+                            H12Utilities.SetToggleState(activation.component, Mathf.Abs(target - active01) < 1f);
+                            break;
+                        case ActivationThreshold.Strict:
+                            H12Utilities.SetToggleState(activation.component, Mathf.Approximately(target, active01));
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
                 }
             }
         }
@@ -294,7 +298,15 @@ namespace Hai.Project12.Vixxy.Runtime
                         }
                     }
 
-                    if (propertyNeedsCleanup) ConsiderCleaningUpProperty(property.FoundComponents);
+                    if (propertyNeedsCleanup)
+                    {
+                        H12Utilities.RemoveDestroyedFromList(property.FoundComponents);
+                        if (property.FoundComponents.Count == 0)
+                        {
+                            property.IsApplicable = false;
+                            // TODO: Also invalidate the subject if no property of that subject is applicable
+                        }
+                    }
                 }
             }
         }
@@ -311,13 +323,6 @@ namespace Hai.Project12.Vixxy.Runtime
             }
 
             return null;
-        }
-
-        private static void ConsiderCleaningUpProperty(List<Component> foundComponents)
-        {
-            H12Utilities.RemoveDestroyedFromList(foundComponents);
-            // TODO: If the list becomes empty, then it may be relevant to make that property non-applicable,
-            // but we can't do that while iterating it in a foreach.
         }
     }
 
@@ -364,8 +369,11 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void BakeAffectedObjects(Transform context)
         {
+            // TODO: Recursive and Everything based on context
             BakedObjects = new List<GameObject>();
             BakedObjects.AddRange(targets);
+
+            H12Utilities.RemoveDestroyedFromList(BakedObjects); // Following the UGC rule; see class header.
         }
     }
 
