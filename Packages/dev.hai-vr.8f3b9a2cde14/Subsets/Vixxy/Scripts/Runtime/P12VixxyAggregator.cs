@@ -16,6 +16,9 @@ namespace Hai.Project12.Vixxy.Runtime
         private readonly HashSet<P12VixxyAggregator> _transformerResult = new();
         private readonly HashSet<P12VixxyActuatorSampler> _actuatorResult = new();
 
+        private int _iddressA;
+        private int _iddressB;
+        private int _outputIddress;
         private float _activeResult = float.MinValue;
         private bool _hasNeverBeenAggregated = true;
 
@@ -26,6 +29,9 @@ namespace Hai.Project12.Vixxy.Runtime
         private void Awake()
         {
             acquisitionService = AcquisitionService.SceneInstance;
+            _iddressA = H12VixxyAddress.AddressToId(addressA);
+            _iddressB = H12VixxyAddress.AddressToId(addressB);
+            _outputIddress = H12VixxyAddress.AddressToId(outputAddress);
 
             if (string.IsNullOrEmpty(addressA) || string.IsNullOrEmpty(addressB) || string.IsNullOrEmpty(outputAddress))
             {
@@ -36,26 +42,37 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void OnEnable()
         {
-            orchestrator.RegisterAggregator(addressA, this);
-            orchestrator.RegisterAggregator(addressB, this);
+            orchestrator.RegisterAggregator(_iddressA, this);
+            orchestrator.RegisterAggregator(_iddressB, this);
             // FIXME: Address registration should be inside the orchestrator
             acquisitionService.RegisterAddresses(new []{ addressA, addressB }, OnAddressUpdated);
         }
 
         private void OnDisable()
         {
-            orchestrator.UnregisterAggregator(addressA, this);
-            orchestrator.UnregisterAggregator(addressB, this);
+            orchestrator.UnregisterAggregator(_iddressA, this);
+            orchestrator.UnregisterAggregator(_iddressB, this);
             // FIXME: Address registration should be inside the orchestrator
             acquisitionService.UnregisterAddresses(new []{ addressA, addressB }, OnAddressUpdated);
         }
 
         private void OnAddressUpdated(string whichAddress, float value)
         {
-            if (whichAddress == addressA) a = value;
-            else if (whichAddress == addressB) b = value;
+            // TODO: Make a different callback for each, so that we don't have to convert the address.
+            // TODO: Or, modify AcquisitionService to use H12VixxyAddress (maybe move H12VixxyAddress to HVRAddress).
+            int iddress;
+            if (whichAddress == addressA)
+            {
+                a = value;
+                iddress = _iddressA;
+            }
+            else
+            {
+                b = value;
+                iddress = _iddressB;
+            }
 
-            orchestrator.PassAddressUpdated(whichAddress);
+            orchestrator.PassAddressUpdated(iddress);
         }
 
         public bool TryAggregate(out IEnumerable<I12VixxyAggregator> aggregators, out IEnumerable<I12VixxyActuator> actuators)
@@ -71,7 +88,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 _hasNeverBeenAggregated = false;
                 _activeResult = result;
 
-                orchestrator.ProvideValue(outputAddress, result);
+                orchestrator.ProvideValue(_outputIddress, result);
 
                 return true;
             }

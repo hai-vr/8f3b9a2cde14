@@ -22,9 +22,8 @@ namespace Hai.Project12.Vixxy.Runtime
         private readonly HashSet<I12VixxyActuator> _actuatorsToUpdateThisTick = new();
         private bool _anythingNeedsUpdating;
 
-        // TODO: Don't do string lookup tables!
-        private readonly Dictionary<string, HashSet<I12VixxyAggregator>> _addressToAggregators = new();
-        private readonly Dictionary<string, HashSet<I12VixxyActuator>> _addressToActuators = new();
+        private readonly Dictionary<int, HashSet<I12VixxyAggregator>> _iddressToAggregators = new();
+        private readonly Dictionary<int, HashSet<I12VixxyActuator>> _iddressToActuators = new();
         private readonly Dictionary<GameObject, MaterialPropertyBlock> _objectToMaterialPropertyBlock = new();
         private readonly Dictionary<GameObject, Renderer> _objectToRenderer_mayContainNullObjects = new();
         private readonly HashSet<GameObject> _stagedBlocks = new(); // FIXME: We should really just be binding tuples into _objectToMaterialPropertyBlock
@@ -43,6 +42,11 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void PassAddressUpdated(string address)
         {
+            PassAddressUpdated(H12VixxyAddress.AddressToId(address));
+        }
+
+        public void PassAddressUpdated(int iddress)
+        {
             // TODO: Store received addresses and value
 
             // This cannot be cached outside of this lambda (unless we're smart about it),
@@ -50,10 +54,8 @@ namespace Hai.Project12.Vixxy.Runtime
             // Might need to add a baking phase so that we don't do a string lookup every time
             // (consider switching to an int lookup).
 
-            // var iddress = H12VixxyAddress.AddressToId(address); // TODO: This needs to be done and cacher earlier up the caller chain
-
-            var aggregators = AggregatorsOf(address);
-            var actuators = ActuatorsOf(address);
+            var aggregators = AggregatorsOf(iddress);
+            var actuators = ActuatorsOf(iddress);
 
             // In AcquisitionService, acquisition events are raised as soon as the data arrives.
             // We don't want to process that new data when it arrives, instead we want to process
@@ -61,25 +63,26 @@ namespace Hai.Project12.Vixxy.Runtime
 
             // FIXME: AcquisitionService "OnAddressUpdated" fires when ANY data is received on that line.
             // The value may have not changed. We need to track it so that we don't send unnecessarily update actuators,
-            // like thos of face tracking.
+            // like that of face tracking.
+            // OR, modify AcquisitionService to have OnAddressValueChanged.
             _aggregatorsToUpdateThisTick.UnionWith(aggregators);
             _actuatorsToUpdateThisTick.UnionWith(actuators);
             _anythingNeedsUpdating = true;
         }
 
-        private IEnumerable<I12VixxyAggregator> AggregatorsOf(string address)
+        private IEnumerable<I12VixxyAggregator> AggregatorsOf(int iddress)
         {
-            if (_addressToAggregators.TryGetValue(address, out var results)) return results;
+            if (_iddressToAggregators.TryGetValue(iddress, out var results)) return results;
             return Enumerable.Empty<I12VixxyAggregator>();
         }
 
-        private IEnumerable<I12VixxyActuator> ActuatorsOf(string address)
+        private IEnumerable<I12VixxyActuator> ActuatorsOf(int iddress)
         {
-            if (_addressToActuators.TryGetValue(address, out var results)) return results;
+            if (_iddressToActuators.TryGetValue(iddress, out var results)) return results;
             return Enumerable.Empty<I12VixxyActuator>();
         }
 
-        public void ProvideValue(string address, float result)
+        public void ProvideValue(int iddress, float result)
         {
             // FIXME: This bleeds the value type to the orchestrator. It would be nice to avoid that.
         }
@@ -143,25 +146,32 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public H12ActuatorRegistrationToken RegisterActuator(string address, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
         {
-            if (_addressToActuators.TryGetValue(address, out var existingActuators))
+            return RegisterActuator(H12VixxyAddress.AddressToId(address), actuator, addressUpdatedFn);
+        }
+
+        public H12ActuatorRegistrationToken RegisterActuator(int iddress, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
+        {
+            if (_iddressToActuators.TryGetValue(iddress, out var existingActuators))
             {
                 existingActuators.Add(actuator);
             }
             else
             {
                 var newActuators = new HashSet<I12VixxyActuator> { actuator };
-                _addressToActuators.Add(address, newActuators);
+                _iddressToActuators.Add(iddress, newActuators);
             }
 
             // When an actuator is added, it is scheduled to be updated for initialization purposes.
             _anythingNeedsUpdating = true;
             _actuatorsToUpdateThisTick.Add(actuator);
 
-            acquisitionService.RegisterAddresses(new []{ address }, addressUpdatedFn);
+            var address = H12VixxyAddress.ResolveKnownAddressFromId(iddress);
+            acquisitionService.RegisterAddresses(new [] { address }, addressUpdatedFn);
 
             return new H12ActuatorRegistrationToken
             {
                 registeredAddress = address,
+                registeredIddress = iddress,
                 registeredCallback = addressUpdatedFn,
                 registeredActuator = actuator
             };
@@ -169,7 +179,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void UnregisterActuator(H12ActuatorRegistrationToken actuatorRegistrationToken)
         {
-            if (_addressToActuators.TryGetValue(actuatorRegistrationToken.registeredAddress, out var existingActuator))
+            if (_iddressToActuators.TryGetValue(actuatorRegistrationToken.registeredIddress, out var existingActuator))
             {
                 existingActuator.Remove(actuatorRegistrationToken.registeredActuator);
             }
@@ -178,14 +188,19 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void RegisterAggregator(string address, I12VixxyAggregator actuator)
         {
-            if (_addressToAggregators.TryGetValue(address, out var existingAggregators))
+            RegisterAggregator(H12VixxyAddress.AddressToId(address), actuator);
+        }
+
+        public void RegisterAggregator(int iddress, I12VixxyAggregator actuator)
+        {
+            if (_iddressToAggregators.TryGetValue(iddress, out var existingAggregators))
             {
                 existingAggregators.Add(actuator);
             }
             else
             {
                 var newAggregators = new HashSet<I12VixxyAggregator> { actuator };
-                _addressToAggregators.Add(address, newAggregators);
+                _iddressToAggregators.Add(iddress, newAggregators);
             }
 
             // When an aggregator is added, it is scheduled to be updated for initialization purposes.
@@ -195,7 +210,12 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void UnregisterAggregator(string address, I12VixxyAggregator aggregator)
         {
-            if (_addressToAggregators.TryGetValue(address, out var existingActuator)) existingActuator.Remove(aggregator);
+            UnregisterAggregator(H12VixxyAddress.AddressToId(address), aggregator);
+        }
+
+        public void UnregisterAggregator(int iddress, I12VixxyAggregator aggregator)
+        {
+            if (_iddressToAggregators.TryGetValue(iddress, out var existingActuator)) existingActuator.Remove(aggregator);
         }
 
         public void RequireMaterialPropertyBlock(GameObject bakedObject)

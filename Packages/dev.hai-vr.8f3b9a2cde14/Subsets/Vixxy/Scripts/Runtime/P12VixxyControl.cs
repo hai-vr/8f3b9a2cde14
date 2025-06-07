@@ -10,13 +10,14 @@ namespace Hai.Project12.Vixxy.Runtime
 {
     public class P12VixxyControl : MonoBehaviour, I12VixxyActuator
     {
-        private const string PropMaterialPrefix = "material.";
-        private const string PropBlendShapePrefix = "blendShape.";
         // Licensing notes:
         // Portions of the code below originally comes from portions of a proprietary software that I (Haï~) am the author of,
         // and is notably used in "Vixen" (2023-2024).
         // The code below is released under the same terms as the LICENSE file of the specific "Vixxy/" subdirectory that this file is contained in which is MIT,
         // including the specific portions of the code that originally came from "Vixen".
+
+        private const string PropMaterialPrefix = "material.";
+        private const string PropBlendShapePrefix = "blendShape.";
 
         /// The orchestrator defines the context that the subjects of this control will affect (e.g. Recursive Search).
         /// Vixxy is not an avatar-specific component, so it needs that limited context.
@@ -32,6 +33,7 @@ namespace Hai.Project12.Vixxy.Runtime
         public AnimationCurve interpolationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
         // Runtime only
+        private int _iddress;
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
 
@@ -39,6 +41,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void Awake()
         {
+            _iddress = H12VixxyAddress.AddressToId(address);
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             _context = orchestrator.Context();
@@ -174,7 +177,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void OnEnable()
         {
-            _registeredActuator = orchestrator.RegisterActuator(address, this, OnAddressUpdated);
+            _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnAddressUpdated);
         }
 
         private void OnDisable()
@@ -183,13 +186,13 @@ namespace Hai.Project12.Vixxy.Runtime
             _registeredActuator = default;
         }
 
-        private void OnAddressUpdated(string whichAddress, float value)
+        private void OnAddressUpdated(string _, float value)
         {
             // FIXME: Storing that value is probably not a good idea to do at this specific stage of the processing.
             //           For comparison, we can't do this for aggregators (which can have multiple input values), it's not their responsibility.
             sample.storedValue = value;
 
-            orchestrator.PassAddressUpdated(whichAddress);
+            orchestrator.PassAddressUpdated(_iddress);
         }
 
         public void Actuate()

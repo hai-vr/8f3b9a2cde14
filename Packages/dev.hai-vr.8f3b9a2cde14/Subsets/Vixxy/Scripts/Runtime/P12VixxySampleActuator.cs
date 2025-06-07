@@ -15,11 +15,13 @@ namespace Hai.Project12.Vixxy.Runtime
         [SerializeField] private Color whenInactive = Color.white;
         [SerializeField] private Color whenActive = Color.green;
 
+        private int _iddress;
         private MaterialPropertyBlock _propertyBlock;
         private H12ActuatorRegistrationToken _registeredActuator;
 
         private void Awake()
         {
+            _iddress = H12VixxyAddress.AddressToId(address);
             _propertyBlock = new MaterialPropertyBlock();
 
             if (string.IsNullOrEmpty(address))
@@ -31,7 +33,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void OnEnable()
         {
-            _registeredActuator = orchestrator.RegisterActuator(address, this, OnAddressUpdated);
+            _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnAddressUpdated);
         }
 
         private void OnDisable()
@@ -40,13 +42,13 @@ namespace Hai.Project12.Vixxy.Runtime
             _registeredActuator = default;
         }
 
-        private void OnAddressUpdated(string whichAddress, float value)
+        private void OnAddressUpdated(string _, float value)
         {
             // FIXME: Storing that value is probably not a good idea to do at this specific stage of the processing.
             //           For comparison, we can't do this for aggregators (which can have multiple input values), it's not their responsibility.
             sample.storedValue = value;
 
-            orchestrator.PassAddressUpdated(whichAddress);
+            orchestrator.PassAddressUpdated(_iddress);
         }
 
         public void Actuate()
