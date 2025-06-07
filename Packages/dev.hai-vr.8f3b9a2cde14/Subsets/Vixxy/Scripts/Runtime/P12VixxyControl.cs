@@ -94,20 +94,25 @@ namespace Hai.Project12.Vixxy.Runtime
                                 property.IsApplicable = true;
                                 property.FoundType = foundType;
                                 property.FoundComponents = foundComponents;
-                                property.AffectsMaterialPropertyBlock = affectsMaterialPropertyBlock;
                                 if (affectsMaterialPropertyBlock)
                                 {
                                     isAnyPropertyDependentOnMaterialPropertyBlock = true;
                                     property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
+                                    property.SpecialMarker = P12SpecialMarker.AffectsMaterialPropertyBlock;
                                 }
-
-                                if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
+                                else if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
                                 {
                                     property.SpecialMarker = P12SpecialMarker.BlendShape;
                                 }
                                 else
                                 {
-                                    property.SpecialMarker = P12SpecialMarker.None;
+                                    // FIXME: If field is null, then this property is not applicable!
+                                    var fieldInfoNullable = GetFieldInfoOrNull(property);
+                                    property.FieldIfMarkedAsFieldAccess = fieldInfoNullable;
+                                    property.SpecialMarker = P12SpecialMarker.FieldAccess;
+
+                                    // FIXME: This is set to false late, we should be checking that earlier. This whole method could be turned into TryResolveProperty(out Property) or something.
+                                    property.IsApplicable = fieldInfoNullable != null;
                                 }
                                 property.PropertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
                             }
@@ -247,7 +252,7 @@ namespace Hai.Project12.Vixxy.Runtime
                         // Defensive check in case of external destruction.
                         if (null != component)
                         {
-                            if (property.AffectsMaterialPropertyBlock)
+                            if (property.SpecialMarker == P12SpecialMarker.AffectsMaterialPropertyBlock)
                             {
                                 var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
                                 if (lerpValue is Vector4 lerpVector4Value)
@@ -272,18 +277,17 @@ namespace Hai.Project12.Vixxy.Runtime
                                     smr.SetBlendShapeWeight(index, lerpFloatValue);
                                 }
                             }
-                            else
+                            else if (property.SpecialMarker == P12SpecialMarker.FieldAccess)
                             {
-                                // FIXME: This is slow. Bake it into the property itself in Awake.
-                                var fields = property.FoundType.GetFields();
-                                foreach (var fieldInfo in fields)
-                                {
-                                    if (fieldInfo.Name == property.propertyName)
-                                    {
-                                        // TODO: Cast to the type that this field expects
-                                        fieldInfo.SetValue(component, lerpValue);
-                                    }
-                                }
+                                var fieldInfo = property.FieldIfMarkedAsFieldAccess;
+                                // TODO: Cast to the type that this field expects
+                                fieldInfo.SetValue(component, lerpValue);
+                            }
+                            else if (property.SpecialMarker == P12SpecialMarker.Undefined)
+                            {
+                                throw new ArgumentException("We tried to access an Undefined property, but Undefined properties are not supposed" +
+                                                            " to be valid if the property IsApplicable. This may be a design error, did you" +
+                                                            " properly check that the property IsApplicable?");
                             }
                         }
                         else
@@ -295,6 +299,20 @@ namespace Hai.Project12.Vixxy.Runtime
                     if (propertyNeedsCleanup) ConsiderCleaningUpProperty(property.FoundComponents);
                 }
             }
+        }
+
+        private static FieldInfo GetFieldInfoOrNull(P12VixxyPropertyBase property)
+        {
+            var fields = property.FoundType.GetFields();
+            foreach (var fieldInfo in fields)
+            {
+                if (fieldInfo.Name == property.propertyName)
+                {
+                    return fieldInfo;
+                }
+            }
+
+            return null;
         }
 
         private static void ConsiderCleaningUpProperty(List<Component> foundComponents)
@@ -381,10 +399,10 @@ namespace Hai.Project12.Vixxy.Runtime
         [NonSerialized] internal bool IsApplicable;
         [NonSerialized] internal Type FoundType;
         [NonSerialized] internal List<Component> FoundComponents;
-        [NonSerialized] internal bool AffectsMaterialPropertyBlock;
         [NonSerialized] internal P12SpecialMarker SpecialMarker;
         [NonSerialized] internal int ShaderMaterialProperty;
         [NonSerialized] internal string PropertySuffix;
+        [NonSerialized] internal FieldInfo FieldIfMarkedAsFieldAccess; // null if SpecialMarker is not FieldAccess
     }
 
     interface I12VixxyProperty
@@ -393,6 +411,6 @@ namespace Hai.Project12.Vixxy.Runtime
 
     public enum P12SpecialMarker
     {
-        None, BlendShape
+        Undefined, AffectsMaterialPropertyBlock, BlendShape, FieldAccess
     }
 }
