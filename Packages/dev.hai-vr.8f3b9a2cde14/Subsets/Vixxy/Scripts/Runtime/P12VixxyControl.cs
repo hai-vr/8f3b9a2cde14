@@ -286,7 +286,7 @@ namespace Hai.Project12.Vixxy.Runtime
                             else if (property.SpecialMarker == P12SpecialMarker.Undefined)
                             {
                                 throw new ArgumentException("We tried to access an Undefined property, but Undefined properties are not supposed" +
-                                                            " to be valid if the property IsApplicable. This may be a design error, did you" +
+                                                            " to be valid if the property IsApplicable. This may be a programming error, did you" +
                                                             " properly check that the property IsApplicable?");
                             }
                         }

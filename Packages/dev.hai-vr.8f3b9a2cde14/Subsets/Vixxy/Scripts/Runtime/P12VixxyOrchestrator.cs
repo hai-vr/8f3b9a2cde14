@@ -133,7 +133,7 @@ namespace Hai.Project12.Vixxy.Runtime
             {
                 foreach (var stagedBlock in _stagedBlocks)
                 {
-                    // No ContainsKey checks: The objects should always exist in the dictionaries. If they don't, it's a design error.
+                    // No ContainsKey checks: The objects should always exist in the dictionaries. If they don't, it's a programming error.
                     var stagedRenderer = _objectToRenderer_mayContainNullObjects[stagedBlock];
                     if (stagedRenderer != null)
                     {
@@ -229,13 +229,13 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public MaterialPropertyBlock GetMaterialPropertyBlockForBakedObject(GameObject bakedObject)
         {
-            // If the key doesn't exist, it is a design error. Callers should only call GetMaterialPropertyBlockFor
+            // If the key doesn't exist, it is a programming error. Callers should only call GetMaterialPropertyBlockFor
             // if that subject is guaranteed to have a MaterialPropertyBlock declared, as it is required by Awake.
             // (Live edits not currently supported)
             if (!_objectToMaterialPropertyBlock.ContainsKey(bakedObject))
             {
                 // DEFENSIVE for live edits only. This condition should not be entered by design.
-                H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a design error, or the user is currently doing a live edit," +
+                H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a programming error, or the user is currently doing a live edit," +
                                     " and MaterialPropertyBlock are not normally cached if the control did not previously make use of materials.");
                 _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
                 _objectToRenderer_mayContainNullObjects.Add(bakedObject, bakedObject.GetComponent<Renderer>());
