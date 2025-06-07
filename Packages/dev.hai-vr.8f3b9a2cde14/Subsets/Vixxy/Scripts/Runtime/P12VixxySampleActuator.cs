@@ -1,6 +1,5 @@
 ﻿using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
-using HVR.Basis.Comms;
 using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
@@ -10,7 +9,6 @@ namespace Hai.Project12.Vixxy.Runtime
         [EarlyInjectable] public P12VixxyOrchestrator orchestrator;
         [EarlyInjectable] public P12SettableFloatElement sample;
         [EarlyInjectable] public MeshRenderer renderer;
-        [LateInjectable] public AcquisitionService acquisitionService;
 
         // Cannot change after the component gets enabled.
         [SerializeField] private string address = "";
@@ -23,7 +21,6 @@ namespace Hai.Project12.Vixxy.Runtime
         private void Awake()
         {
             _propertyBlock = new MaterialPropertyBlock();
-            acquisitionService = AcquisitionService.SceneInstance;
 
             if (string.IsNullOrEmpty(address))
             {

@@ -9,6 +9,7 @@ namespace Hai.Project12.Vixxy.Runtime
 {
     public class P12VixxyControl : MonoBehaviour, I12VixxyActuator
     {
+        private const string DotMaterialPrefix = "material.";
         // Licensing notes:
         // Portions of the code below originally comes from portions of a proprietary software that I (Haï~) am the author of,
         // and is notably used in "Vixen" (2023-2024).
@@ -50,18 +51,42 @@ namespace Hai.Project12.Vixxy.Runtime
                     var property = subject.propertiesForVector4[index];
                     if (TryGetType(assemblies, property.fullClassName, out var foundType))
                     {
-                        property.IsApplicable = true;
-                        property.FoundType = foundType;
+                        // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
+                        var affectsMaterialPropertyBlock = property.propertyName.StartsWith(DotMaterialPrefix);
+
+                        // This is just a sanity check:
+                        // - If it's not a material property block, it is OK.
+                        // - If it *is* a material property block, then the type must be a renderer, so that we can skip the type check at runtime.
+                        if (!affectsMaterialPropertyBlock || typeof(Renderer).IsAssignableFrom(foundType))
+                        {
+                            property.IsApplicable = true;
+                            property.FoundType = foundType;
+
+                            var foundComponents = new List<Component>();
+                            foreach (var bakedObject in subject.BakedObjects)
+                            {
+                                var component = bakedObject.GetComponent(foundType);
+                                if (component != null)
+                                {
+                                    foundComponents.Add(component);
+                                }
+                            }
+                            property.FoundComponents = foundComponents;
+                            property.AffectsMaterialPropertyBlock = affectsMaterialPropertyBlock;
+                            if (affectsMaterialPropertyBlock)
+                            {
+                                isAnyPropertyDependentOnMaterialPropertyBlock = true;
+                                property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(DotMaterialPrefix.Length));
+                            }
+                        }
+                        else
+                        {
+                            property.IsApplicable = false;
+                        }
                     }
                     else
                     {
                         property.IsApplicable = false;
-                        property.FoundType = null;
-                    }
-
-                    if (!isAnyPropertyDependentOnMaterialPropertyBlock && property.propertyName.StartsWith("material."))
-                    {
-                        isAnyPropertyDependentOnMaterialPropertyBlock = true;
                     }
 
                     subject.propertiesForVector4[index] = property;
@@ -141,10 +166,10 @@ namespace Hai.Project12.Vixxy.Runtime
                 switch (activation.threshold)
                 {
                     case ActivationThreshold.Blended:
-                        Toggle(activation.component, Mathf.Abs(activation.target - value) < 1f);
+                        SetToggleState(activation.component, Mathf.Abs(activation.target - value) < 1f);
                         break;
                     case ActivationThreshold.Strict:
-                        Toggle(activation.component, Mathf.Approximately(activation.target, value));
+                        SetToggleState(activation.component, Mathf.Approximately(activation.target, value));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -160,46 +185,56 @@ namespace Hai.Project12.Vixxy.Runtime
                 {
                     if (property.IsApplicable)
                     {
+                        var propertyNeedsCleanup = false;
                         var color = Color.Lerp(property.unbound, property.bound, value);
-                        foreach (var bakedObject in subject.BakedObjects)
+                        foreach (var component in property.FoundComponents)
                         {
-                            // FIXME: This is slow. Bake it into the property itself in Awake.
-                            var component = bakedObject.GetComponent(property.FoundType);
-                            if (property.propertyName.StartsWith("material."))
+                            // Defensive check in case of external destruction.
+                            if (null != component)
                             {
-                                var suffix = property.propertyName.Substring("material.".Length);
-                                // TODO: We need to store MPBs for each object in the orchestrator itself,
-                                // in case multiple controls change the MPB for the same object.
-
-                                if (component is Renderer)
+                                if (property.AffectsMaterialPropertyBlock)
                                 {
-                                    var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(bakedObject);
-                                    materialPropertyBlock.SetColor(suffix, color);
-                                    orchestrator.StagePropertyBlock(bakedObject);
+                                    var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
+                                    materialPropertyBlock.SetColor(property.ShaderMaterialProperty, color);
+                                    orchestrator.StagePropertyBlock(component.gameObject);
+                                }
+                                else
+                                {
+                                    // FIXME: This is slow. Bake it into the property itself in Awake.
+                                    var fields = property.FoundType.GetFields();
+                                    foreach (var fieldInfo in fields)
+                                    {
+                                        if (fieldInfo.Name == property.propertyName)
+                                        {
+                                            // TODO: Cast to the type that this field expects
+                                            fieldInfo.SetValue(component, color);
+                                        }
+                                    }
                                 }
                             }
                             else
                             {
-                                var fields = property.FoundType.GetFields();
-                                foreach (var fieldInfo in fields)
-                                {
-                                    if (fieldInfo.Name == property.propertyName)
-                                    {
-                                        // TODO: Cast to the type that this field expects
-                                        fieldInfo.SetValue(component, color);
-                                    }
-                                }
+                                propertyNeedsCleanup = true;
                             }
+                        }
+
+                        if (propertyNeedsCleanup)
+                        {
+                            var listToClean = property.FoundComponents;
+                            H12Utilities.RemoveNullsFromList(listToClean);
                         }
                     }
                 }
             }
         }
 
-        private void Toggle(Component component, bool isOn)
+        /// Enables or disables a behaviour. If the component is a transform, then by convention, its GameObject is set active or inactive.
+        private void SetToggleState(Component component, bool isOn)
         {
             if (component is Transform) component.gameObject.SetActive(isOn);
-            else if (component is Behaviour behaviour) behaviour.enabled = isOn;
+            else if (component is Behaviour thatBehaviour) thatBehaviour.enabled = isOn;
+            else if (component is Renderer thatRenderer) thatRenderer.enabled = isOn;
+            else if (component is Collider thatCollider) thatCollider.enabled = isOn;
             // else, there is no effect on other non-Behaviour components.
         }
     }
@@ -276,5 +311,8 @@ namespace Hai.Project12.Vixxy.Runtime
         // Runtime only
         [NonSerialized] internal bool IsApplicable;
         [NonSerialized] internal Type FoundType;
+        [NonSerialized] internal List<Component> FoundComponents;
+        [NonSerialized] internal bool AffectsMaterialPropertyBlock;
+        [NonSerialized] internal int ShaderMaterialProperty;
     }
 }

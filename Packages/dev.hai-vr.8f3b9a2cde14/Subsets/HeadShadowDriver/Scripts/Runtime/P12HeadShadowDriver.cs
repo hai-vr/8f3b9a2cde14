@@ -34,11 +34,11 @@ namespace Hai.Project12.ListenServer.Runtime
                 ? head : null;
             if (_headNullable == null)
             {
-                Debug.Log("There was Head bone to generate the shadow clone (This is not a problem)");
+                H12Debug.Log("There was no Head bone to generate the shadow clone (this is odd, but not a problem).");
             }
 
-            _meshRenderersUnderHeadBoneOrZero = _headNullable ? _headNullable.GetComponentsInChildren<MeshRenderer>(true) : Array.Empty<MeshRenderer>();
-            _transformsUnderHeadBoneOrZero = _headNullable ? _headNullable.GetComponentsInChildren<Transform>(true).ToList() : new List<Transform>();
+            _meshRenderersUnderHeadBoneOrZero = _headNullable != null ? _headNullable.GetComponentsInChildren<MeshRenderer>(true) : Array.Empty<MeshRenderer>();
+            _transformsUnderHeadBoneOrZero = _headNullable != null ? _headNullable.GetComponentsInChildren<Transform>(true).ToList() : new List<Transform>();
 
             // TODO: Need to handle special case when there is a SMR under the Head hierarchy, which may have no bones in it.
             _skinnedMeshesOnAvatarThatDependOnHead = avatar.GetComponentsInChildren<SkinnedMeshRenderer>(true)
@@ -48,7 +48,7 @@ namespace Hai.Project12.ListenServer.Runtime
                 .Where(HasAnyBoneThatRequiresBonesUnderHeadHierarchy)
                 .ToArray();
 
-            _isShadowNecessary = _headNullable && (_skinnedMeshesOnAvatarThatDependOnHead.Length > 0 || _meshRenderersUnderHeadBoneOrZero.Length > 0);
+            _isShadowNecessary = _headNullable != null && (_skinnedMeshesOnAvatarThatDependOnHead.Length > 0 || _meshRenderersUnderHeadBoneOrZero.Length > 0);
             if (_isShadowNecessary)
             {
                 // Head can't be null past this point.

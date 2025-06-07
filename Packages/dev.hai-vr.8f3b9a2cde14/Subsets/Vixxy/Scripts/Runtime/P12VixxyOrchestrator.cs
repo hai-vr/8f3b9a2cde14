@@ -57,7 +57,8 @@ namespace Hai.Project12.Vixxy.Runtime
             // only after all data has arrived for that frame, all at once.
 
             // FIXME: AcquisitionService "OnAddressUpdated" fires when ANY data is received on that line.
-            // The value may have not changed. We need to track it.
+            // The value may have not changed. We need to track it so that we don't send unnecessarily update actuators,
+            // like thos of face tracking.
             _aggregatorsToUpdateThisTick.UnionWith(aggregators);
             _actuatorsToUpdateThisTick.UnionWith(actuators);
             _anythingNeedsUpdating = true;
@@ -211,7 +212,8 @@ namespace Hai.Project12.Vixxy.Runtime
             if (!_objectToMaterialPropertyBlock.ContainsKey(bakedObject))
             {
                 // DEFENSIVE for live edits only. This condition should not be entered by design.
-                H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a design error, or the user is currently doing a live edit.");
+                H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a design error, or the user is currently doing a live edit," +
+                                    " and MaterialPropertyBlock are not normally cached if the control did not previously make use of materials.");
                 _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
                 _objectToRenderer_mayContainNullObjects.Add(bakedObject, bakedObject.GetComponent<Renderer>());
             }

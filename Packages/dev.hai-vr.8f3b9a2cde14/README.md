@@ -5,6 +5,21 @@
 - I12 are interfaces.
 - Custom attributes belong in the Supporting assembly, and shouldn't have prefixes.
 
+## Handling of null values
+
+- Offensive programming: The project operates on the principles of offensive programming.
+    - Don't check for any nulls unless it is expected.
+    - If something is unexpected, don't try to recover, let it crash.
+    - If something **does** need to be recovered from, then it was not unexpected behaviour to begin with; make it an expectation.
+- Therefore, the only null checks that exist in the project are *only* those that *really* matter.
+- If a dictionary or list can contain null values, make that fact clear in the variable or field name.
+- Checking for null components:
+    - When checking for a component that we're not sure is there (e.g. right after `.GetComponent<...>()` before we store that value inside our domain), use `if (component != null)`.
+    - When checking for a component that was there but is no longer there (if a component we stored in our domain was destroyed), **use a yoda condition** `if (null != component)`.
+        - This makes those checks stand out.
+    - Never use `if (component)` in our domain. The syntax `if (something)` is exclusively reserved to express semantics where `something` refers to a variable or field of type `bool`.
+    - It is fine to do `var condition = component && otherCondition`.
+
 ## Basis modifications for our app
 
 Since this is a consumer of the Basis framework, we want to modify Basis as little as possible so that we may update the Basis

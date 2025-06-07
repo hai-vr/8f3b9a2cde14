@@ -16,6 +16,7 @@ namespace Hai.Project12.InteractionElements.Runtime
         {
             H12LateInjector.InjectDependenciesInto(this);
 
+            // FIXME: Expecting element to be null is not sustainable
             if (element == null)
             {
                 element = ScriptableObject.CreateInstance<P12SettableFloatElement>();

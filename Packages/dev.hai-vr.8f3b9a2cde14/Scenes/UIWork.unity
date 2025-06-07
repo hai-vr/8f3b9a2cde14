@@ -2903,7 +2903,7 @@ MonoBehaviour:
   address: OurTestAddress
   sample: {fileID: 11400000, guid: c280c3d53f129a648a031a80e098743b, type: 2}
   activations:
-  - component: {fileID: 1280096505}
+  - component: {fileID: 1280096503}
     threshold: 0
     target: 1
   subjects:
@@ -10353,7 +10353,6 @@ MonoBehaviour:
   orchestrator: {fileID: 184113079}
   sample: {fileID: 11400000, guid: c280c3d53f129a648a031a80e098743b, type: 2}
   renderer: {fileID: 1280096503}
-  acquisitionService: {fileID: 0}
   address: OurTestAddress
   whenInactive: {r: 1, g: 1, b: 1, a: 1}
   whenActive: {r: 0, g: 1, b: 0, a: 1}
