@@ -37,12 +37,24 @@ namespace Hai.Project12.Vixxy.Runtime
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             _context = orchestrator.Context();
+
+            // In this phase, we do all the checks, so that when actuation is requested (this might be as expensive
+            // as running every frame), we don't need to do type checks or other work.
+            // This means that we need to catch all invalid cases. See below comments that say "Not Applicable".
             for (var i = 0; i < subjects.Length; i++)
             {
                 var subject = subjects[i];
                 subject.BakeAffectedObjects(_context);
-                subjects[i] = subject;
 
+                if (subject.BakedObjects.Count == 0)
+                {
+                    // Subject Not applicable: No objects
+                    subject.IsApplicable = false;
+                    subjects[i] = subject;
+                    continue;
+                }
+
+                var isAnyPropertyApplicable = false;
                 var isAnyPropertyDependentOnMaterialPropertyBlock = false;
 
                 // TODO: Bake for other properties too.
@@ -72,6 +84,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
                             if (foundComponents.Count > 0)
                             {
+                                isAnyPropertyApplicable = true;
                                 property.IsApplicable = true;
                                 property.FoundType = foundType;
                                 property.FoundComponents = foundComponents;
@@ -95,16 +108,19 @@ namespace Hai.Project12.Vixxy.Runtime
                             }
                             else
                             {
+                                // Not applicable: No objects has that component
                                 property.IsApplicable = false;
                             }
                         }
                         else
                         {
+                            // Not applicable: MPB with no Renderer.
                             property.IsApplicable = false;
                         }
                     }
                     else
                     {
+                        // Not applicable: Type not found
                         property.IsApplicable = false;
                     }
 
@@ -118,6 +134,10 @@ namespace Hai.Project12.Vixxy.Runtime
                         orchestrator.RequireMaterialPropertyBlock(bakedObject);
                     }
                 }
+
+                // When Subject Not applicable: As no property is applicable, the subject is not applicable either.
+                subject.IsApplicable = isAnyPropertyApplicable;
+                subjects[i] = subject;
             }
         }
 
@@ -200,6 +220,9 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             foreach (var subject in subjects)
             {
+                // TODO: Rather than do that check every time, only keep applicable subjects into an internal field.
+                if (!subject.IsApplicable) return;
+
                 foreach (var property in subject.propertiesForVector4)
                 {
                     // TODO: Rather than do that check every time, bake the applicable properties into an internal field.
@@ -342,6 +365,7 @@ namespace Hai.Project12.Vixxy.Runtime
         public P12VixxyProperty<Texture>[] propertiesForTexture;
 
         [NonSerialized] internal List<GameObject> BakedObjects;
+        [NonSerialized] internal bool IsApplicable;
 
         public void BakeAffectedObjects(Transform context)
         {
