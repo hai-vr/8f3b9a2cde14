@@ -9,7 +9,8 @@ namespace Hai.Project12.Vixxy.Runtime
 {
     public class P12VixxyControl : MonoBehaviour, I12VixxyActuator
     {
-        private const string DotMaterialPrefix = "material.";
+        private const string PropMaterialPrefix = "material.";
+        private const string PropBlendShapePrefix = "blendShape.";
         // Licensing notes:
         // Portions of the code below originally comes from portions of a proprietary software that I (Haï~) am the author of,
         // and is notably used in "Vixen" (2023-2024).
@@ -30,7 +31,6 @@ namespace Hai.Project12.Vixxy.Runtime
         private H12ActuatorRegistrationToken _registeredActuator;
 
         private readonly Dictionary<string, Type> _typeCache_mayContainNullObjects = new();
-        // private readonly HashSet<MPBApplier> _stagedBlocks = new();
 
         public void Awake()
         {
@@ -46,22 +46,20 @@ namespace Hai.Project12.Vixxy.Runtime
                 var isAnyPropertyDependentOnMaterialPropertyBlock = false;
 
                 // TODO: Bake for other properties too.
+                // FIXME: Having different property types is not maintainable, we need different loops that practically do the same thing.
                 for (var index = 0; index < subject.propertiesForVector4.Length; index++)
                 {
                     var property = subject.propertiesForVector4[index];
                     if (TryGetType(assemblies, property.fullClassName, out var foundType))
                     {
                         // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
-                        var affectsMaterialPropertyBlock = property.propertyName.StartsWith(DotMaterialPrefix);
+                        var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
 
                         // This is just a sanity check:
                         // - If it's not a material property block, it is OK.
                         // - If it *is* a material property block, then the type must be a renderer, so that we can skip the type check at runtime.
                         if (!affectsMaterialPropertyBlock || typeof(Renderer).IsAssignableFrom(foundType))
                         {
-                            property.IsApplicable = true;
-                            property.FoundType = foundType;
-
                             var foundComponents = new List<Component>();
                             foreach (var bakedObject in subject.BakedObjects)
                             {
@@ -71,12 +69,33 @@ namespace Hai.Project12.Vixxy.Runtime
                                     foundComponents.Add(component);
                                 }
                             }
-                            property.FoundComponents = foundComponents;
-                            property.AffectsMaterialPropertyBlock = affectsMaterialPropertyBlock;
-                            if (affectsMaterialPropertyBlock)
+
+                            if (foundComponents.Count > 0)
                             {
-                                isAnyPropertyDependentOnMaterialPropertyBlock = true;
-                                property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(DotMaterialPrefix.Length));
+                                property.IsApplicable = true;
+                                property.FoundType = foundType;
+                                property.FoundComponents = foundComponents;
+                                property.AffectsMaterialPropertyBlock = affectsMaterialPropertyBlock;
+                                if (affectsMaterialPropertyBlock)
+                                {
+                                    isAnyPropertyDependentOnMaterialPropertyBlock = true;
+                                    property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
+                                }
+
+                                // FIXME: This can never be true unless we are passed false data. Blendshapes are floats, not Vector4s
+                                if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
+                                {
+                                    property.SpecialMarker = P12SpecialMarker.BlendShape;
+                                }
+                                else
+                                {
+                                    property.SpecialMarker = P12SpecialMarker.None;
+                                }
+                                property.PropertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
+                            }
+                            else
+                            {
+                                property.IsApplicable = false;
                             }
                         }
                         else
@@ -166,10 +185,10 @@ namespace Hai.Project12.Vixxy.Runtime
                 switch (activation.threshold)
                 {
                     case ActivationThreshold.Blended:
-                        SetToggleState(activation.component, Mathf.Abs(activation.target - value) < 1f);
+                        H12Utilities.SetToggleState(activation.component, Mathf.Abs(activation.target - value) < 1f);
                         break;
                     case ActivationThreshold.Strict:
-                        SetToggleState(activation.component, Mathf.Approximately(activation.target, value));
+                        H12Utilities.SetToggleState(activation.component, Mathf.Approximately(activation.target, value));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -183,59 +202,101 @@ namespace Hai.Project12.Vixxy.Runtime
             {
                 foreach (var property in subject.propertiesForVector4)
                 {
-                    if (property.IsApplicable)
+                    // TODO: Rather than do that check every time, bake the applicable properties into an internal field.
+                    if (!property.IsApplicable) continue;
+
+                    var propertyNeedsCleanup = false;
+                    var lerpValue = Color.Lerp(property.unbound, property.bound, value);
+                    foreach (var component in property.FoundComponents)
                     {
-                        var propertyNeedsCleanup = false;
-                        var color = Color.Lerp(property.unbound, property.bound, value);
-                        foreach (var component in property.FoundComponents)
+                        // Defensive check in case of external destruction.
+                        if (null != component)
                         {
-                            // Defensive check in case of external destruction.
-                            if (null != component)
+                            if (property.AffectsMaterialPropertyBlock)
                             {
-                                if (property.AffectsMaterialPropertyBlock)
-                                {
-                                    var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
-                                    materialPropertyBlock.SetColor(property.ShaderMaterialProperty, color);
-                                    orchestrator.StagePropertyBlock(component.gameObject);
-                                }
-                                else
-                                {
-                                    // FIXME: This is slow. Bake it into the property itself in Awake.
-                                    var fields = property.FoundType.GetFields();
-                                    foreach (var fieldInfo in fields)
-                                    {
-                                        if (fieldInfo.Name == property.propertyName)
-                                        {
-                                            // TODO: Cast to the type that this field expects
-                                            fieldInfo.SetValue(component, color);
-                                        }
-                                    }
-                                }
+                                var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
+                                materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpValue);
+                                orchestrator.StagePropertyBlock(component.gameObject);
                             }
                             else
                             {
-                                propertyNeedsCleanup = true;
+                                // FIXME: This is slow. Bake it into the property itself in Awake.
+                                var fields = property.FoundType.GetFields();
+                                foreach (var fieldInfo in fields)
+                                {
+                                    if (fieldInfo.Name == property.propertyName)
+                                    {
+                                        // TODO: Cast to the type that this field expects
+                                        fieldInfo.SetValue(component, lerpValue);
+                                    }
+                                }
                             }
                         }
-
-                        if (propertyNeedsCleanup)
+                        else
                         {
-                            var listToClean = property.FoundComponents;
-                            H12Utilities.RemoveNullsFromList(listToClean);
+                            propertyNeedsCleanup = true;
                         }
                     }
+
+                    if (propertyNeedsCleanup) ConsiderCleaningUpProperty(property.FoundComponents);
+                }
+
+                // FIXME: Having a different foreach loop for each type is pure annoyance. This is not maintainable, find a way to bake it into one loop.
+                foreach (var property in subject.propertiesForFloat)
+                {
+                    // TODO: Rather than do that check every time, bake the applicable properties into an internal field.
+                    if (!property.IsApplicable) continue;
+
+                    var propertyNeedsCleanup = false;
+                    var lerpValue = Mathf.Lerp(property.unbound, property.bound, value);
+                    foreach (var component in property.FoundComponents)
+                    {
+                        // Defensive check in case of external destruction.
+                        if (null != component)
+                        {
+                            if (property.AffectsMaterialPropertyBlock)
+                            {
+                                var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
+                                materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpValue);
+                                orchestrator.StagePropertyBlock(component.gameObject);
+                            }
+                            else if (property.SpecialMarker == P12SpecialMarker.BlendShape)
+                            {
+                                var smr = (SkinnedMeshRenderer)component;
+                                // FIXME: We need to cache this blendShape index
+                                var index = smr.sharedMesh.GetBlendShapeIndex(property.PropertySuffix);
+                                smr.SetBlendShapeWeight(index, lerpValue);
+                            }
+                            else
+                            {
+                                // FIXME: This is slow. Bake it into the property itself in Awake.
+                                var fields = property.FoundType.GetFields();
+                                foreach (var fieldInfo in fields)
+                                {
+                                    if (fieldInfo.Name == property.propertyName)
+                                    {
+                                        // TODO: Cast to the type that this field expects
+                                        fieldInfo.SetValue(component, lerpValue);
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            propertyNeedsCleanup = true;
+                        }
+                    }
+
+                    if (propertyNeedsCleanup) ConsiderCleaningUpProperty(property.FoundComponents);
                 }
             }
         }
 
-        /// Enables or disables a behaviour. If the component is a transform, then by convention, its GameObject is set active or inactive.
-        private void SetToggleState(Component component, bool isOn)
+        private static void ConsiderCleaningUpProperty(List<Component> foundComponents)
         {
-            if (component is Transform) component.gameObject.SetActive(isOn);
-            else if (component is Behaviour thatBehaviour) thatBehaviour.enabled = isOn;
-            else if (component is Renderer thatRenderer) thatRenderer.enabled = isOn;
-            else if (component is Collider thatCollider) thatCollider.enabled = isOn;
-            // else, there is no effect on other non-Behaviour components.
+            H12Utilities.RemoveNullsFromList(foundComponents);
+            // TODO: If the list becomes empty, then it may be relevant to make that property non-applicable,
+            // but we can't do that while iterating it in a foreach.
         }
     }
 
@@ -297,7 +358,7 @@ namespace Hai.Project12.Vixxy.Runtime
     }
 
     [Serializable]
-    public struct P12VixxyProperty<T>
+    public struct P12VixxyProperty<T> : I12VixxyProperty
     {
         // TODO: It might be relevant to use another approach than getting animatable properties,
         // since we have control over the system. It doesn't have to piggyback on the animation APIs.
@@ -313,6 +374,17 @@ namespace Hai.Project12.Vixxy.Runtime
         [NonSerialized] internal Type FoundType;
         [NonSerialized] internal List<Component> FoundComponents;
         [NonSerialized] internal bool AffectsMaterialPropertyBlock;
+        [NonSerialized] internal P12SpecialMarker SpecialMarker;
         [NonSerialized] internal int ShaderMaterialProperty;
+        [NonSerialized] internal string PropertySuffix;
+    }
+
+    interface I12VixxyProperty
+    {
+    }
+
+    public enum P12SpecialMarker
+    {
+        None, BlendShape
     }
 }
