@@ -14,7 +14,7 @@ namespace Hai.Project12.Vixxy.Runtime
         // Licensing notes:
         // Portions of the code below originally comes from portions of a proprietary software that I (Haï~) am the author of,
         // and is notably used in "Vixen" (2023-2024).
-        // The code below is released under the same terms of the "Vixxy/" subdirectory that this file is contained in which is NOT DEFINED yet,
+        // The code below is released under the same terms as the LICENSE file of the specific "Vixxy/" subdirectory that this file is contained in which is MIT,
         // including the specific portions of the code that originally came from "Vixen".
 
         /// The orchestrator defines the context that the subjects of this control will affect (e.g. Recursive Search).

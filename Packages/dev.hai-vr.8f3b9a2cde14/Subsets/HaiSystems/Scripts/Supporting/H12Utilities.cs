@@ -17,6 +17,7 @@ namespace Hai.Project12.HaiSystems.Supporting
         }
 
         /// Enables or disables a component, when applicable. If the component is a transform, then by convention, its GameObject is set active or inactive.
+        /// If the component does not have a .enabled state, it is a no-op.
         public static void SetToggleState(Component component, bool isOn)
         {
             switch (component)
