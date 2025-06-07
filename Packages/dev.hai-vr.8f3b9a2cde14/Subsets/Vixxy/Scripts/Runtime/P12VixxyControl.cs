@@ -255,15 +255,13 @@ namespace Hai.Project12.Vixxy.Runtime
                             if (property.SpecialMarker == P12SpecialMarker.AffectsMaterialPropertyBlock)
                             {
                                 var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
-                                if (lerpValue is Vector4 lerpVector4Value)
+                                switch (lerpValue)
                                 {
-                                    materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value);
+                                    case Vector4 lerpVector4Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value); break;
+                                    case Color lerpColorValue: materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue); break;
+                                    case float lerpFloatValue: materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpFloatValue); break;
+                                    // TODO: Other types
                                 }
-                                else if (lerpValue is Color lerpColorValue)
-                                {
-                                    materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue);
-                                }
-                                // TODO: Other types
                                 orchestrator.StagePropertyBlock(component.gameObject);
                             }
                             else if (property.SpecialMarker == P12SpecialMarker.BlendShape)
