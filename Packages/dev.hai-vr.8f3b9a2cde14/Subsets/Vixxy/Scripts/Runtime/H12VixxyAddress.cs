@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
@@ -15,7 +14,7 @@ namespace Hai.Project12.Vixxy.Runtime
         /// Valid IDs start at 1.
         public static int NewRandomAddress()
         {
-            return AddressToId(GUID.Generate().ToString());
+            return AddressToId(Guid.NewGuid().ToString());
         }
 
         /// Returns an ID for that address, storing that address if it was not seen before.
