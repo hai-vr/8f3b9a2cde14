@@ -135,8 +135,9 @@ namespace Hai.Project12.Remesher.Runtime
                 ourCollider.convex = true;
                 ourCollider.sharedMesh = generatedMesh;
                 ourCollider.cookingOptions = MeshColliderCookingOptions.EnableMeshCleaning
-                                          | MeshColliderCookingOptions.WeldColocatedVertices
-                                          | MeshColliderCookingOptions.CookForFasterSimulation;
+                                             | MeshColliderCookingOptions.WeldColocatedVertices
+                                             | MeshColliderCookingOptions.CookForFasterSimulation
+                                             | MeshColliderCookingOptions.UseFastMidphase; // TODO: Should we use FastMidphase? does it matter?
 
                 if (createRigidbodies)
                 {
