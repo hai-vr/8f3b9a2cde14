@@ -25,7 +25,7 @@ namespace Hai.Project12.Vixxy.Runtime
         private const string PropBlendShapePrefix = "blendShape.";
 
         // static: Share this type cache across multiple controls
-        private static readonly Dictionary<string, Type> TypeCache_MayContainNullObjects = new();
+        private static readonly Dictionary<string, Type> ComponentDictionary = new Dictionary<string, Type>();
 
         /// The orchestrator defines the context that the subjects of this control will affect (e.g. Recursive Search).
         /// Vixxy is not an avatar-specific component, so it needs that limited context.
@@ -45,6 +45,21 @@ namespace Hai.Project12.Vixxy.Runtime
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
 
+        static P12VixxyControl()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (typeof(Component).IsAssignableFrom(type))
+                    {
+                        ComponentDictionary.TryAdd(type.FullName, type);
+                    }
+                }
+            }
+        }
+
         public void Awake()
         {
             _iddress = H12VixxyAddress.AddressToId(address);
@@ -61,8 +76,6 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void BakeControlForRuntime()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
             // In this phase, we do all the checks, so that when actuation is requested (this might be as expensive
             // as running every frame), we don't need to do type checks or other work.
             // This means that we need to catch all invalid cases. See below comments that say "Not Applicable".
@@ -85,7 +98,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 // (P12VixxyPropertyBase is no longer a struct, so we don't need to reassign the changes)
                 foreach (var property in subject.properties)
                 {
-                    var isApplicable = BakeProperty(property, assemblies, subject);
+                    var isApplicable = BakeProperty(property, subject);
                     property.IsApplicable = isApplicable;
 
                     isAnyPropertyApplicable |= isApplicable;
@@ -109,9 +122,9 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
-        private bool BakeProperty(P12VixxyPropertyBase property, Assembly[] assemblies, P12VixxySubject subject)
+        private bool BakeProperty(P12VixxyPropertyBase property, P12VixxySubject subject)
         {
-            if (!TryGetType(assemblies, property.fullClassName, out var foundType)) return false; // // Not applicable: Type not found
+            if (!TryGetType(property.fullClassName, out var foundType)) return false; // // Not applicable: Type not found
 
             // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
             var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
@@ -170,30 +183,13 @@ namespace Hai.Project12.Vixxy.Runtime
             return true;
         }
 
-        private bool TryGetType(Assembly[] assemblies, string propertyFullClassName, out Type foundType)
+        private bool TryGetType(string propertyFullClassName, out Type foundType)
         {
-            if (TypeCache_MayContainNullObjects.TryGetValue(propertyFullClassName, out var typeNullable))
+            if (ComponentDictionary.TryGetValue(propertyFullClassName, out var result))
             {
-                foundType = typeNullable;
-                return typeNullable != null;
+                foundType = result;
+                return true;
             }
-
-            foreach (var assembly in assemblies)
-            {
-                foreach (var thatType in assembly.GetTypes())
-                {
-                    if (thatType.FullName == propertyFullClassName)
-                    {
-                        TypeCache_MayContainNullObjects.Add(propertyFullClassName, thatType);
-
-                        foundType = thatType;
-                        return true;
-                    }
-                }
-            }
-
-            // We do cache null when we don't find that class, so that we don't try to find that again.
-            TypeCache_MayContainNullObjects.Add(propertyFullClassName, null);
 
             foundType = null;
             return false;
