@@ -30,11 +30,14 @@ namespace Hai.Project12.HaiSystems.Supporting
         /// If the component does not have a .enabled state, it is a no-op.
         public static void SetToggleState(Component component, bool isOn)
         {
-            // (counter-intuitively, .enabled does not imply Behaviour)
             switch (component)
             {
                 case Transform: component.gameObject.SetActive(isOn); break;
                 case Behaviour thatBehaviour: thatBehaviour.enabled = isOn; break;
+
+                // Counter-intuitively, .enabled does not imply Behaviour.
+                // The following should cover all known components.
+                // (CharacterController is a Collider, and SpriteMask is a Renderer).
                 case Renderer thatRenderer: thatRenderer.enabled = isOn; break;
                 case Collider thatCollider: thatCollider.enabled = isOn; break;
                 case Cloth thatCloth: thatCloth.enabled = isOn; break;
@@ -47,11 +50,14 @@ namespace Hai.Project12.HaiSystems.Supporting
         /// If the component does not have a .enabled state, this returns true.
         public static bool GetToggleState(Component component)
         {
-            // (counter-intuitively, .enabled does not imply Behaviour)
             return component switch
             {
                 Transform => component.gameObject.activeSelf,
                 Behaviour thatBehaviour => thatBehaviour.enabled,
+
+                // Counter-intuitively, .enabled does not imply Behaviour.
+                // The following should cover all known components.
+                // (CharacterController is a Collider, and SpriteMask is a Renderer).
                 Renderer thatRenderer => thatRenderer.enabled,
                 Collider thatCollider => thatCollider.enabled,
                 Cloth thatCloth => thatCloth.enabled,
