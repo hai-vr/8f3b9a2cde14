@@ -10,6 +10,13 @@ namespace Hai.Project12.Remesher.Runtime
     public class P12Remesher : MonoBehaviour
     {
         private const float BoneWeightAcceptanceThreshold = 0.4f;
+
+        // TODO: Should we use FastMidphase? does it matter?
+        private const MeshColliderCookingOptions Cooking = MeshColliderCookingOptions.EnableMeshCleaning
+                                                           | UnityEngine.MeshColliderCookingOptions.WeldColocatedVertices
+                                                           | UnityEngine.MeshColliderCookingOptions.CookForFasterSimulation
+                                                           | UnityEngine.MeshColliderCookingOptions.UseFastMidphase;
+
         [SerializeField] private SkinnedMeshRenderer[] sources; // UGC Rule.
         [SerializeField] private bool createRigidbodies = true;
 
@@ -98,6 +105,8 @@ namespace Hai.Project12.Remesher.Runtime
 
                             generatedMeshes.Add(meshForThisBone);
                             whichBoneIndexForThatGeneratedMesh.Add(boneIndex);
+
+                            Physics.BakeMesh(meshForThisBone.GetInstanceID(), true, Cooking);
                         }
                     }
                 }
@@ -134,10 +143,7 @@ namespace Hai.Project12.Remesher.Runtime
                 var ourCollider = go.AddComponent<MeshCollider>();
                 ourCollider.convex = true;
                 ourCollider.sharedMesh = generatedMesh;
-                ourCollider.cookingOptions = MeshColliderCookingOptions.EnableMeshCleaning
-                                             | MeshColliderCookingOptions.WeldColocatedVertices
-                                             | MeshColliderCookingOptions.CookForFasterSimulation
-                                             | MeshColliderCookingOptions.UseFastMidphase; // TODO: Should we use FastMidphase? does it matter?
+                ourCollider.cookingOptions = Cooking;
 
                 if (createRigidbodies)
                 {
