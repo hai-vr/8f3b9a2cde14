@@ -6,6 +6,7 @@ namespace Hai.Project12.Remesher.Runtime
 {
     public class P12Remesher : MonoBehaviour
     {
+        private const float BoneWeightAcceptanceThreshold = 0.4f;
         [SerializeField] private SkinnedMeshRenderer[] sources; // UGC Rule.
 
         private void Awake()
@@ -41,14 +42,22 @@ namespace Hai.Project12.Remesher.Runtime
 
             for (var vertexId = 0; vertexId < vertexCount; vertexId++)
             {
-                if (boneCountPerVertex[vertexId] > 0)
+                if (boneCountPerVertex[vertexId] > 0) // Guarantees that thisVertexWeights is non-empty
                 {
                     var thisVertexWeights = ReadInputBoneWeightsAsNewList(vertexId, boneCountPerVertex, vertexIdToStartingIndexInsideBoneWeightsArray, allBoneWeights);
 
-                    // TODO: Add the other vertices that have a weight greater than some number (maybe 0.4)
                     var mostWeighted = thisVertexWeights[0];
-
                     boneIndexToMajorlyVertexIds[mostWeighted.boneIndex].Add(vertexId);
+
+                    // TODO: Add the other vertices that have a weight greater than some number (maybe 0.4)
+                    for (var i = 1; i < thisVertexWeights.Count; i++)
+                    {
+                        var currentWeight = thisVertexWeights[i];
+                        if (currentWeight.weight > BoneWeightAcceptanceThreshold)
+                        {
+                            boneIndexToMajorlyVertexIds[currentWeight.boneIndex].Add(vertexId);
+                        }
+                    }
                 }
             }
 
