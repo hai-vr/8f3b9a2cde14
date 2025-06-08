@@ -208,6 +208,17 @@ namespace Hai.Project12.Vixxy.Editor
                         EditorGUILayout.ObjectField(nameof(P12VixxyPropertyBase.FoundType), null, it.FoundType, false);
                         EditorGUILayout.EnumPopup(nameof(P12VixxyPropertyBase.SpecialMarker), it.SpecialMarker);
                         EditorGUILayout.TextField(nameof(P12VixxyPropertyBase.PropertySuffix), it.PropertySuffix);
+                        if (it.SpecialMarker == P12SpecialMarker.BlendShape)
+                        {
+                            EditorGUILayout.LabelField(nameof(P12VixxyPropertyBase.SmrToBlendshapeIndex), EditorStyles.boldLabel);
+                            foreach (var smrToBlendshapeIndex in it.SmrToBlendshapeIndex)
+                            {
+                                EditorGUILayout.BeginHorizontal();
+                                EditorGUILayout.ObjectField(smrToBlendshapeIndex.Key, typeof(SkinnedMeshRenderer), false);
+                                EditorGUILayout.TextField($"{smrToBlendshapeIndex.Value}");
+                                EditorGUILayout.EndHorizontal();
+                            }
+                        }
                         EditorGUILayout.LabelField(nameof(P12VixxyPropertyBase.FoundComponents));
                         foreach (var found in it.FoundComponents)
                         {

@@ -155,14 +155,50 @@ namespace Hai.Project12.Vixxy.Runtime
 
             if (foundComponents.Count <= 0) return false; // Not applicable: No objects has that component
 
+            var propertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
+
             if (affectsMaterialPropertyBlock)
             {
                 property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
                 property.SpecialMarker = P12SpecialMarker.AffectsMaterialPropertyBlock;
             }
-            else if (property.propertyName.StartsWith(PropBlendShapePrefix) && foundType == typeof(SkinnedMeshRenderer))
+            else if (property.propertyName.StartsWith(PropBlendShapePrefix))
             {
+                if (foundType != typeof(SkinnedMeshRenderer)) return false; // Not applicable: blendShape can only be used on SMRs
+
+                var nonApplicableComponents = new List<Component>();
+                var smrToIndex = new Dictionary<SkinnedMeshRenderer, int>();
+                foreach (var component in foundComponents)
+                {
+                    var smr = (SkinnedMeshRenderer)component;
+                    var sharedMesh = smr.sharedMesh;
+                    if (sharedMesh != null)
+                    {
+                        var blendShapeIndex = sharedMesh.GetBlendShapeIndex(propertySuffix);
+                        if (blendShapeIndex != -1)
+                        {
+                            smrToIndex[smr] = blendShapeIndex;
+                        }
+                        else
+                        {
+                            nonApplicableComponents.Add(component);
+                        }
+                    }
+                    else
+                    {
+                        nonApplicableComponents.Add(component);
+                    }
+                }
+
+                foreach (var nonApplicableComponent in nonApplicableComponents)
+                {
+                    foundComponents.Remove(nonApplicableComponent);
+                }
+
+                if (foundComponents.Count == 0) return false; // Not applicable: No SMR with a valid mesh has this blendshape.
+
                 property.SpecialMarker = P12SpecialMarker.BlendShape;
+                property.SmrToBlendshapeIndex = smrToIndex;
             }
             else
             {
@@ -184,7 +220,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
             property.FoundType = foundType;
             property.FoundComponents = foundComponents;
-            property.PropertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
+            property.PropertySuffix = propertySuffix;
 
             return true;
         }
@@ -298,10 +334,8 @@ namespace Hai.Project12.Vixxy.Runtime
                                 if (lerpValue is float lerpFloatValue)
                                 {
                                     var smr = (SkinnedMeshRenderer)component;
-                                    // FIXME: We need to cache this blendShape index
-                                    // Maybe all applicators need to be cached (float) => () lambdas in Awake or something.
-                                    var index = smr.sharedMesh.GetBlendShapeIndex(property.PropertySuffix);
-                                    smr.SetBlendShapeWeight(index, lerpFloatValue);
+                                    var blendShapeIndex = property.SmrToBlendshapeIndex[smr];
+                                    smr.SetBlendShapeWeight(blendShapeIndex, lerpFloatValue);
                                 }
                             }
                             else if (property.SpecialMarker == P12SpecialMarker.FieldAccess)
@@ -481,6 +515,7 @@ namespace Hai.Project12.Vixxy.Runtime
         [NonSerialized] internal string PropertySuffix;
         [NonSerialized] internal FieldInfo FieldIfMarkedAsFieldAccess; // null if SpecialMarker is not FieldAccess
         [NonSerialized] internal PropertyInfo TPropertyIfMarkedAsTPropertyAccess; // null if SpecialMarker is not PropertyAccess
+        [NonSerialized] internal Dictionary<SkinnedMeshRenderer, int> SmrToBlendshapeIndex; // null if SpecialMarker is not BlendShape
     }
 
     interface I12VixxyProperty
