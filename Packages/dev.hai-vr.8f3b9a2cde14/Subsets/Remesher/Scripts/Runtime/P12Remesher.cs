@@ -4,10 +4,14 @@ using UnityEngine;
 
 namespace Hai.Project12.Remesher.Runtime
 {
+    /// Given SkinnedMeshRenderers, this splits the mesh into several meshes where each mesh represents a bone,
+    /// and adds a convex hull MeshCollider to each bone. All the mesh simplification concerns are handled by
+    /// what is already built-in the MeshCollider, not us.
     public class P12Remesher : MonoBehaviour
     {
         private const float BoneWeightAcceptanceThreshold = 0.4f;
         [SerializeField] private SkinnedMeshRenderer[] sources; // UGC Rule.
+        [SerializeField] private bool createRigidbodies = true;
 
         private void Awake()
         {
@@ -20,7 +24,7 @@ namespace Hai.Project12.Remesher.Runtime
             }
         }
 
-        private static void ManipulateSmr(SkinnedMeshRenderer skinnedMeshRenderer)
+        private void ManipulateSmr(SkinnedMeshRenderer skinnedMeshRenderer)
         {
             var originalMesh = skinnedMeshRenderer.sharedMesh;
 
@@ -37,6 +41,8 @@ namespace Hai.Project12.Remesher.Runtime
                 boneIndexToMajorlyVertexIds.Add(new List<int>());
             }
 
+            // Triage each vertexId into the bones it belongs to.
+
             for (var vertexId = 0; vertexId < vertexCount; vertexId++)
             {
                 if (boneCountPerVertex[vertexId] > 0) // Guarantees that thisVertexWeights is non-empty
@@ -46,7 +52,7 @@ namespace Hai.Project12.Remesher.Runtime
                     var mostWeighted = thisVertexWeights[0];
                     boneIndexToMajorlyVertexIds[mostWeighted.boneIndex].Add(vertexId);
 
-                    // TODO: Add the other vertices that have a weight greater than some number (maybe 0.4)
+                    // Notice how this starts at 1. We always want the heaviest bone to be assigned, even if it's below threshold.
                     for (var i = 1; i < thisVertexWeights.Count; i++)
                     {
                         var currentWeight = thisVertexWeights[i];
@@ -57,6 +63,8 @@ namespace Hai.Project12.Remesher.Runtime
                     }
                 }
             }
+
+            // Rebuild the mesh
 
             var generatedMeshes = new List<Mesh>();
             var whichBoneIndexForThatGeneratedMesh = new List<int>();
@@ -88,6 +96,7 @@ namespace Hai.Project12.Remesher.Runtime
             //
 
             var smrBones = skinnedMeshRenderer.bones;
+            var bindpose = originalMesh.bindposes;
 
             for (var index = 0; index < generatedMeshes.Count; index++)
             {
@@ -95,31 +104,38 @@ namespace Hai.Project12.Remesher.Runtime
                 var boneIndex = whichBoneIndexForThatGeneratedMesh[index];
 
                 var smrBone = smrBones[boneIndex];
+                var bindposeForThisBone = bindpose[boneIndex];
+
                 var go = new GameObject
                 {
                     name = $"{skinnedMeshRenderer.name}_MeshCollider_Bone{boneIndex:000}",
                     transform =
                     {
+                        // TODO: When adding the head, if it's a local avatar, then add it to the same system that the
+                        // shadow clone head transform uses to avoid first-person shrinking.
                         parent = smrBone != null ? smrBone.transform : null,
-                        position = skinnedMeshRenderer.transform.position,
-                        rotation = skinnedMeshRenderer.transform.rotation,
-                        localScale = skinnedMeshRenderer.transform.localScale // FIXME: Incorrect
+                        localPosition = bindposeForThisBone.GetPosition(),
+                        localRotation = bindposeForThisBone.rotation,
+                        localScale = skinnedMeshRenderer.transform.localScale // FIXME: Likely incorrect
                     }
                 };
-                go.SetActive(false);
+                go.SetActive(false); // Ensure that components initialize in one go, after we have defined them.
 
-                var collider = go.AddComponent<MeshCollider>();
-                collider.convex = true;
-                collider.sharedMesh = generatedMesh;
-                collider.cookingOptions = MeshColliderCookingOptions.EnableMeshCleaning
+                var ourCollider = go.AddComponent<MeshCollider>();
+                ourCollider.convex = true;
+                ourCollider.sharedMesh = generatedMesh;
+                ourCollider.cookingOptions = MeshColliderCookingOptions.EnableMeshCleaning
                                           | MeshColliderCookingOptions.WeldColocatedVertices
                                           | MeshColliderCookingOptions.CookForFasterSimulation;
 
-                var rigidbody = go.AddComponent<Rigidbody>();
-                rigidbody.isKinematic = true;
-                rigidbody.mass = 1f;
-                rigidbody.automaticCenterOfMass = true;
-                rigidbody.useGravity = false;
+                if (createRigidbodies)
+                {
+                    var ourRigidbody = go.AddComponent<Rigidbody>();
+                    ourRigidbody.isKinematic = true;
+                    ourRigidbody.mass = 1f;
+                    ourRigidbody.automaticCenterOfMass = true;
+                    ourRigidbody.useGravity = false;
+                }
 
                 go.SetActive(true);
             }
@@ -133,18 +149,20 @@ namespace Hai.Project12.Remesher.Runtime
 
             for (var indexWithinTriangles = 0; indexWithinTriangles < originalTriangles.Length; indexWithinTriangles += 3)
             {
-                var vertexIdForA = originalTriangles[indexWithinTriangles + 0];
+                var vertexIdForA = originalTriangles[indexWithinTriangles];
                 var vertexIdForB = originalTriangles[indexWithinTriangles + 1];
                 var vertexIdForC = originalTriangles[indexWithinTriangles + 2];
 
+                // (Note: The default Basis avatar is painted too weird, so the arms and lower body won't pass this condition.)
                 if (keepThoseVertices.Contains(vertexIdForA)
                     && keepThoseVertices.Contains(vertexIdForB)
                     && keepThoseVertices.Contains(vertexIdForC))
                 {
-                    // This triangle needs to be kept.
+                    // The index of the vertexId inside the majorlyVertexIds list is the new vertexId of our new mesh.
                     var regeneratedVertexIdForA = majorlyVertexIds.IndexOf(vertexIdForA);
                     var regeneratedVertexIdForB = majorlyVertexIds.IndexOf(vertexIdForB);
                     var regeneratedVertexIdForC = majorlyVertexIds.IndexOf(vertexIdForC);
+
                     reconstructedTriangles.Add(regeneratedVertexIdForA);
                     reconstructedTriangles.Add(regeneratedVertexIdForB);
                     reconstructedTriangles.Add(regeneratedVertexIdForC);
