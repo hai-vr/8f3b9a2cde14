@@ -98,7 +98,12 @@ namespace Hai.Project12.Vixxy.Editor
                 subjectsSp.arraySize += 1;
             }
 
+            var wasModified = serializedObject.hasModifiedProperties;
             serializedObject.ApplyModifiedProperties();
+            if (wasModified)
+            {
+                my.DebugOnly_ReBakeControl();
+            }
 
             DrawDefaultInspector();
         }

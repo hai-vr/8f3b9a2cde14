@@ -48,9 +48,20 @@ namespace Hai.Project12.Vixxy.Runtime
         public void Awake()
         {
             _iddress = H12VixxyAddress.AddressToId(address);
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             _context = orchestrator.Context();
+
+            BakeControlForRuntime();
+        }
+
+        internal void DebugOnly_ReBakeControl()
+        {
+            BakeControlForRuntime();
+        }
+
+        private void BakeControlForRuntime()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             // In this phase, we do all the checks, so that when actuation is requested (this might be as expensive
             // as running every frame), we don't need to do type checks or other work.
