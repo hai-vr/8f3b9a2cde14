@@ -10,7 +10,8 @@
         "BasisDebug",
         "Hai.Project12.HaiSystems.Supporting",
         "Hai.Project12.InteractionElements.Runtime",
-        "HVR.Basis.Comms"
+        "HVR.Basis.Comms",
+        "Unity.RenderPipelines.Universal.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

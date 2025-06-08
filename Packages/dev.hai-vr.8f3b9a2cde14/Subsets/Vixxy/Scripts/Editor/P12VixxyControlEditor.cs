@@ -4,7 +4,7 @@ using Hai.Project12.Vixxy.Runtime;
 using UnityEditor;
 using UnityEngine;
 
-namespace Subsets.Vixxy.Scripts.Editor
+namespace Hai.Project12.Vixxy.Editor
 {
     [CustomEditor(typeof(P12VixxyControl))]
     public class P12VixxyControlEditor : UnityEditor.Editor
@@ -69,7 +69,7 @@ namespace Subsets.Vixxy.Scripts.Editor
                 for (var propertyIndex = 0; propertyIndex < propertiesSp.arraySize; propertyIndex++)
                 {
                     var propertySp = propertiesSp.GetArrayElementAtIndex(propertyIndex);
-                    if (DrawPropertyOrReturn(propertySp, propertyIndex, propertiesSp)) return;
+                    if (DrawPropertyOrReturn(propertySp, propertyIndex, propertiesSp, isPlaying)) return;
                 }
 
                 if (GUILayout.Button("+ Add Property of type FLOAT"))
@@ -84,6 +84,12 @@ namespace Subsets.Vixxy.Scripts.Editor
                     propertiesSp.arraySize = indexToPutData + 1;
                     propertiesSp.GetArrayElementAtIndex(indexToPutData).managedReferenceValue = new P12VixxyProperty<Vector4>();
                 }
+                if (GUILayout.Button("+ Add Property of type VECTOR3"))
+                {
+                    var indexToPutData = propertiesSp.arraySize;
+                    propertiesSp.arraySize = indexToPutData + 1;
+                    propertiesSp.GetArrayElementAtIndex(indexToPutData).managedReferenceValue = new P12VixxyProperty<Vector3>();
+                }
 
                 EditorGUILayout.EndVertical();
             }
@@ -97,7 +103,7 @@ namespace Subsets.Vixxy.Scripts.Editor
             DrawDefaultInspector();
         }
 
-        private bool DrawPropertyOrReturn(SerializedProperty propertySp, int propertyIndex, SerializedProperty propertiesSp)
+        private bool DrawPropertyOrReturn(SerializedProperty propertySp, int propertyIndex, SerializedProperty propertiesSp, bool isPlaying)
         {
             EditorGUILayout.BeginVertical("GroupBox");
             EditorGUILayout.BeginHorizontal();
@@ -143,6 +149,26 @@ namespace Subsets.Vixxy.Scripts.Editor
                 EditorGUILayout.PropertyField(propertySp.FindPropertyRelative(nameof(P12VixxyProperty<object>.unbound)));
                 EditorGUILayout.PropertyField(propertySp.FindPropertyRelative(nameof(P12VixxyProperty<object>.bound)));
             }
+
+            if (isPlaying)
+            {
+                var propertyBase = (P12VixxyPropertyBase)managedReferenceValue;
+                if (propertyBase.IsApplicable)
+                {
+                    foreach (var found in propertyBase.FoundComponents)
+                    {
+                        if (null != found)
+                        {
+                            EditorGUILayout.ObjectField(found, found.GetType(), true);
+                        }
+                    }
+                }
+                else
+                {
+                    EditorGUILayout.HelpBox("This property has failed to resolve.", MessageType.Error);
+                }
+            }
+
             EditorGUILayout.EndVertical();
             return false;
         }

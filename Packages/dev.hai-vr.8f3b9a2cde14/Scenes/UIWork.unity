@@ -2156,13 +2156,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 304957702}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.7633865, y: -0.07516155, z: 0.090334885, w: 0.6351626}
+  m_LocalRotation: {x: 0.76684725, y: -0.018801484, z: 0.043366153, w: 0.6400869}
   m_LocalPosition: {x: -0.422, y: 0.675, z: 0.473}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 100.47699, y: -13.497009, z: 0}
+  m_LocalEulerAnglesHint: {x: 100.47699, y: -13.497009, z: -8.437012}
 --- !u!224 &314659286 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1634605731340974413, guid: de56d1ad34f4c674984d7ac5ae339f8d, type: 3}
@@ -2914,11 +2914,13 @@ MonoBehaviour:
     targets:
     - {fileID: 1280096501}
     - {fileID: 1892593581}
+    - {fileID: 304957702}
     childrenOf: []
     exceptions: []
     properties:
     - rid: 4365713322413654131
     - rid: 4365713347119939690
+    - rid: 4365713355110088813
   lowerBound: 0
   upperBound: 1
   interpolationCurve:
@@ -2964,6 +2966,14 @@ MonoBehaviour:
         flip: 0
         bound: 1
         unbound: 0.5
+    - rid: 4365713355110088813
+      type: {class: 'P12VixxyProperty`1[[UnityEngine.Vector3, UnityEngine.CoreModule]]', ns: Hai.Project12.Vixxy.Runtime, asm: Hai.Project12.Vixxy.Runtime}
+      data:
+        fullClassName: UnityEngine.Rendering.Universal.DecalProjector
+        propertyName: size
+        flip: 0
+        bound: {x: 3, y: 3, z: 3}
+        unbound: {x: 1, y: 1, z: 1}
 --- !u!4 &400168027 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8224631541272572913, guid: aea3d39e9e497da40b6a1240365555a1, type: 3}
@@ -12536,7 +12546,7 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: b8ef85248826b7844ab559afe6def52e, type: 2}

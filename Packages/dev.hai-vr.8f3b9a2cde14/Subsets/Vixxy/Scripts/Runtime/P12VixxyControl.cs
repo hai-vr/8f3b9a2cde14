@@ -136,11 +136,20 @@ namespace Hai.Project12.Vixxy.Runtime
             }
             else
             {
-                var fieldInfoNullable = GetFieldInfoOrNull(property);
-                if (fieldInfoNullable == null) return false; // Not applicable: No field.
+                var fieldInfoNullable = GetFieldInfoOrNull(foundType, property.propertyName);
+                if (fieldInfoNullable != null)
+                {
+                    property.FieldIfMarkedAsFieldAccess = fieldInfoNullable;
+                    property.SpecialMarker = P12SpecialMarker.FieldAccess;
+                }
+                else
+                {
+                    var propertyInfoNullable = GetPropertyInfoOrNull(foundType, property.propertyName);
+                    if (propertyInfoNullable == null) return false; // Not applicable: No field nor property
 
-                property.FieldIfMarkedAsFieldAccess = fieldInfoNullable;
-                property.SpecialMarker = P12SpecialMarker.FieldAccess;
+                    property.TPropertyIfMarkedAsTPropertyAccess = propertyInfoNullable;
+                    property.SpecialMarker = P12SpecialMarker.PropertyAccess;
+                }
             }
 
             property.FoundType = foundType;
@@ -248,7 +257,9 @@ namespace Hai.Project12.Vixxy.Runtime
                     object lerpValue = property switch
                     {
                         P12VixxyProperty<float> valueFloat => Mathf.Lerp(valueFloat.unbound, valueFloat.bound, active01),
-                        P12VixxyProperty<Vector4> valueVector4 => Color.Lerp(valueVector4.unbound, valueVector4.bound, active01),
+                        P12VixxyProperty<Color> valueColor => Color.Lerp(valueColor.unbound, valueColor.bound, active01),
+                        P12VixxyProperty<Vector4> valueVector4 => Vector4.Lerp(valueVector4.unbound, valueVector4.bound, active01),
+                        P12VixxyProperty<Vector3> valueVector3 => Vector3.Lerp(valueVector3.unbound, valueVector3.bound, active01),
                         _ => null
                     };
                     foreach (var component in property.FoundComponents)
@@ -261,9 +272,10 @@ namespace Hai.Project12.Vixxy.Runtime
                                 var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
                                 switch (lerpValue)
                                 {
-                                    case Vector4 lerpVector4Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value); break;
-                                    case Color lerpColorValue: materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue); break;
                                     case float lerpFloatValue: materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpFloatValue); break;
+                                    case Color lerpColorValue: materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue); break;
+                                    case Vector4 lerpVector4Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value); break;
+                                    case Vector3 lerpVector3Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector3Value); break;
                                     // TODO: Other types
                                 }
                                 orchestrator.StagePropertyBlock(component.gameObject);
@@ -284,6 +296,14 @@ namespace Hai.Project12.Vixxy.Runtime
                                 var fieldInfo = property.FieldIfMarkedAsFieldAccess;
                                 // TODO: Cast to the type that this field expects
                                 fieldInfo.SetValue(component, lerpValue);
+                                orchestrator.StagePossibleSpecialComponentHandling(component);
+                            }
+                            else if (property.SpecialMarker == P12SpecialMarker.PropertyAccess)
+                            {
+                                var propertyInfo = property.TPropertyIfMarkedAsTPropertyAccess;
+                                // TODO: Cast to the type that this field expects
+                                propertyInfo.SetValue(component, lerpValue);
+                                orchestrator.StagePossibleSpecialComponentHandling(component);
                             }
                             else if (property.SpecialMarker == P12SpecialMarker.Undefined)
                             {
@@ -311,14 +331,28 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
-        private static FieldInfo GetFieldInfoOrNull(P12VixxyPropertyBase property)
+        private static FieldInfo GetFieldInfoOrNull(Type foundType, string propertyName)
         {
-            var fields = property.FoundType.GetFields();
+            var fields = foundType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (var fieldInfo in fields)
             {
-                if (fieldInfo.Name == property.propertyName)
+                if (fieldInfo.Name == propertyName)
                 {
                     return fieldInfo;
+                }
+            }
+
+            return null;
+        }
+
+        private static PropertyInfo GetPropertyInfoOrNull(Type foundType, string propertyName)
+        {
+            var typeProperties = foundType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var propertyInfo in typeProperties)
+            {
+                if (propertyInfo.Name == propertyName)
+                {
+                    return propertyInfo;
                 }
             }
 
@@ -409,6 +443,7 @@ namespace Hai.Project12.Vixxy.Runtime
         [NonSerialized] internal int ShaderMaterialProperty;
         [NonSerialized] internal string PropertySuffix;
         [NonSerialized] internal FieldInfo FieldIfMarkedAsFieldAccess; // null if SpecialMarker is not FieldAccess
+        [NonSerialized] internal PropertyInfo TPropertyIfMarkedAsTPropertyAccess; // null if SpecialMarker is not PropertyAccess
     }
 
     interface I12VixxyProperty
@@ -417,6 +452,10 @@ namespace Hai.Project12.Vixxy.Runtime
 
     public enum P12SpecialMarker
     {
-        Undefined, AffectsMaterialPropertyBlock, BlendShape, FieldAccess
+        Undefined,
+        AffectsMaterialPropertyBlock,
+        BlendShape,
+        FieldAccess,
+        PropertyAccess
     }
 }

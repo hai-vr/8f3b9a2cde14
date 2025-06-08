@@ -27,6 +27,7 @@ namespace Hai.Project12.Vixxy.Runtime
         private readonly Dictionary<GameObject, MaterialPropertyBlock> _objectToMaterialPropertyBlock = new();
         private readonly Dictionary<GameObject, Renderer> _objectToRenderer_mayContainNullObjects = new();
         private readonly HashSet<GameObject> _stagedBlocks = new(); // FIXME: We should really just be binding tuples into _objectToMaterialPropertyBlock
+        // private readonly HashSet<Component> _stagedComponents = new();
 
         private readonly HashSet<I12VixxyAggregator> _workAggregators = new();
 
@@ -142,6 +143,12 @@ namespace Hai.Project12.Vixxy.Runtime
                 }
                 _stagedBlocks.Clear();
             }
+
+            // TODO: Special update handling when fields of some components require an update call
+            // if (_stagedComponents.Count > 0)
+            // {
+                // _stagedComponents.Clear();
+            // }
         }
 
         public H12ActuatorRegistrationToken RegisterActuator(string address, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
@@ -247,6 +254,12 @@ namespace Hai.Project12.Vixxy.Runtime
         public void StagePropertyBlock(GameObject bakedObject)
         {
             _stagedBlocks.Add(bakedObject);
+        }
+
+        public void StagePossibleSpecialComponentHandling(Component component)
+        {
+            // FIXME: No-op for now.
+            // _stagedComponents.Add(component);
         }
     }
 }
