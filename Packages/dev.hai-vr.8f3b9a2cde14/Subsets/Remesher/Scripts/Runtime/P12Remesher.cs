@@ -24,9 +24,6 @@ namespace Hai.Project12.Remesher.Runtime
         {
             var originalMesh = skinnedMeshRenderer.sharedMesh;
 
-            var bakedMesh = new Mesh();
-            skinnedMeshRenderer.BakeMesh(bakedMesh, true);
-
             var vertexCount = originalMesh.vertexCount;
             var boneCountPerVertex = originalMesh.GetBonesPerVertex();
             var allBoneWeights = originalMesh.GetAllBoneWeights();
@@ -62,6 +59,7 @@ namespace Hai.Project12.Remesher.Runtime
             }
 
             var generatedMeshes = new List<Mesh>();
+            var whichBoneIndexForThatGeneratedMesh = new List<int>();
 
             var originalVertices = originalMesh.vertices;
             var originalTriangles = originalMesh.triangles;
@@ -83,46 +81,26 @@ namespace Hai.Project12.Remesher.Runtime
                     meshForThisBone.triangles = ReconstructTriangles(majorlyVertexIds, originalTriangles);
 
                     generatedMeshes.Add(meshForThisBone);
+                    whichBoneIndexForThatGeneratedMesh.Add(boneIndex);
                 }
             }
 
             //
 
-            if (true)
+            var smrBones = skinnedMeshRenderer.bones;
+
+            for (var index = 0; index < generatedMeshes.Count; index++)
             {
-                for (var boneIndex = 0; boneIndex < totalBoneCount; boneIndex++)
-                {
-                    var generatedMesh = generatedMeshes[boneIndex];
+                var generatedMesh = generatedMeshes[index];
+                var boneIndex = whichBoneIndexForThatGeneratedMesh[index];
 
-                    var go = new GameObject
-                    {
-                        name = $"{skinnedMeshRenderer.name}_MeshCollider_Bone{boneIndex:000}",
-                        transform =
-                        {
-                            position = skinnedMeshRenderer.transform.position,
-                            rotation = skinnedMeshRenderer.transform.rotation,
-                            localScale = skinnedMeshRenderer.transform.localScale // FIXME: Incorrect
-                        }
-                    };
-                    go.SetActive(false);
-
-                    var collider = go.AddComponent<MeshCollider>();
-                    collider.convex = true;
-                    collider.sharedMesh = generatedMesh;
-                    collider.cookingOptions = MeshColliderCookingOptions.EnableMeshCleaning
-                                              | MeshColliderCookingOptions.WeldColocatedVertices
-                                              | MeshColliderCookingOptions.CookForFasterSimulation;
-                    go.SetActive(true);
-                }
-            }
-
-            if (false)
-            {
+                var smrBone = smrBones[boneIndex];
                 var go = new GameObject
                 {
-                    name = $"{skinnedMeshRenderer.name}_MeshCollider",
+                    name = $"{skinnedMeshRenderer.name}_MeshCollider_Bone{boneIndex:000}",
                     transform =
                     {
+                        parent = smrBone != null ? smrBone.transform : null,
                         position = skinnedMeshRenderer.transform.position,
                         rotation = skinnedMeshRenderer.transform.rotation,
                         localScale = skinnedMeshRenderer.transform.localScale // FIXME: Incorrect
@@ -132,10 +110,17 @@ namespace Hai.Project12.Remesher.Runtime
 
                 var collider = go.AddComponent<MeshCollider>();
                 collider.convex = true;
-                collider.sharedMesh = bakedMesh;
+                collider.sharedMesh = generatedMesh;
                 collider.cookingOptions = MeshColliderCookingOptions.EnableMeshCleaning
                                           | MeshColliderCookingOptions.WeldColocatedVertices
                                           | MeshColliderCookingOptions.CookForFasterSimulation;
+
+                var rigidbody = go.AddComponent<Rigidbody>();
+                rigidbody.isKinematic = true;
+                rigidbody.mass = 1f;
+                rigidbody.automaticCenterOfMass = true;
+                rigidbody.useGravity = false;
+
                 go.SetActive(true);
             }
         }
