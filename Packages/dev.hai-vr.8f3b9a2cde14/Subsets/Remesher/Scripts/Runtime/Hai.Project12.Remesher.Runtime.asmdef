@@ -1,0 +1,20 @@
+{
+    "name": "Hai.Project12.Remesher.Runtime",
+    "rootNamespace": "Hai.Project12.Remesher.Runtime",
+    "references": [
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "BasisDebug",
+        "Hai.Project12.HaiSystems.Supporting"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
