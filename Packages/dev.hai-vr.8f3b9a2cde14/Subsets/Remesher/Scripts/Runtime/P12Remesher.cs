@@ -77,7 +77,6 @@ namespace Hai.Project12.Remesher.Runtime
 
                 if (majorlyVertexIds.Count > 0)
                 {
-                    var meshForThisBone = new Mesh();
                     var verticesForThisBone = new Vector3[majorlyVertexIds.Count];
                     for (var index = 0; index < majorlyVertexIds.Count; index++)
                     {
@@ -85,11 +84,22 @@ namespace Hai.Project12.Remesher.Runtime
                         verticesForThisBone[index] = originalVertices[vertexId];
                     }
 
-                    meshForThisBone.vertices = verticesForThisBone;
-                    meshForThisBone.triangles = ReconstructTriangles(majorlyVertexIds, originalTriangles);
+                    if (verticesForThisBone.Length >= 3)
+                    {
+                        var trianglesForThisBone = ReconstructTriangles(majorlyVertexIds, originalTriangles);
 
-                    generatedMeshes.Add(meshForThisBone);
-                    whichBoneIndexForThatGeneratedMesh.Add(boneIndex);
+                        var thereIsAtLeastOneTriangle = trianglesForThisBone.Length >= 3;
+                        if (thereIsAtLeastOneTriangle)
+                        {
+                            var meshForThisBone = new Mesh();
+
+                            meshForThisBone.vertices = verticesForThisBone;
+                            meshForThisBone.triangles = trianglesForThisBone;
+
+                            generatedMeshes.Add(meshForThisBone);
+                            whichBoneIndexForThatGeneratedMesh.Add(boneIndex);
+                        }
+                    }
                 }
             }
 
