@@ -9,10 +9,20 @@ namespace Hai.Project12.Vixxy.Editor
     [CustomEditor(typeof(P12VixxyControl))]
     public class P12VixxyControlEditor : UnityEditor.Editor
     {
-        private const string MsgCannotEditInPlayMode = "Editing this component currently has no effect during Play Mode.";
+        private static readonly Color RuntimeColorOK = Color.cyan;
+        private static readonly Color RuntimeColorKO = new Color(1f, 0.72f, 0f);
+        private const string MsgCannotEditInPlayMode = "Editing this component during Play Mode can lead to different visual and scene results than editing the component in Edit Mode.";
 
         private const string CrossSymbol = "×";
         private const float DeleteButtonWidth = 40;
+
+        private const string CreatorViewLabel = "Creator View";
+        private const string DeveloperViewLabel = "Developer View";
+        private const string UserViewLabel = "User View";
+
+        private static bool _userViewFoldout;
+        private static bool _creatorViewFoldout;
+        private static bool _developerViewFoldout;
 
         public override void OnInspectorGUI()
         {
@@ -23,6 +33,20 @@ namespace Hai.Project12.Vixxy.Editor
             {
                 EditorGUILayout.HelpBox(MsgCannotEditInPlayMode, MessageType.Warning);
             }
+
+            var anyChanged = false;
+            _userViewFoldout = HaiEFCommon.LilFoldout(UserViewLabel, "", _userViewFoldout, ref anyChanged);
+            _creatorViewFoldout = HaiEFCommon.LilFoldout(CreatorViewLabel, "", _creatorViewFoldout, ref anyChanged);
+            _developerViewFoldout = HaiEFCommon.LilFoldout(DeveloperViewLabel, "", _developerViewFoldout, ref anyChanged);
+            if (_developerViewFoldout)
+            {
+                if (DeveloperView(my)) return; // Workaround array size change error
+            }
+        }
+
+        private bool DeveloperView(P12VixxyControl my)
+        {
+            var isPlaying = Application.isPlaying;
 
             EditorGUI.BeginDisabledGroup(isPlaying);
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(P12VixxyControl.address)));
@@ -41,7 +65,7 @@ namespace Hai.Project12.Vixxy.Editor
                     subjectsSp.DeleteArrayElementAtIndex(subjectIndex);
 
                     serializedObject.ApplyModifiedProperties();
-                    return; // Workaround array size change error
+                    return true;
                 }
                 EditorGUILayout.EndHorizontal();
 
@@ -64,32 +88,36 @@ namespace Hai.Project12.Vixxy.Editor
                     EditorGUILayout.PropertyField(subjectSp.FindPropertyRelative(nameof(P12VixxySubject.targets))); // TODO: Only show 0th value
                 }
 
+                if (isPlaying)
+                {
+                    var it = my.subjects[subjectIndex];
+                    HaiEFCommon.ColoredBackgroundVoid(true, it.IsApplicable ? RuntimeColorOK : RuntimeColorKO, () =>
+                    {
+                        // var it = (P12VixxySubject)subjectSp.boxedValue; // This doesn't work. It returns a default struct
+                        EditorGUILayout.BeginVertical("GroupBox");
+                        EditorGUILayout.LabelField("Runtime Baked Data", EditorStyles.boldLabel);
+                        EditorGUILayout.Toggle(nameof(P12VixxySubject.IsApplicable), it.IsApplicable);
+                        EditorGUILayout.LabelField(nameof(P12VixxySubject.BakedObjects));
+                        foreach (var found in it.BakedObjects)
+                        {
+                            EditorGUILayout.ObjectField(found, found.GetType(), true);
+                        }
+                        EditorGUILayout.EndVertical();
+                    });
+                }
+
                 var propertiesSp = subjectSp.FindPropertyRelative(nameof(P12VixxySubject.properties));
-                EditorGUILayout.LabelField($"Properties array size is {propertiesSp.arraySize}");
+                EditorGUILayout.LabelField($"Properties ({propertiesSp.arraySize})", EditorStyles.boldLabel);
                 for (var propertyIndex = 0; propertyIndex < propertiesSp.arraySize; propertyIndex++)
                 {
                     var propertySp = propertiesSp.GetArrayElementAtIndex(propertyIndex);
-                    if (DrawPropertyOrReturn(propertySp, propertyIndex, propertiesSp, isPlaying)) return;
+                    if (DrawPropertyOrReturn(propertySp, propertyIndex, propertiesSp, isPlaying)) return true;
                 }
 
-                if (GUILayout.Button("+ Add Property of type FLOAT"))
-                {
-                    var indexToPutData = propertiesSp.arraySize;
-                    propertiesSp.arraySize = indexToPutData + 1;
-                    propertiesSp.GetArrayElementAtIndex(indexToPutData).managedReferenceValue = new P12VixxyProperty<float>();
-                }
-                if (GUILayout.Button("+ Add Property of type VECTOR4"))
-                {
-                    var indexToPutData = propertiesSp.arraySize;
-                    propertiesSp.arraySize = indexToPutData + 1;
-                    propertiesSp.GetArrayElementAtIndex(indexToPutData).managedReferenceValue = new P12VixxyProperty<Vector4>();
-                }
-                if (GUILayout.Button("+ Add Property of type VECTOR3"))
-                {
-                    var indexToPutData = propertiesSp.arraySize;
-                    propertiesSp.arraySize = indexToPutData + 1;
-                    propertiesSp.GetArrayElementAtIndex(indexToPutData).managedReferenceValue = new P12VixxyProperty<Vector3>();
-                }
+                AddProperty(propertiesSp, "float", () => new P12VixxyProperty<float>());
+                AddProperty(propertiesSp, "Color", () => new P12VixxyProperty<Color>());
+                AddProperty(propertiesSp, "Vector4", () => new P12VixxyProperty<Vector4>());
+                AddProperty(propertiesSp, "Vector3", () => new P12VixxyProperty<Vector3>());
 
                 EditorGUILayout.EndVertical();
             }
@@ -106,6 +134,18 @@ namespace Hai.Project12.Vixxy.Editor
             }
 
             DrawDefaultInspector();
+
+            return false;
+        }
+
+        private static void AddProperty(SerializedProperty propertiesSp, string name, Func<object> factoryFn)
+        {
+            if (GUILayout.Button($"+ Add Property of type {name}"))
+            {
+                var indexToPutData = propertiesSp.arraySize;
+                propertiesSp.arraySize = indexToPutData + 1;
+                propertiesSp.GetArrayElementAtIndex(indexToPutData).managedReferenceValue = factoryFn.Invoke();
+            }
         }
 
         private bool DrawPropertyOrReturn(SerializedProperty propertySp, int propertyIndex, SerializedProperty propertiesSp, bool isPlaying)
@@ -157,21 +197,30 @@ namespace Hai.Project12.Vixxy.Editor
 
             if (isPlaying)
             {
-                var propertyBase = (P12VixxyPropertyBase)managedReferenceValue;
-                if (propertyBase.IsApplicable)
+                var it = (P12VixxyPropertyBase)managedReferenceValue;
+                HaiEFCommon.ColoredBackgroundVoid(true, it.IsApplicable ? RuntimeColorOK : RuntimeColorKO, () =>
                 {
-                    foreach (var found in propertyBase.FoundComponents)
+                    EditorGUILayout.BeginVertical("GroupBox");
+                    EditorGUILayout.LabelField("Runtime Baked Data", EditorStyles.boldLabel);
+                    EditorGUILayout.Toggle(nameof(P12VixxyPropertyBase.IsApplicable), it.IsApplicable);
+                    if (it.IsApplicable)
                     {
-                        if (null != found)
+                        EditorGUILayout.ObjectField(nameof(P12VixxyPropertyBase.FoundType), null, it.FoundType, false);
+                        EditorGUILayout.EnumPopup(nameof(P12VixxyPropertyBase.SpecialMarker), it.SpecialMarker);
+                        EditorGUILayout.TextField(nameof(P12VixxyPropertyBase.PropertySuffix), it.PropertySuffix);
+                        EditorGUILayout.LabelField(nameof(P12VixxyPropertyBase.FoundComponents));
+                        foreach (var found in it.FoundComponents)
                         {
                             EditorGUILayout.ObjectField(found, found.GetType(), true);
                         }
                     }
-                }
-                else
-                {
-                    EditorGUILayout.HelpBox("This property has failed to resolve.", MessageType.Error);
-                }
+                    else
+                    {
+
+                        HaiEFCommon.ColoredBackgroundVoid(true, Color.white, () => { EditorGUILayout.HelpBox("This property has failed to resolve.", MessageType.Error); });
+                    }
+                    EditorGUILayout.EndVertical();
+                });
             }
 
             EditorGUILayout.EndVertical();

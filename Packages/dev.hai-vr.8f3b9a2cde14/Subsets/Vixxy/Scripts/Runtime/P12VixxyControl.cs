@@ -89,6 +89,12 @@ namespace Hai.Project12.Vixxy.Runtime
                     // Subject Not applicable: No objects
                     subject.IsApplicable = false;
                     subjects[i] = subject;
+
+                    foreach (var property in subject.properties)
+                    {
+                        property.IsApplicable = false;
+                    }
+
                     continue;
                 }
 
@@ -412,7 +418,31 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             // TODO: Recursive and Everything based on context
             BakedObjects = new List<GameObject>();
-            BakedObjects.AddRange(targets);
+            if (selection == P12VixxySelection.Normal)
+            {
+                BakedObjects.AddRange(targets);
+            }
+            else if (selection == P12VixxySelection.RecursiveSearch)
+            {
+                // TODO: Exceptions
+                foreach (var childrenRoot in childrenOf)
+                {
+                    var allTransforms = childrenRoot.GetComponentsInChildren<Transform>(true);
+                    foreach (var t in allTransforms)
+                    {
+                        BakedObjects.Add(t.gameObject);
+                    }
+                }
+            }
+            else if (selection == P12VixxySelection.Everything)
+            {
+                // TODO: Exceptions
+                var allTransforms = context.GetComponentsInChildren<Transform>(true);
+                foreach (var t in allTransforms)
+                {
+                    BakedObjects.Add(t.gameObject);
+                };
+            }
 
             H12Utilities.RemoveDestroyedFromList(BakedObjects); // Following the UGC rule; see class header.
         }
