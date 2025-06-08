@@ -20,6 +20,19 @@
     - Never use `if (component)` in our domain. The syntax `if (something)` is exclusively reserved to express semantics where `something` refers to a variable or field of type `bool`.
     - It is fine to do `var condition = component && otherCondition`.
 
+## UGC Rule
+
+Some fields and classes are marked as following the UGC Rule.
+
+In these cases, extra consideration need to be taken for those fields, or for the components managed by those classes:
+- Some arrays may contain null values on initialization.
+- Some components may be destroyed during execution.
+
+These must **not** be treated as errors, and be gracefully handled as being an expectation of those systems.
+
+The same thing in classes or fields that *don't* follow the UGC Rule must be treated as a programming error,
+and cause an exception to occur.
+
 ## Basis modifications for our app
 
 Since this is a consumer of the Basis framework, we want to modify Basis as little as possible so that we may update the Basis
