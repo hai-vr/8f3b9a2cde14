@@ -13,9 +13,9 @@ namespace Hai.Project12.Remesher.Runtime
 
         // TODO: Should we use FastMidphase? does it matter?
         private const MeshColliderCookingOptions Cooking = MeshColliderCookingOptions.EnableMeshCleaning
-                                                           | UnityEngine.MeshColliderCookingOptions.WeldColocatedVertices
-                                                           | UnityEngine.MeshColliderCookingOptions.CookForFasterSimulation
-                                                           | UnityEngine.MeshColliderCookingOptions.UseFastMidphase;
+                                                           | MeshColliderCookingOptions.WeldColocatedVertices
+                                                           | MeshColliderCookingOptions.CookForFasterSimulation
+                                                           | MeshColliderCookingOptions.UseFastMidphase;
 
         [SerializeField] private SkinnedMeshRenderer[] sources; // UGC Rule.
         [SerializeField] private bool createRigidbodies = true;
@@ -76,6 +76,7 @@ namespace Hai.Project12.Remesher.Runtime
             var generatedMeshes = new List<Mesh>();
             var whichBoneIndexForThatGeneratedMesh = new List<int>();
 
+            var originalBindposes = originalMesh.bindposes;
             var originalVertices = originalMesh.vertices;
             var originalTriangles = originalMesh.triangles;
             for (var boneIndex = 0; boneIndex < totalBoneCount; boneIndex++)
@@ -84,11 +85,14 @@ namespace Hai.Project12.Remesher.Runtime
 
                 if (majorlyVertexIds.Count > 0)
                 {
+                    var bindposeForThisBone = originalBindposes[boneIndex];
+
                     var verticesForThisBone = new Vector3[majorlyVertexIds.Count];
                     for (var index = 0; index < majorlyVertexIds.Count; index++)
                     {
                         var vertexId = majorlyVertexIds[index];
-                        verticesForThisBone[index] = originalVertices[vertexId];
+                        var v3 = originalVertices[vertexId];
+                        verticesForThisBone[index] = bindposeForThisBone * new Vector4(v3.x, v3.y, v3.z, 1);
                     }
 
                     if (verticesForThisBone.Length >= 3)
@@ -115,7 +119,6 @@ namespace Hai.Project12.Remesher.Runtime
             //
 
             var smrBones = skinnedMeshRenderer.bones;
-            var bindpose = originalMesh.bindposes;
 
             for (var index = 0; index < generatedMeshes.Count; index++)
             {
@@ -123,7 +126,6 @@ namespace Hai.Project12.Remesher.Runtime
                 var boneIndex = whichBoneIndexForThatGeneratedMesh[index];
 
                 var smrBone = smrBones[boneIndex];
-                var bindposeForThisBone = bindpose[boneIndex];
 
                 var go = new GameObject
                 {
@@ -133,8 +135,8 @@ namespace Hai.Project12.Remesher.Runtime
                         // TODO: When adding the head, if it's a local avatar, then add it to the same system that the
                         // shadow clone head transform uses to avoid first-person shrinking.
                         parent = smrBone != null ? smrBone.transform : null,
-                        localPosition = bindposeForThisBone.GetPosition(),
-                        localRotation = bindposeForThisBone.rotation,
+                        localPosition = Vector3.zero,
+                        localRotation = Quaternion.identity,
                         localScale = skinnedMeshRenderer.transform.localScale // FIXME: Likely incorrect
                     }
                 };
@@ -147,7 +149,8 @@ namespace Hai.Project12.Remesher.Runtime
 
                 if (createRigidbodies)
                 {
-                    var ourRigidbody = go.AddComponent<Rigidbody>();
+                    var previousRigidbodyNullable = go.GetComponent<Rigidbody>();
+                    var ourRigidbody = previousRigidbodyNullable != null ? previousRigidbodyNullable : go.AddComponent<Rigidbody>();
                     ourRigidbody.isKinematic = true;
                     ourRigidbody.mass = 1f;
                     ourRigidbody.automaticCenterOfMass = true;
