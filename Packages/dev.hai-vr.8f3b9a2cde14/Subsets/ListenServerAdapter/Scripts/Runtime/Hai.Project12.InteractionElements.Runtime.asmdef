@@ -20,6 +20,12 @@
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+            "name" : "Facepunch.Steamworks.Win64",
+            "expression": "",
+            "define": "FACEPUNCH_STEAMWORKS_AVAILABLE"
+        }
+    ],
     "noEngineReferences": false
 }

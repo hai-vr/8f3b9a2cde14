@@ -7,8 +7,11 @@ using Basis.Network.Core;
 using Hai.Project12.HaiSystems.Supporting;
 using LiteNetLib;
 using LiteNetLib.Utils;
+// FIXME: This if condition doesn't work.
+#if FACEPUNCH_STEAMWORKS_AVAILABLE
 using Steamworks;
 using Steamworks.Data;
+#endif
 using UnityEngine;
 
 namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
@@ -17,6 +20,8 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
     public class P12SDRProxyServer : MonoBehaviour
     {
         public const uint RVRAppId = 2_212_290;
+// FIXME: This if condition doesn't work.
+#if FACEPUNCH_STEAMWORKS_AVAILABLE
 
         private SocketManager _socket;
         private bool _isShutdown;
@@ -56,8 +61,10 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
             _isShutdown = true;
             SteamClient.Shutdown();
         }
+#endif
     }
 
+#if FACEPUNCH_STEAMWORKS_AVAILABLE
     internal class P12SDRProxyServerManager : ISocketManager
     {
         private const int MaximumMessageLength = 1024 * 1024;
@@ -180,4 +187,5 @@ namespace Hai.Project12.ListenServer.Runtime.ExternalLicense
         {
         }
     }
+#endif
 }
