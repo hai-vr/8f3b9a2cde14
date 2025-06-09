@@ -5,7 +5,9 @@
         "BattlePhazeSettingsManger",
         "Basis",
         "BasisAddressableDriver",
-        "Unity.Addressables"
+        "Unity.Addressables",
+        "Hai.Project12.DataViz.Runtime",
+        "Hai.Project12.HaiSystems.Supporting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
