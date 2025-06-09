@@ -4,8 +4,11 @@ using System.IO;
 using System.Net;
 using Basis.Scripts.Networking;
 using Hai.Project12.HaiSystems.Supporting;
-using Lavender.Systems;
 using UnityEngine;
+// FIXME: Unavailable outside those builds. Can't be bothered figuring this out properly for now.
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+using Lavender.Systems;
+#endif
 
 namespace Hai.Project12.ListenServer.Runtime
 {
@@ -26,6 +29,8 @@ namespace Hai.Project12.ListenServer.Runtime
             _serverProcessPath = "../Basis Server/BasisServerConsole/bin/Release/net9.0/BasisNetworkConsole.exe";
             _port = Port;
 
+// FIXME: Unavailable outside those builds. Can't be bothered figuring this out properly for now.
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
             if (File.Exists(_serverProcessPath))
             {
                 // "il2cpp does not support process.start"
@@ -44,6 +49,7 @@ namespace Hai.Project12.ListenServer.Runtime
             {
                 H12Debug.LogError($"Basis server could not be found at {_serverProcessPath}.", H12Debug.LogTag.ListenNetworking);
             }
+#endif
         }
 
         public IEnumerator ConnectToLocalServer()
