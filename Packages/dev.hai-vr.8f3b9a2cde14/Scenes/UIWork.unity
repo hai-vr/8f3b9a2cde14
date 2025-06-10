@@ -7347,13 +7347,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 2029883952}
+  bodyOptional: {fileID: 2029883952}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 539840193}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &251452092
 GameObject:
@@ -25198,13 +25201,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1825070090}
+  bodyOptional: {fileID: 1825070090}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 516056523}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &670761412
 GameObject:
@@ -25250,13 +25256,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1021505086}
+  bodyOptional: {fileID: 1021505086}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1611558816}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &694625858
 GameObject:
@@ -25750,13 +25759,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1045527478}
+  bodyOptional: {fileID: 1045527478}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1845252475}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &721514573
 GameObject:
@@ -27472,13 +27484,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1815232608}
+  bodyOptional: {fileID: 1815232608}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1714465671}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &780505752
 GameObject:
@@ -32785,12 +32800,12 @@ Transform:
   - {fileID: 1606337623}
   - {fileID: 1637948181}
   - {fileID: 2061274989}
+  - {fileID: 2037238310}
+  - {fileID: 1473500837}
   - {fileID: 1333738556}
   - {fileID: 670761413}
   - {fileID: 779082299}
   - {fileID: 1461308261}
-  - {fileID: 2037238310}
-  - {fileID: 1473500837}
   - {fileID: 1504706137}
   - {fileID: 250886808}
   - {fileID: 1279239909}
@@ -40695,13 +40710,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 558054742}
+  bodyOptional: {fileID: 558054742}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1680422882}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1280096501
 GameObject:
@@ -42275,6 +42293,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0a42d8ba52b4cf18ab140ac9492b767, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!137 &1287119868 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1630794972795428178, guid: 224ef0db5cc64d64492fb19eea385681, type: 3}
+  m_PrefabInstance: {fileID: 1287119839}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1293979339
 GameObject:
   m_ObjectHideFlags: 0
@@ -43314,13 +43337,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 943677692}
+  bodyOptional: {fileID: 943677692}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1210888622}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1337969486
 GameObject:
@@ -46177,13 +46203,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 504688196}
+  bodyOptional: {fileID: 504688196}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 828312893}
   dataViz: {fileID: 225776180}
-  proportionalGain: 1000
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!224 &1463538171 stripped
 RectTransform:
@@ -46894,13 +46923,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1266919707}
+  bodyOptional: {fileID: 1266919707}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1773034228}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 800
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1478363862
 GameObject:
@@ -47938,13 +47970,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 416106688}
+  bodyOptional: {fileID: 416106688}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1840721131}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1512501542
 GameObject:
@@ -48899,13 +48934,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1021505086}
+  bodyOptional: {fileID: 1021505086}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 843897191}
   dataViz: {fileID: 225776180}
   proportionalGain: 1000
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!4 &1543002777 stripped
 Transform:
@@ -50552,13 +50590,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1004700278}
+  bodyOptional: {fileID: 1004700278}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1054338370}
   dataViz: {fileID: 225776180}
   proportionalGain: 1000
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1608315843
 GameObject:
@@ -56820,13 +56861,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1266919707}
+  bodyOptional: {fileID: 1266919707}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1649535455}
   dataViz: {fileID: 225776180}
   proportionalGain: 1000
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1644161565
 GameObject:
@@ -64685,13 +64729,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 924005865}
+  bodyOptional: {fileID: 924005865}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1614586562}
   dataViz: {fileID: 0}
   proportionalGain: 1000
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1883920678 stripped
 GameObject:
@@ -65594,6 +65641,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sources:
   - {fileID: 1279086165}
+  - {fileID: 1287119868}
   rigidbodyPhysics: 4
   excludeFingerBones: 1
   humanoidReference: {fileID: 1702326250}
@@ -65920,13 +65968,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 943677692}
+  bodyOptional: {fileID: 943677692}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 1524653664}
   dataViz: {fileID: 0}
   proportionalGain: 1000
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &1937502241
 GameObject:
@@ -68750,13 +68801,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 1004700278}
+  bodyOptional: {fileID: 1004700278}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 356712449}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 800
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &2037826304
 GameObject:
@@ -69472,13 +69526,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 87909929}
+  bodyOptional: {fileID: 87909929}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 508224323}
   dataViz: {fileID: 225776180}
-  proportionalGain: 1000
-  integralGain: 10
+  proportionalGain: 400
+  integralGain: 100
   derivativeGain: 40
-  integralMaximumMagnitude: 10
+  integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &2064474273
 GameObject:
@@ -69904,7 +69961,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2069513131
 Transform:
   m_ObjectHideFlags: 0
@@ -69933,13 +69990,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 0}
+  bodyOptional: {fileID: 0}
+  remesherOptional: {fileID: 1908797775}
+  humanBodyBone: 8
   target: {fileID: 1750349886}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 1200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &2075749466
 GameObject:
@@ -71491,13 +71551,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 895982749}
+  bodyOptional: {fileID: 895982749}
+  remesherOptional: {fileID: 0}
+  humanBodyBone: 0
   target: {fileID: 245967076}
   dataViz: {fileID: 225776180}
-  proportionalGain: 400
-  integralGain: 100
+  proportionalGain: 200
+  integralGain: 0
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  compensateGravity: 1
   _debug_clickToResetJoints: 0
 --- !u!1 &2131897447
 GameObject:

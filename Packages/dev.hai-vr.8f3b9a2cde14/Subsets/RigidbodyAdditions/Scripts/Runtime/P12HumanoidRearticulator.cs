@@ -18,6 +18,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         [SerializeField] private bool _debug_clickToResetJoints;
 
         private readonly List<ArticulationBody> _articulations = new List<ArticulationBody>();
+        private ArticulationBody _hipArticulation;
 
         private void Awake()
         {
@@ -48,6 +49,11 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
                     var articulationBody = boneTransform.GetComponent<ArticulationBody>(); // TODO: Also support rigidbody?
                     availableBones.Add((hbb, articulationBody));
+
+                    if (hbb == Hips)
+                    {
+                        _hipArticulation = articulationBody;
+                    }
 
                     _articulations.Add(articulationBody);
                 }
@@ -89,6 +95,18 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 foreach (var body in _articulations)
                 {
                     body.jointPosition = new ArticulationReducedSpace(0f, 0f, 0f);
+                }
+            }
+
+            if (remesherOptional != null)
+            {
+                foreach (KeyValuePair<HumanBodyBones, Transform> hbbToRig in remesherOptional.Rig)
+                {
+                    var rig = hbbToRig.Value;
+                    // TODO: Cache the bone transform
+                    var visualRepresentation = humanoidReference.GetBoneTransform(hbbToRig.Key);
+                    visualRepresentation.position = rig.position;
+                    visualRepresentation.rotation = rig.rotation;
                 }
             }
         }
@@ -181,49 +199,70 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         {
             var go = boneTransform.gameObject;
 
-            var Damping = 0.3f;
+            var Damping = 1f;
 
             var articulationBody = go.GetComponent<ArticulationBody>();
             if (articulationBody == null)
             {
-                articulationBody = articulationBody != null ? articulationBody : go.AddComponent<ArticulationBody>();
-                // articulationBody.immovable = false;
-                articulationBody.mass = 3f;
-                articulationBody.automaticCenterOfMass = true;
-                articulationBody.useGravity = true;
-                articulationBody.jointType = ArticulationJointType.SphericalJoint;
+                {
+                    articulationBody = articulationBody != null ? articulationBody : go.AddComponent<ArticulationBody>();
+                    // articulationBody.immovable = false;
+                    articulationBody.mass = 3f;
+                    articulationBody.automaticCenterOfMass = true;
+                    articulationBody.useGravity = true;
+                    articulationBody.jointType = ArticulationJointType.SphericalJoint;
 
-                articulationBody.swingYLock = ArticulationDofLock.LimitedMotion;
-                articulationBody.swingZLock = ArticulationDofLock.LimitedMotion;
-                articulationBody.twistLock = ArticulationDofLock.LimitedMotion;
+                    articulationBody.swingYLock = ArticulationDofLock.LimitedMotion;
+                    articulationBody.swingZLock = ArticulationDofLock.LimitedMotion;
+                    articulationBody.twistLock = ArticulationDofLock.LimitedMotion;
 
-                articulationBody.linearDamping = Damping;
-                articulationBody.angularDamping = Damping;
+                    articulationBody.linearDamping = Damping;
+                    articulationBody.angularDamping = Damping;
 
-                articulationBody.jointFriction = 0.05f;
+                    // articulationBody.jointFriction = 0.05f;
+                    articulationBody.jointFriction = 1f;
 
-                var yDrive = articulationBody.yDrive;
-                var zDrive = articulationBody.zDrive;
-                var twist = articulationBody.xDrive;
-                yDrive.lowerLimit = -90;
-                yDrive.upperLimit = +90;
+                    var yDrive = articulationBody.yDrive;
+                    var zDrive = articulationBody.zDrive;
+                    var twist = articulationBody.xDrive;
+                    yDrive.lowerLimit = -90;
+                    yDrive.upperLimit = +90;
 
-                zDrive.lowerLimit = -0;
-                zDrive.upperLimit = +0;
+                    zDrive.lowerLimit = -0;
+                    zDrive.upperLimit = +0;
 
-                twist.lowerLimit = -15;
-                twist.upperLimit = +15;
+                    twist.lowerLimit = -15;
+                    twist.upperLimit = +15;
 
-                yDrive.damping = Damping;
-                zDrive.damping = Damping;
-                twist.damping = Damping;
+                    yDrive.damping = Damping;
+                    zDrive.damping = Damping;
+                    twist.damping = Damping;
 
-                articulationBody.yDrive = yDrive;
-                articulationBody.zDrive = zDrive;
-                articulationBody.xDrive = twist;
+                    articulationBody.yDrive = yDrive;
+                    articulationBody.zDrive = zDrive;
+                    articulationBody.xDrive = twist;
 
-                articulationBody.excludeLayers = LayerMask.NameToLayer("Default");
-                articulationBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+                    articulationBody.excludeLayers = LayerMask.NameToLayer("Default");
+                    articulationBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+                }
+
+                {
+                    var yDrive = articulationBody.yDrive;
+                    var zDrive = articulationBody.zDrive;
+                    var twist = articulationBody.xDrive;
+                    yDrive.damping = Damping;
+                    zDrive.damping = Damping;
+                    twist.damping = Damping;
+                    yDrive.forceLimit = 100;
+                    zDrive.forceLimit = 100;
+                    twist.forceLimit = 100;
+                    yDrive.stiffness = 1;
+                    zDrive.stiffness = 1;
+                    twist.stiffness = 1;
+                    articulationBody.yDrive = yDrive;
+                    articulationBody.zDrive = zDrive;
+                    articulationBody.xDrive = twist;
+                }
 
                 // articulationBody.maxAngularVelocity = 0.1f;
                 // articulationBody.maxDepenetrationVelocity = 0.1f;
@@ -246,6 +285,12 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                     yDrive.damping = Damping;
                     zDrive.damping = Damping;
                     twist.damping = Damping;
+                    yDrive.forceLimit = 100;
+                    zDrive.forceLimit = 100;
+                    twist.forceLimit = 100;
+                    yDrive.stiffness = 1;
+                    zDrive.stiffness = 1;
+                    twist.stiffness = 1;
                     articulationBody.yDrive = yDrive;
                     articulationBody.zDrive = zDrive;
                     articulationBody.xDrive = twist;
