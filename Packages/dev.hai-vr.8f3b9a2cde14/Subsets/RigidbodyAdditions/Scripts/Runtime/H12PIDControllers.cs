@@ -16,6 +16,13 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         // Whenever the object spawns or teleports, we need skip the first derivative in order to prevent a sudden jump.
         private bool _skipFirstDerivative = true;
 
+        public void _ResetAsFirstFrame()
+        {
+            _skipFirstDerivative = true;
+            _previous = Vector3.zero;
+            _integration = Vector3.zero;
+        }
+
         public Vector3 _Update(float fixedDeltaTime, Vector3 current, Vector3 target)
         {
             var error = target - current;
@@ -59,6 +66,13 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
         // Whenever the object spawns or teleports, we need skip the first derivative in order to prevent a sudden jump.
         private bool _skipFirstDerivative = true;
+
+        public void _ResetAsFirstFrame()
+        {
+            _skipFirstDerivative = true;
+            _previous = Quaternion.identity;
+            _integration = Vector3.zero;
+        }
 
         public Vector3 _Update(float fixedDeltaTime, Quaternion current, Quaternion target)
         {

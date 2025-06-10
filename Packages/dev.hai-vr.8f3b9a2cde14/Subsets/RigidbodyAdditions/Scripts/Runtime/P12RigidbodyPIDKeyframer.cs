@@ -25,6 +25,12 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             _rotationPid = new H12PIDControllerAngularVelocity();
         }
 
+        private void OnDisable()
+        {
+            _positionPid._ResetAsFirstFrame();
+            _rotationPid._ResetAsFirstFrame();
+        }
+
         private void FixedUpdate()
         {
             _positionPid.proportionalGain = proportionalGain;

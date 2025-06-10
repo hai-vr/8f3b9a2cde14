@@ -19,9 +19,9 @@ namespace Hai.Project12.Remesher.Runtime
                                                            | MeshColliderCookingOptions.UseFastMidphase;
 
         [SerializeField] private SkinnedMeshRenderer[] sources; // UGC Rule.
-        [SerializeField] private P12RemesherRigidbodyPhysics rigidbodyPhysics = P12RemesherRigidbodyPhysics.CreateRigidbodiesOnSeparateGameObjects;
+        [SerializeField] private P12RemesherRigidbodyPhysics rigidbodyPhysics = P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies;
         [SerializeField] private bool excludeFingerBones = false;
-        [SerializeField] private Animator humanoidReference; // must be non-null, if excludeFingerBones is true.
+        [SerializeField] private Animator humanoidReference; // must be non-null if excludeFingerBones is true.
         [SerializeField] private PhysicsMaterial physicsMaterial;
 
 
@@ -159,7 +159,7 @@ namespace Hai.Project12.Remesher.Runtime
 
                 var smrBoneNullable = smrBones[boneIndex];
 
-                if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.None or P12RemesherRigidbodyPhysics.CreateRigidbodiesOnSeparateGameObjects)
+                if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.None or P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies)
                 {
                     var go = new GameObject
                     {
@@ -183,7 +183,7 @@ namespace Hai.Project12.Remesher.Runtime
                     ourCollider.sharedMesh = generatedMesh;
                     createdColliders.Add(ourCollider);
 
-                    if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateRigidbodiesOnSeparateGameObjects)
+                    if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies)
                     {
                         var previousRigidbodyNullable = go.GetComponent<Rigidbody>();
                         var ourRigidbody = previousRigidbodyNullable != null ? previousRigidbodyNullable : go.AddComponent<Rigidbody>();
@@ -195,7 +195,7 @@ namespace Hai.Project12.Remesher.Runtime
 
                     go.SetActive(true);
                 }
-                else if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.CreateRigidbodiesOnBones or P12RemesherRigidbodyPhysics.CreateArticulationBodiesOnBones)
+                else if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.CreateCollidersOnBonesWithRigidbodies or P12RemesherRigidbodyPhysics.CreateCollidersOnBones)
                 {
                     if (smrBoneNullable != null)
                     {
@@ -224,91 +224,12 @@ namespace Hai.Project12.Remesher.Runtime
             }
 
             PhysicsIgnoreIntraCollisions(createdColliders);
-            // PhysicsIgnoreSiblingAndParentCollisions(demarker);
 
-            var Damping = 0.3f;
-
-            foreach (var thatCollider in createdColliders)
+            if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnBonesWithRigidbodies)
             {
-                var go = thatCollider.gameObject;
-                if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateArticulationBodiesOnBones)
+                foreach (var thatCollider in createdColliders)
                 {
-                    var articulationBody = go.GetComponent<ArticulationBody>();
-                    if (articulationBody == null)
-                    {
-                        articulationBody = articulationBody != null ? articulationBody : go.AddComponent<ArticulationBody>();
-                        articulationBody.immovable = false;
-                        articulationBody.mass = 3f;
-                        articulationBody.automaticCenterOfMass = true;
-                        articulationBody.useGravity = true;
-                        articulationBody.jointType = ArticulationJointType.SphericalJoint;
-
-                        articulationBody.swingYLock = ArticulationDofLock.LimitedMotion;
-                        articulationBody.swingZLock = ArticulationDofLock.LimitedMotion;
-                        articulationBody.twistLock = ArticulationDofLock.LimitedMotion;
-
-                        articulationBody.linearDamping = Damping;
-                        articulationBody.angularDamping = Damping;
-
-                        articulationBody.jointFriction = 0.05f;
-
-                        var yDrive = articulationBody.yDrive;
-                        var zDrive = articulationBody.zDrive;
-                        var twist = articulationBody.xDrive;
-                        yDrive.lowerLimit = -90;
-                        yDrive.upperLimit = +90;
-
-                        zDrive.lowerLimit = -0;
-                        zDrive.upperLimit = +0;
-
-                        twist.lowerLimit = -15;
-                        twist.upperLimit = +15;
-
-                        yDrive.damping = Damping;
-                        zDrive.damping = Damping;
-                        twist.damping = Damping;
-
-                        articulationBody.yDrive = yDrive;
-                        articulationBody.zDrive = zDrive;
-                        articulationBody.xDrive = twist;
-
-                        articulationBody.excludeLayers = LayerMask.NameToLayer("Default");
-                        articulationBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-
-                        // articulationBody.maxAngularVelocity = 0.1f;
-                        // articulationBody.maxDepenetrationVelocity = 0.1f;
-                        // articulationBody.maxJointVelocity = 0.1f;
-                        // articulationBody.maxLinearVelocity = 0.1f;
-                    }
-                    else
-                    {
-                        if (articulationBody != null)
-                        {
-                            articulationBody.excludeLayers = LayerMask.NameToLayer("Default");
-                            articulationBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-
-                            articulationBody.linearDamping = Damping;
-                            articulationBody.angularDamping = Damping;
-
-                            var yDrive = articulationBody.yDrive;
-                            var zDrive = articulationBody.zDrive;
-                            var twist = articulationBody.xDrive;
-                            yDrive.damping = Damping;
-                            zDrive.damping = Damping;
-                            twist.damping = Damping;
-                            articulationBody.yDrive = yDrive;
-                            articulationBody.zDrive = zDrive;
-                            articulationBody.xDrive = twist;
-
-                            // articulationBody.maxAngularVelocity = 0.1f;
-                            // articulationBody.maxDepenetrationVelocity = 0.1f;
-                            // articulationBody.maxJointVelocity = 0.1f;
-                            // articulationBody.maxLinearVelocity = 0.1f;
-                        }
-                    }
-                }
-                else if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateRigidbodiesOnBones)
-                {
+                    var go = thatCollider.gameObject;
                     var previousRigidbodyNullable = go.GetComponent<Rigidbody>();
                     var ourRigidbody = previousRigidbodyNullable != null ? previousRigidbodyNullable : go.AddComponent<Rigidbody>();
                     ourRigidbody.isKinematic = true;
@@ -439,8 +360,8 @@ namespace Hai.Project12.Remesher.Runtime
     public enum P12RemesherRigidbodyPhysics
     {
         None,
-        CreateRigidbodiesOnSeparateGameObjects,
-        CreateRigidbodiesOnBones,
-        CreateArticulationBodiesOnBones,
+        CreateCollidersOnSeparateGameObjectsWithRigidbodies,
+        CreateCollidersOnBonesWithRigidbodies,
+        CreateCollidersOnBones,
     }
 }
