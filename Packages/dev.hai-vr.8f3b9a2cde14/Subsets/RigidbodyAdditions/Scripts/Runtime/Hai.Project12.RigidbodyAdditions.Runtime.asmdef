@@ -7,7 +7,8 @@
         "BasisAddressableDriver",
         "Unity.Addressables",
         "Hai.Project12.DataViz.Runtime",
-        "Hai.Project12.HaiSystems.Supporting"
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.Remesher.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

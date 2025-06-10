@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Hai.Project12.Remesher.Runtime
 {
+    [DefaultExecutionOrder(-100)]
     /// Given SkinnedMeshRenderers, this splits the mesh into several meshes where each mesh represents a bone,
     /// and adds a convex hull MeshCollider to each bone. All the mesh simplification concerns are handled by
     /// what is already built-in the MeshCollider, not us.
@@ -24,6 +25,9 @@ namespace Hai.Project12.Remesher.Runtime
         [SerializeField] private Animator humanoidReference; // must be non-null if excludeFingerBones is true.
         [SerializeField] private PhysicsMaterial physicsMaterial;
 
+        [SerializeField] private Transform newRigRoot; // Only used for CreateCollidersOnSeparateRig
+
+        [NonSerialized] public Dictionary<HumanBodyBones, Transform> Rig;
 
         private void Awake()
         {
@@ -46,16 +50,91 @@ namespace Hai.Project12.Remesher.Runtime
                 }
             }
 
+            if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateRig)
+            {
+                var boneToTransform = new Dictionary<HumanBodyBones, Transform>();
+
+                var hips = RecreateBone(HumanBodyBones.Hips, boneToTransform);
+                hips.gameObject.SetActive(false);
+                hips.transform.SetParent(newRigRoot, true);
+
+                var spine = RecreateBone(HumanBodyBones.Spine, boneToTransform);
+                var chest = RecreateBone(HumanBodyBones.Chest, boneToTransform);
+                // TODO: Upper chest
+                var neck = RecreateBone(HumanBodyBones.Neck, boneToTransform);
+                var head = RecreateBone(HumanBodyBones.Head, boneToTransform);
+
+                var upperArmLeft = RecreateBone(HumanBodyBones.LeftUpperArm, boneToTransform);
+                var lowerArmLeft = RecreateBone(HumanBodyBones.LeftLowerArm, boneToTransform);
+                var handLeft = RecreateBone(HumanBodyBones.LeftHand, boneToTransform);
+
+                var upperArmRight = RecreateBone(HumanBodyBones.RightUpperArm, boneToTransform);
+                var lowerArmRight = RecreateBone(HumanBodyBones.RightLowerArm, boneToTransform);
+                var handRight = RecreateBone(HumanBodyBones.RightHand, boneToTransform);
+
+                var upperLegLeft = RecreateBone(HumanBodyBones.LeftUpperLeg, boneToTransform);
+                var lowerLegLeft = RecreateBone(HumanBodyBones.LeftLowerLeg, boneToTransform);
+                var footLeft = RecreateBone(HumanBodyBones.LeftFoot, boneToTransform);
+
+                var upperLegRight = RecreateBone(HumanBodyBones.RightUpperLeg, boneToTransform);
+                var lowerLegRight = RecreateBone(HumanBodyBones.RightLowerLeg, boneToTransform);
+                var footRight = RecreateBone(HumanBodyBones.RightFoot, boneToTransform);
+
+                spine.SetParent(hips, true);
+                chest.SetParent(spine, true);
+                var chestConnector = chest;
+                // TODO: Upper chest
+
+                neck.SetParent(chestConnector, true);
+                head.SetParent(neck, true);
+
+                upperArmLeft.SetParent(chestConnector, true);
+                lowerArmLeft.SetParent(upperArmLeft, true);
+                handLeft.SetParent(lowerArmLeft, true);
+
+                upperArmRight.SetParent(chestConnector, true);
+                lowerArmRight.SetParent(upperArmRight, true);
+                handRight.SetParent(lowerArmRight, true);
+
+                upperLegLeft.SetParent(hips, true);
+                lowerLegLeft.SetParent(upperLegLeft, true);
+                footLeft.SetParent(lowerLegLeft, true);
+
+                upperLegRight.SetParent(hips, true);
+                lowerLegRight.SetParent(upperLegRight, true);
+                footRight.SetParent(lowerLegRight, true);
+
+                Rig = boneToTransform;
+            }
+
+            var allColliders = new List<Collider>();
             foreach (var skinnedMeshRenderer in sources)
             {
                 if (null != skinnedMeshRenderer)
                 {
-                    ManipulateSmr(skinnedMeshRenderer, boneExclusions);
+                    var generatedColliders = ManipulateSmr(skinnedMeshRenderer, boneExclusions);
+                    allColliders.AddRange(generatedColliders);
                 }
             }
+
+            PhysicsIgnoreIntraCollisions(allColliders);
         }
 
-        private void ManipulateSmr(SkinnedMeshRenderer skinnedMeshRenderer, HashSet<Transform> boneExclusions)
+        private Transform RecreateBone(HumanBodyBones bone, Dictionary<HumanBodyBones, Transform> boneToTransform_mutated)
+        {
+            var hips = humanoidReference.GetBoneTransform(bone);
+            var result = new GameObject
+            {
+                transform = { position = hips.position, rotation = hips.rotation },
+                name = bone.ToString()
+            }.transform;
+
+            boneToTransform_mutated[bone] = result;
+
+            return result;
+        }
+
+        private List<Collider> ManipulateSmr(SkinnedMeshRenderer skinnedMeshRenderer, HashSet<Transform> boneExclusions)
         {
             var originalMesh = skinnedMeshRenderer.sharedMesh;
 
@@ -148,82 +227,149 @@ namespace Hai.Project12.Remesher.Runtime
                 }
             }
 
-            //
+            // Rig building
 
             var createdColliders = new List<Collider>();
 
-            for (var index = 0; index < generatedMeshes.Count; index++)
+            if (rigidbodyPhysics != P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateRig)
             {
-                var generatedMesh = generatedMeshes[index];
-                var boneIndex = whichBoneIndexForThatGeneratedMesh[index];
-
-                var smrBoneNullable = smrBones[boneIndex];
-
-                if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.None or P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies)
+                for (var index = 0; index < generatedMeshes.Count; index++)
                 {
-                    var go = new GameObject
+                    var generatedMesh = generatedMeshes[index];
+                    var boneIndex = whichBoneIndexForThatGeneratedMesh[index];
+
+                    var smrBoneNullable = smrBones[boneIndex];
+
+                    if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.None or P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies)
                     {
-                        name = $"{skinnedMeshRenderer.name}_MeshCollider_Bone{boneIndex:000}",
-                        transform =
+                        var go = new GameObject
                         {
-                            // TODO: When adding the head, if it's a local avatar, then add it to the same system that the
-                            // shadow clone head transform uses to avoid first-person shrinking.
-                            parent = smrBoneNullable != null ? smrBoneNullable.transform : null, // FIXME: null parent is a mistake!
-                            localPosition = Vector3.zero,
-                            localRotation = Quaternion.identity,
-                            localScale = skinnedMeshRenderer.transform.localScale // FIXME: Likely incorrect
+                            name = $"{skinnedMeshRenderer.name}_MeshCollider_Bone{boneIndex:000}",
+                            transform =
+                            {
+                                // TODO: When adding the head, if it's a local avatar, then add it to the same system that the
+                                // shadow clone head transform uses to avoid first-person shrinking.
+                                parent = smrBoneNullable != null ? smrBoneNullable.transform : null, // FIXME: null parent is a mistake!
+                                localPosition = Vector3.zero,
+                                localRotation = Quaternion.identity,
+                                localScale = skinnedMeshRenderer.transform.localScale // FIXME: Likely incorrect
+                            }
+                        };
+                        go.SetActive(false); // Ensure that components initialize in one go, after we have defined them.
+
+                        var ourCollider = go.AddComponent<MeshCollider>();
+                        ourCollider.sharedMaterial = physicsMaterial;
+                        ourCollider.convex = true;
+                        ourCollider.cookingOptions = Cooking;
+                        ourCollider.sharedMesh = generatedMesh;
+                        createdColliders.Add(ourCollider);
+
+                        if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies)
+                        {
+                            var previousRigidbodyNullable = go.GetComponent<Rigidbody>();
+                            var ourRigidbody = previousRigidbodyNullable != null ? previousRigidbodyNullable : go.AddComponent<Rigidbody>();
+                            ourRigidbody.isKinematic = true;
+                            ourRigidbody.mass = 1f;
+                            ourRigidbody.automaticCenterOfMass = true;
+                            ourRigidbody.useGravity = false;
                         }
-                    };
-                    go.SetActive(false); // Ensure that components initialize in one go, after we have defined them.
 
-                    var ourCollider = go.AddComponent<MeshCollider>();
-                    ourCollider.sharedMaterial = physicsMaterial;
-                    ourCollider.convex = true;
-                    ourCollider.cookingOptions = Cooking;
-                    ourCollider.sharedMesh = generatedMesh;
-                    createdColliders.Add(ourCollider);
-
-                    if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateGameObjectsWithRigidbodies)
-                    {
-                        var previousRigidbodyNullable = go.GetComponent<Rigidbody>();
-                        var ourRigidbody = previousRigidbodyNullable != null ? previousRigidbodyNullable : go.AddComponent<Rigidbody>();
-                        ourRigidbody.isKinematic = true;
-                        ourRigidbody.mass = 1f;
-                        ourRigidbody.automaticCenterOfMass = true;
-                        ourRigidbody.useGravity = false;
+                        go.SetActive(true);
                     }
-
-                    go.SetActive(true);
-                }
-                else if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.CreateCollidersOnBonesWithRigidbodies or P12RemesherRigidbodyPhysics.CreateCollidersOnBones)
-                {
-                    if (smrBoneNullable != null)
+                    else if (rigidbodyPhysics is P12RemesherRigidbodyPhysics.CreateCollidersOnBonesWithRigidbodies or P12RemesherRigidbodyPhysics.CreateCollidersOnBones)
                     {
-                        var go = smrBoneNullable.gameObject;
-
-                        Collider ourCollider2;
-                        if (true)
+                        if (smrBoneNullable != null)
                         {
-                            var ourCollider = go.AddComponent<MeshCollider>();
-                            ourCollider.sharedMaterial = physicsMaterial;
-                            ourCollider.convex = true;
-                            ourCollider.cookingOptions = Cooking;
-                            ourCollider.sharedMesh = generatedMesh;
-                            ourCollider2 = ourCollider;
-                        }
-                        else
-                        {
-                            var ourCollider = go.AddComponent<SphereCollider>();
-                            ourCollider.radius = 0.05f;
-                            ourCollider2 = ourCollider;
-                        }
+                            var go = smrBoneNullable.gameObject;
 
-                        createdColliders.Add(ourCollider2);
+                            Collider ourCollider2;
+                            if (true)
+                            {
+                                var ourCollider = go.AddComponent<MeshCollider>();
+                                ourCollider.sharedMaterial = physicsMaterial;
+                                ourCollider.convex = true;
+                                ourCollider.cookingOptions = Cooking;
+                                ourCollider.sharedMesh = generatedMesh;
+                                ourCollider2 = ourCollider;
+                            }
+                            else
+                            {
+                                var ourCollider = go.AddComponent<SphereCollider>();
+                                ourCollider.radius = 0.05f;
+                                ourCollider2 = ourCollider;
+                            }
+
+                            createdColliders.Add(ourCollider2);
+                        }
                     }
                 }
             }
+            else
+            {
+                var applicableHbbs = new[]
+                {
+                    HumanBodyBones.Hips,
+                    HumanBodyBones.Spine,
+                    HumanBodyBones.Chest,
+                    HumanBodyBones.Neck,
+                    HumanBodyBones.Head,
+                    HumanBodyBones.LeftUpperArm,
+                    HumanBodyBones.LeftLowerArm,
+                    HumanBodyBones.LeftHand,
+                    HumanBodyBones.RightUpperArm,
+                    HumanBodyBones.RightLowerArm,
+                    HumanBodyBones.RightHand,
+                    HumanBodyBones.LeftUpperLeg,
+                    HumanBodyBones.LeftLowerLeg,
+                    HumanBodyBones.LeftFoot,
+                    HumanBodyBones.RightUpperLeg,
+                    HumanBodyBones.RightLowerLeg,
+                    HumanBodyBones.RightFoot
+                };
+                var matchedSmrBones = new List<Transform>();
+                foreach (var hbb in applicableHbbs)
+                {
+                    matchedSmrBones.Add(humanoidReference.GetBoneTransform(hbb));
+                }
 
-            PhysicsIgnoreIntraCollisions(createdColliders);
+                for (var index = 0; index < generatedMeshes.Count; index++)
+                {
+                    var generatedMesh = generatedMeshes[index];
+                    var boneIndex = whichBoneIndexForThatGeneratedMesh[index];
+
+                    var smrBone = smrBones[boneIndex];
+                    if (smrBone != null)
+                    {
+                        var matchedSmrBoneHbbIndex = matchedSmrBones.IndexOf(smrBone);
+                        if (matchedSmrBoneHbbIndex != -1)
+                        {
+                            var go = Rig[applicableHbbs[matchedSmrBoneHbbIndex]].gameObject;
+
+                            Collider ourCollider2;
+                            if (true)
+                            {
+                                var ourCollider = go.AddComponent<MeshCollider>();
+                                ourCollider.sharedMaterial = physicsMaterial;
+                                ourCollider.convex = true;
+                                ourCollider.cookingOptions = Cooking;
+                                ourCollider.sharedMesh = generatedMesh;
+                                ourCollider2 = ourCollider;
+                            }
+                            else
+                            {
+                                var ourCollider = go.AddComponent<SphereCollider>();
+                                ourCollider.radius = 0.05f;
+                                ourCollider2 = ourCollider;
+                            }
+
+                            createdColliders.Add(ourCollider2);
+                        }
+                    }
+                }
+
+                newRigRoot.GetChild(0).gameObject.SetActive(true);
+            }
+
 
             if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnBonesWithRigidbodies)
             {
@@ -238,50 +384,8 @@ namespace Hai.Project12.Remesher.Runtime
                     ourRigidbody.useGravity = false;
                 }
             }
-        }
 
-        // This is flawed.
-        private static void PhysicsIgnoreSiblingAndParentCollisions(List<Collider> demarker)
-        {
-            foreach (var meshCollider in demarker)
-            {
-                var currentTransform = meshCollider.transform;
-                var exit = false;
-                do
-                {
-                    var parent = currentTransform.parent;
-                    if (parent != null)
-                    {
-                        var parentColliders = parent.GetComponents<MeshCollider>();
-                        if (parentColliders.Length > 0)
-                        {
-                            foreach (var parentCollider in parentColliders)
-                            {
-                                Physics.IgnoreCollision(meshCollider, parentCollider, true);
-                            }
-                            exit = true;
-                        }
-                        else
-                        {
-                            currentTransform = parent;
-                            // We continue (this is mainly to handle the shoulder bone)
-                        }
-                    }
-                    else
-                    {
-                        exit = true;
-                    }
-                } while (!exit);
-
-                var siblingColliders = meshCollider.GetComponents<MeshCollider>();
-                foreach (var siblingCollider in siblingColliders)
-                {
-                    if (siblingCollider != meshCollider)
-                    {
-                        Physics.IgnoreCollision(meshCollider, siblingCollider, true);
-                    }
-                }
-            }
+            return createdColliders;
         }
 
         private static void PhysicsIgnoreIntraCollisions(List<Collider> colliders)
@@ -363,5 +467,6 @@ namespace Hai.Project12.Remesher.Runtime
         CreateCollidersOnSeparateGameObjectsWithRigidbodies,
         CreateCollidersOnBonesWithRigidbodies,
         CreateCollidersOnBones,
+        CreateCollidersOnSeparateRig
     }
 }

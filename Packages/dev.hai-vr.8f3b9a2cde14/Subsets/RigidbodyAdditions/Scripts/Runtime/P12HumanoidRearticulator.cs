@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using Hai.Project12.Remesher.Runtime;
 using UnityEngine;
 using static UnityEngine.HumanBodyBones;
 
 namespace Hai.Project12.RigidbodyAdditions.Runtime
 {
+    [DefaultExecutionOrder(-90)]
     public class P12HumanoidRearticulator : MonoBehaviour
     {
-        [SerializeField] private bool includeFingers = false;
+        [SerializeField] private bool includeFingers;
         [SerializeField] private Animator humanoidReference;
+        [SerializeField] private P12Remesher remesherOptional;
 
         [SerializeField] private float _debug_estimatedBodyHeight;
         [SerializeField] private float _debug_estimatedBodyMass;
+        [SerializeField] private bool _debug_clickToResetJoints;
+
+        private readonly List<ArticulationBody> _articulations = new List<ArticulationBody>();
 
         private void Awake()
         {
@@ -19,20 +25,31 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
             // Create articulations
 
-            for (HumanBodyBones bone = Hips; bone < LastBone; bone++)
+            for (HumanBodyBones hbb = Hips; hbb < LastBone; hbb++)
             {
-                var isFingerBone = bone >= LeftThumbProximal && bone <= RightLittleDistal;
+                var isFingerBone = hbb >= LeftThumbProximal && hbb <= RightLittleDistal;
                 if (!includeFingers && isFingerBone) continue;
 
-                if (BoneIsInconsequential(bone)) continue;
+                if (BoneIsInconsequential(hbb)) continue;
 
-                var boneTransform = humanoidReference.GetBoneTransform(bone);
+                Transform boneTransform;
+                if (remesherOptional != null)
+                {
+                    boneTransform = remesherOptional.Rig.GetValueOrDefault(hbb);
+                }
+                else
+                {
+                    boneTransform = humanoidReference.GetBoneTransform(hbb);
+                }
+
                 if (boneTransform != null)
                 {
-                    MakeArticulation(bone, boneTransform);
+                    MakeArticulation(hbb, boneTransform);
 
                     var articulationBody = boneTransform.GetComponent<ArticulationBody>(); // TODO: Also support rigidbody?
-                    availableBones.Add((bone, articulationBody));
+                    availableBones.Add((hbb, articulationBody));
+
+                    _articulations.Add(articulationBody);
                 }
             }
 
@@ -60,6 +77,19 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             {
                 var massToApply = (MassDistribution(availableBone.Item1) / totalDistribution) * totalBodyMass;
                 availableBone.Item2.mass = massToApply;
+            }
+        }
+
+        private void Update()
+        {
+            if (_debug_clickToResetJoints)
+            {
+                _debug_clickToResetJoints = false;
+
+                foreach (var body in _articulations)
+                {
+                    body.jointPosition = new ArticulationReducedSpace(0f, 0f, 0f);
+                }
             }
         }
 
@@ -157,7 +187,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             if (articulationBody == null)
             {
                 articulationBody = articulationBody != null ? articulationBody : go.AddComponent<ArticulationBody>();
-                articulationBody.immovable = false;
+                // articulationBody.immovable = false;
                 articulationBody.mass = 3f;
                 articulationBody.automaticCenterOfMass = true;
                 articulationBody.useGravity = true;

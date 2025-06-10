@@ -1071,72 +1071,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 31261870}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!171741748 &35421526
-ArticulationBody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 472503589}
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Mass: 10
-  m_ParentAnchorPosition: {x: 0, y: 0, z: 0}
-  m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_AnchorPosition: {x: 0, y: 0, z: 0}
-  m_AnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_MatchAnchors: 1
-  m_ArticulationJointType: 0
-  m_LinearX: 2
-  m_LinearY: 2
-  m_LinearZ: 2
-  m_SwingY: 2
-  m_SwingZ: 2
-  m_Twist: 2
-  m_XDrive:
-    lowerLimit: 0
-    upperLimit: 0
-    stiffness: 0
-    damping: 0
-    forceLimit: 3.4028235e+38
-    target: 0
-    targetVelocity: 0
-    driveType: 0
-  m_YDrive:
-    lowerLimit: 0
-    upperLimit: 0
-    stiffness: 0
-    damping: 0
-    forceLimit: 3.4028235e+38
-    target: 0
-    targetVelocity: 0
-    driveType: 0
-  m_ZDrive:
-    lowerLimit: 0
-    upperLimit: 0
-    stiffness: 0
-    damping: 0
-    forceLimit: 3.4028235e+38
-    target: 0
-    targetVelocity: 0
-    driveType: 0
-  m_LinearDamping: 0.05
-  m_AngularDamping: 0.05
-  m_JointFriction: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_Immovable: 0
-  m_UseGravity: 1
-  m_CollisionDetectionMode: 0
 --- !u!1 &39965440
 GameObject:
   m_ObjectHideFlags: 0
@@ -7420,6 +7354,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &251452092
 GameObject:
   m_ObjectHideFlags: 0
@@ -18510,11 +18445,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 919584bac9c043d389fc8087f2a36e86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &472503589 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -2779099152873015741, guid: 224ef0db5cc64d64492fb19eea385681, type: 3}
-  m_PrefabInstance: {fileID: 1287119839}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &475642184
 GameObject:
   m_ObjectHideFlags: 0
@@ -25275,6 +25205,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &670761412
 GameObject:
   m_ObjectHideFlags: 0
@@ -25326,6 +25257,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &694625858
 GameObject:
   m_ObjectHideFlags: 0
@@ -25825,6 +25757,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &721514573
 GameObject:
   m_ObjectHideFlags: 0
@@ -27546,6 +27479,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &780505752
 GameObject:
   m_ObjectHideFlags: 0
@@ -30344,8 +30278,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   includeFingers: 0
   humanoidReference: {fileID: 1702326250}
+  remesherOptional: {fileID: 1908797775}
   _debug_estimatedBodyHeight: 0
   _debug_estimatedBodyMass: 0
+  _debug_clickToResetJoints: 0
 --- !u!1 &893804354
 GameObject:
   m_ObjectHideFlags: 0
@@ -37910,6 +37846,7 @@ MonoBehaviour:
   excludeFingerBones: 0
   humanoidReference: {fileID: 0}
   physicsMaterial: {fileID: 0}
+  newRigRoot: {fileID: 0}
 --- !u!1 &1184283380
 GameObject:
   m_ObjectHideFlags: 0
@@ -39619,6 +39556,7 @@ MonoBehaviour:
   excludeFingerBones: 1
   humanoidReference: {fileID: 603070704}
   physicsMaterial: {fileID: 13400000, guid: d3d169064befd0343b2b283bae38686d, type: 2}
+  newRigRoot: {fileID: 0}
 --- !u!1 &1241531439
 GameObject:
   m_ObjectHideFlags: 0
@@ -40764,6 +40702,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &1280096501
 GameObject:
   m_ObjectHideFlags: 0
@@ -42146,9 +42085,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1988243345}
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: -2779099152873015741, guid: 224ef0db5cc64d64492fb19eea385681, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 35421526}
     - targetCorrespondingSourceObject: {fileID: 635547659545568360, guid: 224ef0db5cc64d64492fb19eea385681, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1287119862}
@@ -43385,6 +43321,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &1337969486
 GameObject:
   m_ObjectHideFlags: 0
@@ -46247,6 +46184,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!224 &1463538171 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1634605731340974413, guid: de56d1ad34f4c674984d7ac5ae339f8d, type: 3}
@@ -46963,6 +46901,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &1478363862
 GameObject:
   m_ObjectHideFlags: 0
@@ -48006,6 +47945,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &1512501542
 GameObject:
   m_ObjectHideFlags: 0
@@ -48966,6 +48906,7 @@ MonoBehaviour:
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!4 &1543002777 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8320464304645587498, guid: d4f67d46838e91b4ab2c85c94c0f472e, type: 3}
@@ -50618,6 +50559,7 @@ MonoBehaviour:
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!1 &1608315843
 GameObject:
   m_ObjectHideFlags: 0
@@ -56885,6 +56827,7 @@ MonoBehaviour:
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!1 &1644161565
 GameObject:
   m_ObjectHideFlags: 0
@@ -57021,6 +56964,37 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1644161565}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1644321615
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1644321616}
+  m_Layer: 0
+  m_Name: PhysicsRig
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1644321616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1644321615}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1904536490}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1649144525
 GameObject:
   m_ObjectHideFlags: 0
@@ -57241,6 +57215,7 @@ MonoBehaviour:
   excludeFingerBones: 0
   humanoidReference: {fileID: 0}
   physicsMaterial: {fileID: 0}
+  newRigRoot: {fileID: 0}
 --- !u!1 &1654681854
 GameObject:
   m_ObjectHideFlags: 0
@@ -64717,6 +64692,7 @@ MonoBehaviour:
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!1 &1883920678 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3258002717557503375, guid: d4f67d46838e91b4ab2c85c94c0f472e, type: 3}
@@ -65430,9 +65406,10 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1908797774}
-  - {fileID: 2069513131}
-  - {fileID: 1702326251}
   - {fileID: 890921183}
+  - {fileID: 2069513131}
+  - {fileID: 1644321616}
+  - {fileID: 1702326251}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1905462375
@@ -65617,10 +65594,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sources:
   - {fileID: 1279086165}
-  rigidbodyPhysics: 3
+  rigidbodyPhysics: 4
   excludeFingerBones: 1
   humanoidReference: {fileID: 1702326250}
   physicsMaterial: {fileID: 13400000, guid: d3d169064befd0343b2b283bae38686d, type: 2}
+  newRigRoot: {fileID: 1644321616}
 --- !u!1 &1919573759
 GameObject:
   m_ObjectHideFlags: 0
@@ -65803,8 +65781,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   includeFingers: 0
   humanoidReference: {fileID: 603070704}
+  remesherOptional: {fileID: 0}
   _debug_estimatedBodyHeight: 0
   _debug_estimatedBodyMass: 0
+  _debug_clickToResetJoints: 0
 --- !u!1 &1931099422
 GameObject:
   m_ObjectHideFlags: 0
@@ -65947,6 +65927,7 @@ MonoBehaviour:
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!1 &1937502241
 GameObject:
   m_ObjectHideFlags: 0
@@ -68776,6 +68757,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &2037826304
 GameObject:
   m_ObjectHideFlags: 0
@@ -69497,6 +69479,7 @@ MonoBehaviour:
   integralGain: 10
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!1 &2064474273
 GameObject:
   m_ObjectHideFlags: 0
@@ -69921,7 +69904,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2069513131
 Transform:
   m_ObjectHideFlags: 0
@@ -69950,13 +69933,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 35421526}
+  body: {fileID: 0}
   target: {fileID: 1750349886}
   dataViz: {fileID: 225776180}
   proportionalGain: 400
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 10
+  _debug_clickToResetJoints: 0
 --- !u!1 &2075749466
 GameObject:
   m_ObjectHideFlags: 0
@@ -71514,6 +71498,7 @@ MonoBehaviour:
   integralGain: 100
   derivativeGain: 40
   integralMaximumMagnitude: 100
+  _debug_clickToResetJoints: 0
 --- !u!1 &2131897447
 GameObject:
   m_ObjectHideFlags: 0
