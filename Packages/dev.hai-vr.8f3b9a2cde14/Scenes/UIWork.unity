@@ -30934,7 +30934,7 @@ MonoBehaviour:
   humanBodyBone: 6
   target: {fileID: 1507573236}
   dataViz: {fileID: 225776180}
-  proportionalGain: 2000
+  proportionalGain: 1000
   integralGain: 0
   derivativeGain: 20
   integralMaximumMagnitude: 10
@@ -39259,7 +39259,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &848275007
 Transform:
   m_ObjectHideFlags: 0
@@ -39561,7 +39561,7 @@ MonoBehaviour:
   humanBodyBone: 10
   target: {fileID: 1646162880}
   dataViz: {fileID: 225776180}
-  proportionalGain: 2000
+  proportionalGain: 1000
   integralGain: 0
   derivativeGain: 20
   integralMaximumMagnitude: 10
@@ -71678,7 +71678,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1245877200
 Transform:
   m_ObjectHideFlags: 0
@@ -116661,7 +116661,7 @@ MonoBehaviour:
   humanBodyBone: 5
   target: {fileID: 1067142887}
   dataViz: {fileID: 225776180}
-  proportionalGain: 2000
+  proportionalGain: 1000
   integralGain: 0
   derivativeGain: 20
   integralMaximumMagnitude: 10

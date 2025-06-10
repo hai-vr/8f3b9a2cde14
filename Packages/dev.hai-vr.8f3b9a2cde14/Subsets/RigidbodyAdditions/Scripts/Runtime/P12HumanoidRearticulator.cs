@@ -140,8 +140,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 Head => 30,
                 LeftShoulder or RightShoulder => 50,
                 LeftUpperArm or RightUpperArm => 40,
-                LeftLowerArm or RightLowerArm => 30,
-                LeftHand or RightHand => 10,
+                LeftLowerArm or RightLowerArm => 40,
+                LeftHand or RightHand => 40,
                 LeftToes or RightToes => 10,
                 LeftEye or RightEye => 1,
                 Jaw => 1,
@@ -237,7 +237,10 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 // joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
                 // hack: PositionDamper 0 is an attempt to fix arms flailing
                 // TODO: Driven, see readme.md, when not-driven then positionDamper should probably be 0.
-                joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
+                var isArmMember = hbb is LeftUpperArm or RightUpperArm or LeftLowerArm or RightLowerArm or LeftHand or RightHand;
+                var positionSpring = isArmMember ? 10f : 0f;
+                var positionDamper = isArmMember ? positionSpring : 100f;
+                joint.slerpDrive = new JointDrive { positionSpring = positionSpring, positionDamper = positionDamper, maximumForce = Mathf.Infinity };
                 joint.rotationDriveMode = RotationDriveMode.Slerp;
 
                 // Junk

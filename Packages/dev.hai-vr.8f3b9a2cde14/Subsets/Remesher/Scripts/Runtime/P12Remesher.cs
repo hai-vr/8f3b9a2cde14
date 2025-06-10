@@ -125,6 +125,11 @@ namespace Hai.Project12.Remesher.Runtime
                 var spine = Rig[HumanBodyBones.Spine].GetComponent<MeshCollider>();
                 var chest = Rig[HumanBodyBones.Chest].GetComponent<MeshCollider>();
                 Physics.IgnoreCollision(
+                    chest,
+                    hips
+                );
+
+                Physics.IgnoreCollision(
                     spine,
                     Rig[HumanBodyBones.LeftUpperLeg].GetComponent<MeshCollider>()
                 );
