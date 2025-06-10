@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.Remesher.Runtime;
 using UnityEngine;
 using static UnityEngine.HumanBodyBones;
@@ -15,6 +16,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
         [SerializeField] private float _debug_estimatedBodyHeight;
         [SerializeField] private float _debug_estimatedBodyMass;
+        [SerializeField] private bool _debug_hackTensorsToUniform;
 
         private readonly List<Rigidbody> _articulations = new List<Rigidbody>();
         private readonly List<ConfigurableJoint> _configurableJoints = new List<ConfigurableJoint>();
@@ -196,6 +198,27 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             var body = go.AddComponent<Rigidbody>();
             body.interpolation = RigidbodyInterpolation.Interpolate;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+            // FIXME: The inertia tensor for the spine and the foot on Wolfram are wrong.
+            // body.automaticInertiaTensor = false;
+            // body.inertiaTensor = Vector3.one * 0.17f;
+            var automaticTensorValue = body.inertiaTensor;
+            body.automaticInertiaTensor = false;
+            var minimumTensorComponent = 0.05f;
+            // var minimumTensorComponent = automaticTensorValue.magnitude * 0.5f;
+            var adjustedTensor = new Vector3(
+                Mathf.Max(minimumTensorComponent, automaticTensorValue.x),
+                Mathf.Max(minimumTensorComponent, automaticTensorValue.y),
+                Mathf.Max(minimumTensorComponent, automaticTensorValue.z)
+            );
+            // FIXME: this is a hack
+            if (_debug_hackTensorsToUniform)
+            {
+                adjustedTensor = Vector3.one * 0.17f;
+            }
+            body.inertiaTensor = adjustedTensor;
+            H12Debug.Log($"Inertia tensor was ({automaticTensorValue.x:0.0000}, {automaticTensorValue.y:0.0000}, {automaticTensorValue.z:0.0000}) on {hbb}, new tensor is ({adjustedTensor.x:0.0000}, {adjustedTensor.y:0.0000}, {adjustedTensor.z:0.0000})");
+
             if (hbb != Hips)
             {
                 var joint = go.AddComponent<ConfigurableJoint>();
@@ -211,6 +234,9 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 joint.angularYLimit = new SoftJointLimit { limit = limit, bounciness = 0, contactDistance = 0 };
                 joint.angularZLimit = new SoftJointLimit { limit = limit, bounciness = 0, contactDistance = 0 };
 
+                // joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
+                // hack: PositionDamper 0 is an attempt to fix arms flailing
+                // TODO: Driven, see readme.md, when not-driven then positionDamper should probably be 0.
                 joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
                 joint.rotationDriveMode = RotationDriveMode.Slerp;
 

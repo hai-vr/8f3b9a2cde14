@@ -117,7 +117,42 @@ namespace Hai.Project12.Remesher.Runtime
                 }
             }
 
-            PhysicsIgnoreIntraCollisions(allColliders);
+            if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateRig)
+            {
+                var hips = newRigRoot.GetChild(0).GetComponent<MeshCollider>();
+                IgnoreRecurse(hips);
+
+                var spine = Rig[HumanBodyBones.Spine].GetComponent<MeshCollider>();
+                var chest = Rig[HumanBodyBones.Chest].GetComponent<MeshCollider>();
+                Physics.IgnoreCollision(
+                    spine,
+                    Rig[HumanBodyBones.LeftUpperLeg].GetComponent<MeshCollider>()
+                );
+                Physics.IgnoreCollision(
+                    spine,
+                    Rig[HumanBodyBones.RightUpperLeg].GetComponent<MeshCollider>()
+                );
+                Physics.IgnoreCollision(
+                    chest,
+                    Rig[HumanBodyBones.LeftUpperLeg].GetComponent<MeshCollider>()
+                );
+                Physics.IgnoreCollision(
+                    chest,
+                    Rig[HumanBodyBones.RightUpperLeg].GetComponent<MeshCollider>()
+                );
+            }
+
+            // PhysicsIgnoreIntraCollisions(allColliders);
+        }
+
+        private void IgnoreRecurse(MeshCollider current)
+        {
+            foreach (Transform child in current.transform)
+            {
+                var childCollider = child.GetComponent<MeshCollider>();
+                Physics.IgnoreCollision(current, childCollider);
+                IgnoreRecurse(current);
+            }
         }
 
         private Transform RecreateBone(HumanBodyBones bone, Dictionary<HumanBodyBones, Transform> boneToTransform_mutated)

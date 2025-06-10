@@ -5,6 +5,34 @@ The original code has other effects such as damage caused by physics collisions.
 
 This is a note for future development.
 
+## Physics-based animation
+
+### Keyframe drivers
+
+TODO:
+- TODO: When a rigidbody is keyframed, then its surroundings joints should probably have a slerpDrive positionDamper of 100, and the mass should be high.
+- TODO: When a rigidbody is powered, then its surroundings joints should probably have a slerpDrive positionDamper of 100, and the mass should be regular.
+- TODO: When a rigidbody is unpowered, then its surroundings joints should probably have a slerpDrive positionDamper of 0, and the mass should be regular.
+
+### Flailing
+
+TODO:
+- Explore joint motor control, as opposed to world space velocity change. This might only be correct for "powered but flailing" limbs.
+- Explore applying physics to the lower body for climbing.
+
+### IK correction
+
+TODO:
+- Add an IK pass to correct for the physics pose, which will then be applied to the visual representation of the avatar.
+
+### Other
+
+TODO:
+- Generated inertia tensors are incorrect. Find and set it to a uniform value for our ragdolls.
+- Rig and physics character control needs to be its own class.
+- Work on adding ragdoll profiles (and lerping between ragdoll profiles) for avatar, NPC, and character control.
+- Include work on limb stiffness.
+
 ## Inconsistent damage due if `fixedDeltaTime` varies
 
 During the development of the original code, I had noticed that the reported damage from collision depends on

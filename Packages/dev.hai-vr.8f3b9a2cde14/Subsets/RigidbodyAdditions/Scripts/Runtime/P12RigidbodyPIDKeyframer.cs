@@ -1,5 +1,4 @@
-﻿using System;
-using Hai.Project12.DataViz.Runtime;
+﻿using Hai.Project12.DataViz.Runtime;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.Remesher.Runtime;
 using UnityEngine;
@@ -27,7 +26,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         [SerializeField] private float torqueLimit = 2000f;
 
         [SerializeField] private bool _debug_clickToResetJoints;
-        [SerializeField] private bool _debug_forcePosition;
+        [SerializeField] private bool _debug_print;
+        [SerializeField] private bool _debug_superControl;
 
         private H12PIDControllerVector3 _positionPid;
         private H12PIDControllerAngularVelocity _rotationPid;
@@ -64,8 +64,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             _positionPid.integralMaximumMagnitude = integralMaximumMagnitude;
 
             _rotationPid.proportionalGain = proportionalGain * 10;
-            _rotationPid.integralGain = integralGain * 2f;
-            _rotationPid.derivativeGain = derivativeGain * 2f;
+            _rotationPid.integralGain = integralGain * 1;
+            _rotationPid.derivativeGain = derivativeGain * 1;
             _rotationPid.integralMaximumMagnitude = integralMaximumMagnitude;
 
             if (_debug_clickToResetJoints)
@@ -92,6 +92,11 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             if (torqueMagnitude > torqueLimit) torque = torque.normalized * torqueLimit;
             bodyOptional.AddTorque(torque, ForceMode.Acceleration);
 
+            if (_debug_print)
+            {
+                H12Debug.Log($"Torque is {torque}");
+            }
+
             _angleDiff = Mathf.Clamp01(Quaternion.Angle(currentRotation, targetRotation) / 30f);
 
             _drawTargetCenterOfMass = targetCenterOfMass;
@@ -105,24 +110,31 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             {
                 bodyOptional.AddForce(-Physics.gravity, ForceMode.Force);
             }
+
+            Debug__SuperControl();
+        }
+
+        private void Debug__SuperControl()
+        {
+            if (_debug_superControl)
+            {
+                bodyOptional.position = target.position;
+                bodyOptional.rotation = target.rotation;
+                bodyOptional.transform.position = target.position;
+                bodyOptional.transform.rotation = target.rotation;
+            }
         }
 
         private void Update()
         {
-            dataViz._DrawLine(_drawCurrentCenterOfMass, _drawTargetCenterOfMass, Color.cyan, Color.red, 1f); // FIXME: Clipping
-            if (_angleDiff >= 1f)
-            {
-                // dataViz._DrawGizmo(new CrossTrackerData
-                // {
-                    // position = _drawTargetCenterOfMass,
-                    // rotation = _drawTargetRotation
-                // });
-                // dataViz._DrawGizmo(new CrossTrackerData
-                // {
-                    // position = _drawCurrentCenterOfMass,
-                    // rotation = _drawCurrentRotation
-                // });
-            }
+            Debug__SuperControl();
+
+            dataViz._DrawLine(_drawCurrentCenterOfMass, _drawTargetCenterOfMass, Color.cyan, Color.red, 1f * proportionalGain / 1000);
+        }
+
+        private void LateUpdate()
+        {
+            Debug__SuperControl();
         }
     }
 }
