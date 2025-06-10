@@ -7357,6 +7357,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &251452092
 GameObject:
@@ -25211,6 +25213,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &670761412
 GameObject:
@@ -25266,6 +25270,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &694625858
 GameObject:
@@ -25769,6 +25775,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &721514573
 GameObject:
@@ -27494,6 +27502,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &780505752
 GameObject:
@@ -30296,7 +30306,6 @@ MonoBehaviour:
   remesherOptional: {fileID: 1908797775}
   _debug_estimatedBodyHeight: 0
   _debug_estimatedBodyMass: 0
-  _debug_clickToResetJoints: 0
 --- !u!1 &893804354
 GameObject:
   m_ObjectHideFlags: 0
@@ -40720,6 +40729,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1280096501
 GameObject:
@@ -43347,6 +43358,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1337969486
 GameObject:
@@ -45683,6 +45696,64 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1447551432}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1448488881
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1448488882}
+  - component: {fileID: 1448488883}
+  m_Layer: 0
+  m_Name: HipKeyframer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1448488882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448488881}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1681605825}
+  m_Father: {fileID: 1904536490}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1448488883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1448488881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6612b5aa3694a019b2e35ec757eea04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bodyOptional: {fileID: 0}
+  remesherOptional: {fileID: 1908797775}
+  humanBodyBone: 0
+  target: {fileID: 1681605825}
+  dataViz: {fileID: 225776180}
+  proportionalGain: 3000
+  integralGain: 0
+  derivativeGain: 200
+  integralMaximumMagnitude: 10
+  compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
+  _debug_clickToResetJoints: 0
 --- !u!1 &1448834726
 GameObject:
   m_ObjectHideFlags: 0
@@ -46213,6 +46284,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!224 &1463538171 stripped
 RectTransform:
@@ -46933,6 +47006,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1478363862
 GameObject:
@@ -47980,6 +48055,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1512501542
 GameObject:
@@ -48944,6 +49021,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 10
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!4 &1543002777 stripped
 Transform:
@@ -50600,6 +50679,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 10
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1608315843
 GameObject:
@@ -56871,6 +56952,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 10
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1644161565
 GameObject:
@@ -58721,6 +58804,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 707173752640410653, guid: d4f67d46838e91b4ab2c85c94c0f472e, type: 3}
   m_PrefabInstance: {fileID: 61161002}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1681605824
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1681605825}
+  m_Layer: 0
+  m_Name: Pin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1681605825
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1681605824}
+  serializedVersion: 2
+  m_LocalRotation: {x: -1.7763568e-14, y: -1, z: 1.5881867e-21, w: -0.000000029802322}
+  m_LocalPosition: {x: 0, y: 0.9113358, z: -0.005544901}
+  m_LocalScale: {x: 1.04, y: 1.0399997, z: 1.0399997}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1448488882}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1684495306
 GameObject:
   m_ObjectHideFlags: 0
@@ -60860,7 +60974,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1750349886}
   m_Layer: 0
-  m_Name: ChestPin
+  m_Name: Pin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -64739,6 +64853,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 10
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1883920678 stripped
 GameObject:
@@ -65455,6 +65571,7 @@ Transform:
   - {fileID: 1908797774}
   - {fileID: 890921183}
   - {fileID: 2069513131}
+  - {fileID: 1448488882}
   - {fileID: 1644321616}
   - {fileID: 1702326251}
   m_Father: {fileID: 0}
@@ -65832,7 +65949,6 @@ MonoBehaviour:
   remesherOptional: {fileID: 0}
   _debug_estimatedBodyHeight: 0
   _debug_estimatedBodyMass: 0
-  _debug_clickToResetJoints: 0
 --- !u!1 &1931099422
 GameObject:
   m_ObjectHideFlags: 0
@@ -65978,6 +66094,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 10
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &1937502241
 GameObject:
@@ -68811,6 +68929,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &2037826304
 GameObject:
@@ -69536,6 +69656,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &2064474273
 GameObject:
@@ -69995,11 +70117,13 @@ MonoBehaviour:
   humanBodyBone: 8
   target: {fileID: 1750349886}
   dataViz: {fileID: 225776180}
-  proportionalGain: 1200
+  proportionalGain: 3000
   integralGain: 0
-  derivativeGain: 40
+  derivativeGain: 200
   integralMaximumMagnitude: 10
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &2075749466
 GameObject:
@@ -71561,6 +71685,8 @@ MonoBehaviour:
   derivativeGain: 40
   integralMaximumMagnitude: 100
   compensateGravity: 1
+  forceLimit: 1000
+  torqueLimit: 2000
   _debug_clickToResetJoints: 0
 --- !u!1 &2131897447
 GameObject:

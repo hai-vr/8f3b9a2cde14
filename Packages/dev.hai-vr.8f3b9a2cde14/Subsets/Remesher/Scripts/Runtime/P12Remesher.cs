@@ -345,24 +345,26 @@ namespace Hai.Project12.Remesher.Runtime
                         {
                             var go = Rig[applicableHbbs[matchedSmrBoneHbbIndex]].gameObject;
 
-                            Collider ourCollider2;
                             if (true)
                             {
-                                var ourCollider = go.AddComponent<MeshCollider>();
-                                ourCollider.sharedMaterial = physicsMaterial;
-                                ourCollider.convex = true;
-                                ourCollider.cookingOptions = Cooking;
-                                ourCollider.sharedMesh = generatedMesh;
-                                ourCollider2 = ourCollider;
+                                // HACK: Avoid creating two mesh collders on the neck
+                                // if (go.GetComponent<MeshCollider>() == null)
+                                {
+                                    var ourCollider = go.AddComponent<MeshCollider>();
+                                    ourCollider.sharedMaterial = physicsMaterial;
+                                    ourCollider.convex = true;
+                                    ourCollider.cookingOptions = Cooking;
+                                    ourCollider.sharedMesh = generatedMesh;
+                                    createdColliders.Add(ourCollider);
+                                }
                             }
                             else
                             {
                                 var ourCollider = go.AddComponent<SphereCollider>();
                                 ourCollider.radius = 0.05f;
-                                ourCollider2 = ourCollider;
+                                createdColliders.Add(ourCollider);
                             }
 
-                            createdColliders.Add(ourCollider2);
                         }
                     }
                 }

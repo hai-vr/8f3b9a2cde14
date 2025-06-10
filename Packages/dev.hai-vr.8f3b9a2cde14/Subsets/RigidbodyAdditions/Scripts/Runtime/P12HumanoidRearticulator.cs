@@ -15,14 +15,14 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
         [SerializeField] private float _debug_estimatedBodyHeight;
         [SerializeField] private float _debug_estimatedBodyMass;
-        [SerializeField] private bool _debug_clickToResetJoints;
 
-        private readonly List<ArticulationBody> _articulations = new List<ArticulationBody>();
-        private ArticulationBody _hipArticulation;
+        private readonly List<Rigidbody> _articulations = new List<Rigidbody>();
+        private readonly List<ConfigurableJoint> _configurableJoints = new List<ConfigurableJoint>();
+        private Rigidbody _hipArticulation;
 
         private void Awake()
         {
-            var availableBones = new List<(HumanBodyBones, ArticulationBody)>();
+            var availableBones = new List<(HumanBodyBones, Rigidbody)>();
 
             // Create articulations
 
@@ -45,9 +45,9 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
                 if (boneTransform != null)
                 {
-                    MakeArticulation(hbb, boneTransform);
+                    MakeRigidbody(hbb, boneTransform);
 
-                    var articulationBody = boneTransform.GetComponent<ArticulationBody>(); // TODO: Also support rigidbody?
+                    var articulationBody = boneTransform.GetComponent<Rigidbody>(); // TODO: Also support rigidbody?
                     availableBones.Add((hbb, articulationBody));
 
                     if (hbb == Hips)
@@ -57,6 +57,11 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
                     _articulations.Add(articulationBody);
                 }
+            }
+
+            foreach (var configurableJoint in _configurableJoints)
+            {
+                configurableJoint.connectedBody = configurableJoint.transform.parent.GetComponent<Rigidbody>();
             }
 
             // HACK: Test conflicts
@@ -88,16 +93,6 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
         private void Update()
         {
-            if (_debug_clickToResetJoints)
-            {
-                _debug_clickToResetJoints = false;
-
-                foreach (var body in _articulations)
-                {
-                    body.jointPosition = new ArticulationReducedSpace(0f, 0f, 0f);
-                }
-            }
-
             if (remesherOptional != null)
             {
                 foreach (KeyValuePair<HumanBodyBones, Transform> hbbToRig in remesherOptional.Rig)
@@ -195,111 +190,36 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 or RightToes;
         }
 
-        private void MakeArticulation(HumanBodyBones bone, Transform boneTransform)
+        private void MakeRigidbody(HumanBodyBones hbb, Transform boneTransform)
         {
             var go = boneTransform.gameObject;
-
-            var Damping = 1f;
-
-            var articulationBody = go.GetComponent<ArticulationBody>();
-            if (articulationBody == null)
+            var body = go.AddComponent<Rigidbody>();
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            if (hbb != Hips)
             {
-                {
-                    articulationBody = articulationBody != null ? articulationBody : go.AddComponent<ArticulationBody>();
-                    // articulationBody.immovable = false;
-                    articulationBody.mass = 3f;
-                    articulationBody.automaticCenterOfMass = true;
-                    articulationBody.useGravity = true;
-                    articulationBody.jointType = ArticulationJointType.SphericalJoint;
+                var joint = go.AddComponent<ConfigurableJoint>();
+                joint.xMotion = ConfigurableJointMotion.Locked;
+                joint.yMotion = ConfigurableJointMotion.Locked;
+                joint.zMotion = ConfigurableJointMotion.Locked;
+                joint.angularXMotion = ConfigurableJointMotion.Limited;
+                joint.angularYMotion = ConfigurableJointMotion.Limited;
+                joint.angularZMotion = ConfigurableJointMotion.Limited;
+                joint.lowAngularXLimit = new SoftJointLimit { limit = -10, bounciness = 0, contactDistance = 0};
+                joint.highAngularXLimit = new SoftJointLimit { limit = 10, bounciness = 0, contactDistance = 0 };
+                joint.angularYLimit = new SoftJointLimit { limit = 10, bounciness = 0, contactDistance = 0 };
+                joint.angularZLimit = new SoftJointLimit { limit = 10, bounciness = 0, contactDistance = 0 };
 
-                    articulationBody.swingYLock = ArticulationDofLock.LimitedMotion;
-                    articulationBody.swingZLock = ArticulationDofLock.LimitedMotion;
-                    articulationBody.twistLock = ArticulationDofLock.LimitedMotion;
+                joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
+                joint.rotationDriveMode = RotationDriveMode.Slerp;
 
-                    articulationBody.linearDamping = Damping;
-                    articulationBody.angularDamping = Damping;
+                // Junk
+                // joint.angularXLimitSpring = new SoftJointLimitSpring { damper = 75f, spring = 2000f };
+                // joint.angularYZLimitSpring = new SoftJointLimitSpring { damper = 75f, spring = 2000f };
+                // joint.configuredInWorldSpace = false;
+                // joint.autoConfigureConnectedAnchor = false;
 
-                    // articulationBody.jointFriction = 0.05f;
-                    articulationBody.jointFriction = 1f;
-
-                    var yDrive = articulationBody.yDrive;
-                    var zDrive = articulationBody.zDrive;
-                    var twist = articulationBody.xDrive;
-                    yDrive.lowerLimit = -90;
-                    yDrive.upperLimit = +90;
-
-                    zDrive.lowerLimit = -0;
-                    zDrive.upperLimit = +0;
-
-                    twist.lowerLimit = -15;
-                    twist.upperLimit = +15;
-
-                    yDrive.damping = Damping;
-                    zDrive.damping = Damping;
-                    twist.damping = Damping;
-
-                    articulationBody.yDrive = yDrive;
-                    articulationBody.zDrive = zDrive;
-                    articulationBody.xDrive = twist;
-
-                    articulationBody.excludeLayers = LayerMask.NameToLayer("Default");
-                    articulationBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-                }
-
-                {
-                    var yDrive = articulationBody.yDrive;
-                    var zDrive = articulationBody.zDrive;
-                    var twist = articulationBody.xDrive;
-                    yDrive.damping = Damping;
-                    zDrive.damping = Damping;
-                    twist.damping = Damping;
-                    yDrive.forceLimit = 100;
-                    zDrive.forceLimit = 100;
-                    twist.forceLimit = 100;
-                    yDrive.stiffness = 1;
-                    zDrive.stiffness = 1;
-                    twist.stiffness = 1;
-                    articulationBody.yDrive = yDrive;
-                    articulationBody.zDrive = zDrive;
-                    articulationBody.xDrive = twist;
-                }
-
-                // articulationBody.maxAngularVelocity = 0.1f;
-                // articulationBody.maxDepenetrationVelocity = 0.1f;
-                // articulationBody.maxJointVelocity = 0.1f;
-                // articulationBody.maxLinearVelocity = 0.1f;
-            }
-            else
-            {
-                if (articulationBody != null)
-                {
-                    articulationBody.excludeLayers = LayerMask.NameToLayer("Default");
-                    articulationBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-
-                    articulationBody.linearDamping = Damping;
-                    articulationBody.angularDamping = Damping;
-
-                    var yDrive = articulationBody.yDrive;
-                    var zDrive = articulationBody.zDrive;
-                    var twist = articulationBody.xDrive;
-                    yDrive.damping = Damping;
-                    zDrive.damping = Damping;
-                    twist.damping = Damping;
-                    yDrive.forceLimit = 100;
-                    zDrive.forceLimit = 100;
-                    twist.forceLimit = 100;
-                    yDrive.stiffness = 1;
-                    zDrive.stiffness = 1;
-                    twist.stiffness = 1;
-                    articulationBody.yDrive = yDrive;
-                    articulationBody.zDrive = zDrive;
-                    articulationBody.xDrive = twist;
-
-                    // articulationBody.maxAngularVelocity = 0.1f;
-                    // articulationBody.maxDepenetrationVelocity = 0.1f;
-                    // articulationBody.maxJointVelocity = 0.1f;
-                    // articulationBody.maxLinearVelocity = 0.1f;
-                }
+                _configurableJoints.Add(joint);
             }
         }
     }

@@ -8,7 +8,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 {
     public class P12RigidbodyPIDKeyframer : MonoBehaviour
     {
-        [FormerlySerializedAs("body")] [SerializeField] private ArticulationBody bodyOptional;
+        [FormerlySerializedAs("body")] [SerializeField] private Rigidbody bodyOptional;
 
         [SerializeField] private P12Remesher remesherOptional;
         [SerializeField] private HumanBodyBones humanBodyBone;
@@ -53,7 +53,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             if (bodyOptional == null)
             {
                 var rigBone = remesherOptional.Rig[humanBodyBone];
-                bodyOptional = rigBone.GetComponent<ArticulationBody>();
+                bodyOptional = rigBone.GetComponent<Rigidbody>();
             }
 
             _positionPid.proportionalGain = proportionalGain;
@@ -69,7 +69,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             if (_debug_clickToResetJoints)
             {
                 _debug_clickToResetJoints = false;
-                bodyOptional.jointPosition = new ArticulationReducedSpace(0f, 0f, 0f);
+                // TODO: Reset configurable joint
             }
 
             var currentCenterOfMass = bodyOptional.worldCenterOfMass;
