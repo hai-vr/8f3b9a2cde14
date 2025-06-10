@@ -205,10 +205,11 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 joint.angularXMotion = ConfigurableJointMotion.Limited;
                 joint.angularYMotion = ConfigurableJointMotion.Limited;
                 joint.angularZMotion = ConfigurableJointMotion.Limited;
-                joint.lowAngularXLimit = new SoftJointLimit { limit = -10, bounciness = 0, contactDistance = 0};
-                joint.highAngularXLimit = new SoftJointLimit { limit = 10, bounciness = 0, contactDistance = 0 };
-                joint.angularYLimit = new SoftJointLimit { limit = 10, bounciness = 0, contactDistance = 0 };
-                joint.angularZLimit = new SoftJointLimit { limit = 10, bounciness = 0, contactDistance = 0 };
+                var limit = 90;
+                joint.lowAngularXLimit = new SoftJointLimit { limit = -limit, bounciness = 0, contactDistance = 0};
+                joint.highAngularXLimit = new SoftJointLimit { limit = limit, bounciness = 0, contactDistance = 0 };
+                joint.angularYLimit = new SoftJointLimit { limit = limit, bounciness = 0, contactDistance = 0 };
+                joint.angularZLimit = new SoftJointLimit { limit = limit, bounciness = 0, contactDistance = 0 };
 
                 joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
                 joint.rotationDriveMode = RotationDriveMode.Slerp;

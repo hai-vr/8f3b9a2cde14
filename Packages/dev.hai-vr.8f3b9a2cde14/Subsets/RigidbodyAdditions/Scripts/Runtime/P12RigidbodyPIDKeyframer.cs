@@ -1,4 +1,5 @@
-﻿using Hai.Project12.DataViz.Runtime;
+﻿using System;
+using Hai.Project12.DataViz.Runtime;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.Remesher.Runtime;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         [SerializeField] private float torqueLimit = 2000f;
 
         [SerializeField] private bool _debug_clickToResetJoints;
+        [SerializeField] private bool _debug_forcePosition;
 
         private H12PIDControllerVector3 _positionPid;
         private H12PIDControllerAngularVelocity _rotationPid;
@@ -62,8 +64,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             _positionPid.integralMaximumMagnitude = integralMaximumMagnitude;
 
             _rotationPid.proportionalGain = proportionalGain * 10;
-            _rotationPid.integralGain = integralGain * 1.5f;
-            _rotationPid.derivativeGain = derivativeGain * 1.5f;
+            _rotationPid.integralGain = integralGain * 2f;
+            _rotationPid.derivativeGain = derivativeGain * 2f;
             _rotationPid.integralMaximumMagnitude = integralMaximumMagnitude;
 
             if (_debug_clickToResetJoints)
