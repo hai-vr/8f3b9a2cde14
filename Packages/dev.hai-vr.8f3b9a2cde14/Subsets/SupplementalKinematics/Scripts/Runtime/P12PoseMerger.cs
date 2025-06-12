@@ -193,6 +193,19 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
                                         var curvedCloseToTooFar = _debug_readjustHighMassPhysicsCurve.Evaluate(closeToTooFar);
                                         var newPosition = Vector3.Lerp(traditionalNullable.position, physicsPositionWeJustSet, curvedCloseToTooFar);
                                         dataViz._DrawLine(physicsPositionWeJustSet, newPosition, Color.orange, Color.orange, 4f);
+
+                                        // FIXME: this condition is not necessary, currently we never readjust high mass on the hip
+                                        if (hbb != Hips)
+                                        {
+                                            // FIXME: This logic is incorrect of the high mass object has multiple children, this whole thing needs to be restricter further up
+                                            var visualParent = visual.parent;
+                                            var modifier = Quaternion.FromToRotation(
+                                                physicsPositionWeJustSet - visualParent.position,
+                                                newPosition - visualParent.position
+                                            );
+                                            visualParent.rotation *= modifier;
+                                        }
+                                        // Order matters, rotate the parent bone before doing this
                                         visual.position = newPosition;
                                     }
                                 }
