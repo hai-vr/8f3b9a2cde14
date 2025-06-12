@@ -34,16 +34,27 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
         };
 
         [SerializeField] private Animator traditionalInput;
+        /// Can be null if we're using the CopyTraditional strategy.
         [SerializeField] private P12Rig physicsRig;
         [SerializeField] private Animator visualOutput;
         [SerializeField] private P12PoseMergerStrategy strategy;
         [SerializeField] private P12QuickDataViz dataViz;
 
+        [SerializeField] private bool runInUpdateLoop = true;
+
+        [SerializeField] private bool _debug_readjustHighMassPhysics = true;
+        [SerializeField] private AnimationCurve _debug_readjustHighMassPhysicsCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+        [SerializeField] private float _debug_readjustHighMassPhysicsCurveClose = 0.02f;
+        [SerializeField] private float _debug_readjustHighMassPhysicsCurveFar = 0.05f;
+
         // TODO: Remove this in the future, when we have a process to create an execution loop that is more tightly controlled.
         // The changes made by this component must not contaminate the networking data.
         private void Update()
         {
-            Resolve();
+            if (runInUpdateLoop)
+            {
+                Resolve();
+            }
         }
 
         /// Call Resolve after the Traditional IK has been resolved, **and after Networking has registered the solved pose**.
@@ -150,11 +161,46 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
                         if (hbb == Hips)
                         {
                             // FIXME: Moving the hips to the physics root may not be the correct strategy to adopt.
-                            visual.position = physicsNullable != null ? physicsNullable.position : traditionalNullable.position;
+                            if (physicsNullable != null)
+                            {
+                                visual.position = physicsNullable.position;
+                            }
+                            else
+                            {
+                                visual.position = traditionalNullable.position;
+                            }
                         }
                         else
                         {
-                            visual.localPosition = traditionalNullable.localPosition;
+                            if (_debug_readjustHighMassPhysics && physicsNullable != null)
+                            {
+                                // Order matters, we reuse the position of the visual right below the physics control test
+                                visual.localPosition = traditionalNullable.localPosition;
+
+                                // Order matters
+                                // FIXME: Move this to the Keyframe controller
+                                // We're gonna need finer control per-bone
+                                if (physicsNullable.GetComponent<Rigidbody>().mass > 75
+                                    // FIXME: This adjustment is not good for the Head bone
+                                    // FIXME: This is a hack for debug purposes only
+                                    && !physicsNullable.name.Contains("Head"))
+                                {
+                                    var physicsPositionWeJustSet = visual.position;
+                                    var distance = Vector3.Distance(physicsPositionWeJustSet, traditionalNullable.position);
+                                    var closeToTooFar = Mathf.InverseLerp(_debug_readjustHighMassPhysicsCurveClose, _debug_readjustHighMassPhysicsCurveFar, distance);
+                                    if (closeToTooFar < 1f)
+                                    {
+                                        var curvedCloseToTooFar = _debug_readjustHighMassPhysicsCurve.Evaluate(closeToTooFar);
+                                        var newPosition = Vector3.Lerp(traditionalNullable.position, physicsPositionWeJustSet, curvedCloseToTooFar);
+                                        dataViz._DrawLine(physicsPositionWeJustSet, newPosition, Color.orange, Color.orange, 4f);
+                                        visual.position = newPosition;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                visual.localPosition = traditionalNullable.localPosition;
+                            }
                         }
 
                         if (physicsNullable != null)

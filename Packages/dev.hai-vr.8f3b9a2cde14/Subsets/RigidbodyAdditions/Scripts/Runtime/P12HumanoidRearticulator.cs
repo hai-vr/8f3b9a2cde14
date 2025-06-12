@@ -198,6 +198,12 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             {
                 body.inertiaTensor = Vector3.one * 0.17f;
             }
+#if UNITY_EDITOR
+            var applier = body.gameObject.AddComponent<P12InertiaTensorEditorApplier>();
+            applier.multiplier = 0.17f;
+            applier.baseInertiaTensor = Vector3.one;
+            applier.Apply();
+#endif
 
             if (hbb != Hips)
             {
