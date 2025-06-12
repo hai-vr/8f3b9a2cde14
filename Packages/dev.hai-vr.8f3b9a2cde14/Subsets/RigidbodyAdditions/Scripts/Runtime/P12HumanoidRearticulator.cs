@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Hai.Project12.HaiSystems.Supporting;
-using Hai.Project12.Remesher.Runtime;
+using Hai.Project12.HaiSystems.DataStructures;
 using UnityEngine;
 using static UnityEngine.HumanBodyBones;
 
@@ -10,17 +9,23 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
     [DefaultExecutionOrder(-90)]
     public class P12HumanoidRearticulator : MonoBehaviour
     {
+        private static readonly HumanBodyBones[] PhysicsRigHbbsInExpectedHierarchyOrder = {
+            Hips, Spine, Chest, UpperChest, Neck, Head,
+            LeftUpperLeg, LeftLowerLeg, LeftFoot,
+            RightUpperLeg, RightLowerLeg, RightFoot,
+            LeftShoulder, LeftUpperArm, LeftLowerArm, LeftHand,
+            RightShoulder, RightUpperArm, RightLowerArm, RightHand,
+        };
+
         [SerializeField] private bool includeFingers;
         [SerializeField] private Animator humanoidReference;
-        [SerializeField] private P12Remesher remesherOptional;
+        [SerializeField] private P12Rig physicsRig; // FIXME: The nullability of this should be replaced. We need the rig
 
         [SerializeField] private float _debug_estimatedBodyHeight;
         [SerializeField] private float _debug_estimatedBodyMass;
         [SerializeField] private bool _debug_hackTensorsToUniform;
 
-        private readonly List<Rigidbody> _articulations = new List<Rigidbody>();
-        private readonly List<ConfigurableJoint> _configurableJoints = new List<ConfigurableJoint>();
-        private Rigidbody _hipArticulation;
+        private readonly List<ConfigurableJoint> _configurableJoints = new();
 
         private void Awake()
         {
@@ -36,9 +41,9 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 if (BoneIsInconsequential(hbb)) continue;
 
                 Transform boneTransform;
-                if (remesherOptional != null)
+                if (physicsRig != null) // FIXME: Not expected, migration necessary
                 {
-                    boneTransform = remesherOptional.Rig.GetValueOrDefault(hbb);
+                    boneTransform = physicsRig.GetBoneTransform(hbb);
                 }
                 else
                 {
@@ -51,13 +56,6 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
                     var articulationBody = boneTransform.GetComponent<Rigidbody>(); // TODO: Also support rigidbody?
                     availableBones.Add((hbb, articulationBody));
-
-                    if (hbb == Hips)
-                    {
-                        _hipArticulation = articulationBody;
-                    }
-
-                    _articulations.Add(articulationBody);
                 }
             }
 
@@ -65,16 +63,6 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             {
                 configurableJoint.connectedBody = configurableJoint.transform.parent.GetComponent<Rigidbody>();
             }
-
-            // HACK: Test conflicts
-            // foreach (var availableBone in availableBones)
-            // {
-            //     var articulationBody = availableBone.Item2;
-            //     articulationBody.jointType = ArticulationJointType.SphericalJoint;
-            //     articulationBody.swingYLock = ArticulationDofLock.FreeMotion;
-            //     articulationBody.swingZLock = ArticulationDofLock.FreeMotion;
-            //     articulationBody.twistLock = ArticulationDofLock.FreeMotion;
-            // }
 
             // Adjust mass
 
@@ -90,21 +78,6 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             {
                 var massToApply = (MassDistribution(availableBone.Item1) / totalDistribution) * totalBodyMass;
                 availableBone.Item2.mass = massToApply;
-            }
-        }
-
-        private void Update()
-        {
-            if (remesherOptional != null)
-            {
-                foreach (KeyValuePair<HumanBodyBones, Transform> hbbToRig in remesherOptional.Rig)
-                {
-                    var rig = hbbToRig.Value;
-                    // TODO: Cache the bone transform
-                    var visualRepresentation = humanoidReference.GetBoneTransform(hbbToRig.Key);
-                    visualRepresentation.position = rig.position;
-                    visualRepresentation.rotation = rig.rotation;
-                }
             }
         }
 
@@ -198,26 +171,33 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             var body = go.AddComponent<Rigidbody>();
             body.interpolation = RigidbodyInterpolation.Interpolate;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+            body.useGravity = false; // The keyframe controller should set this to true.
 
             // FIXME: The inertia tensor for the spine and the foot on Wolfram are wrong.
             // body.automaticInertiaTensor = false;
             // body.inertiaTensor = Vector3.one * 0.17f;
             var automaticTensorValue = body.inertiaTensor;
             body.automaticInertiaTensor = false;
-            var minimumTensorComponent = 0.05f;
-            // var minimumTensorComponent = automaticTensorValue.magnitude * 0.5f;
-            var adjustedTensor = new Vector3(
-                Mathf.Max(minimumTensorComponent, automaticTensorValue.x),
-                Mathf.Max(minimumTensorComponent, automaticTensorValue.y),
-                Mathf.Max(minimumTensorComponent, automaticTensorValue.z)
-            );
-            // FIXME: this is a hack
-            if (_debug_hackTensorsToUniform)
+            if (false)
             {
-                adjustedTensor = Vector3.one * 0.17f;
+                var minimumTensorComponent = 0.05f;
+                // var minimumTensorComponent = automaticTensorValue.magnitude * 0.5f;
+                var adjustedTensor = new Vector3(
+                    Mathf.Max(minimumTensorComponent, automaticTensorValue.x),
+                    Mathf.Max(minimumTensorComponent, automaticTensorValue.y),
+                    Mathf.Max(minimumTensorComponent, automaticTensorValue.z)
+                );
+                // FIXME: this is a hack
+                if (_debug_hackTensorsToUniform)
+                {
+                    adjustedTensor = Vector3.one * 0.17f;
+                }
+                body.inertiaTensor = adjustedTensor;
             }
-            body.inertiaTensor = adjustedTensor;
-            H12Debug.Log($"Inertia tensor was ({automaticTensorValue.x:0.0000}, {automaticTensorValue.y:0.0000}, {automaticTensorValue.z:0.0000}) on {hbb}, new tensor is ({adjustedTensor.x:0.0000}, {adjustedTensor.y:0.0000}, {adjustedTensor.z:0.0000})");
+            else
+            {
+                body.inertiaTensor = Vector3.one * 0.17f;
+            }
 
             if (hbb != Hips)
             {
@@ -237,10 +217,18 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 // joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
                 // hack: PositionDamper 0 is an attempt to fix arms flailing
                 // TODO: Driven, see readme.md, when not-driven then positionDamper should probably be 0.
-                var isArmMember = hbb is LeftUpperArm or RightUpperArm or LeftLowerArm or RightLowerArm or LeftHand or RightHand;
-                var positionSpring = isArmMember ? 10f : 0f;
-                var positionDamper = isArmMember ? positionSpring : 100f;
-                joint.slerpDrive = new JointDrive { positionSpring = positionSpring, positionDamper = positionDamper, maximumForce = Mathf.Infinity };
+                if (false)
+                {
+                    // DEMO FOR FLAILING ARMS ONLY
+                    var isArmMember = hbb is LeftUpperArm or RightUpperArm or LeftLowerArm or RightLowerArm or LeftHand or RightHand;
+                    var positionSpring = isArmMember ? 10f : 0f;
+                    var positionDamper = isArmMember ? positionSpring : 100f;
+                    joint.slerpDrive = new JointDrive { positionSpring = positionSpring, positionDamper = positionDamper, maximumForce = Mathf.Infinity };
+                }
+                else
+                {
+                    joint.slerpDrive = new JointDrive { positionSpring = 0f, positionDamper = 100f, maximumForce = Mathf.Infinity };
+                }
                 joint.rotationDriveMode = RotationDriveMode.Slerp;
 
                 // Junk

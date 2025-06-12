@@ -1,0 +1,22 @@
+{
+    "name": "Hai.Project12.SupplementalKinematics.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "BattlePhazeSettingsManger",
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "Hai.Project12.DataViz.Runtime",
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.HaiSystems.DataStructures"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

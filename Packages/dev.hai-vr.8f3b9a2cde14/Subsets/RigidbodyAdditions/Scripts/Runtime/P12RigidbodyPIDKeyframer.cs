@@ -1,6 +1,6 @@
 ﻿using Hai.Project12.DataViz.Runtime;
+using Hai.Project12.HaiSystems.DataStructures;
 using Hai.Project12.HaiSystems.Supporting;
-using Hai.Project12.Remesher.Runtime;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -10,7 +10,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
     {
         [FormerlySerializedAs("body")] [SerializeField] private Rigidbody bodyOptional;
 
-        [SerializeField] private P12Remesher remesherOptional;
+        [SerializeField] private P12Rig physicsRig;
         [SerializeField] private HumanBodyBones humanBodyBone;
 
         [FormerlySerializedAs("targetCenterOfMass")] [SerializeField] private Transform target; // TODO: This is no longer a center of mass
@@ -20,6 +20,11 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         [SerializeField] private float integralGain = 10;
         [SerializeField] private float derivativeGain = 40;
         [SerializeField] private float integralMaximumMagnitude = 10;
+
+        [SerializeField] private float proportionalTorqueMul = 10f;
+        [SerializeField] private float integralTorqueMul = 1f;
+        [SerializeField] private float derivativeTorqueMul = 1f;
+        [SerializeField] private float integralMaximumMagnitudelTorqueMul = 1f;
 
         [SerializeField] private bool compensateGravity = true;
         [SerializeField] private float forceLimit = 1000f;
@@ -54,8 +59,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         {
             if (bodyOptional == null)
             {
-                var rigBone = remesherOptional.Rig[humanBodyBone];
-                bodyOptional = rigBone.GetComponent<Rigidbody>();
+                var rigBone = physicsRig.GetBoneTransform(humanBodyBone);
+                bodyOptional = rigBone.GetComponent<Rigidbody>(); // TODO: Have the rigidbody already in the rig
             }
 
             _positionPid.proportionalGain = proportionalGain;
@@ -63,10 +68,10 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             _positionPid.derivativeGain = derivativeGain;
             _positionPid.integralMaximumMagnitude = integralMaximumMagnitude;
 
-            _rotationPid.proportionalGain = proportionalGain * 10;
-            _rotationPid.integralGain = integralGain * 1;
-            _rotationPid.derivativeGain = derivativeGain * 1;
-            _rotationPid.integralMaximumMagnitude = integralMaximumMagnitude;
+            _rotationPid.proportionalGain = proportionalGain * proportionalTorqueMul;
+            _rotationPid.integralGain = integralGain * integralTorqueMul;
+            _rotationPid.derivativeGain = derivativeGain * derivativeTorqueMul;
+            _rotationPid.integralMaximumMagnitude = integralMaximumMagnitude * integralMaximumMagnitudelTorqueMul;
 
             if (_debug_clickToResetJoints)
             {

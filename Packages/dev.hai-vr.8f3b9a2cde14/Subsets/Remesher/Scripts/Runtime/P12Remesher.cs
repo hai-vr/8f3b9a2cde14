@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using Hai.Project12.HaiSystems.DataStructures;
 using Unity.Collections;
 using UnityEngine;
 
 namespace Hai.Project12.Remesher.Runtime
 {
-    [DefaultExecutionOrder(-100)]
     /// Given SkinnedMeshRenderers, this splits the mesh into several meshes where each mesh represents a bone,
     /// and adds a convex hull MeshCollider to each bone. All the mesh simplification concerns are handled by
     /// what is already built-in the MeshCollider, not us.
+    [DefaultExecutionOrder(-100)]
     public class P12Remesher : MonoBehaviour
     {
         private const float BoneWeightAcceptanceThreshold = 0.4f;
@@ -25,9 +26,8 @@ namespace Hai.Project12.Remesher.Runtime
         [SerializeField] private Animator humanoidReference; // must be non-null if excludeFingerBones is true.
         [SerializeField] private PhysicsMaterial physicsMaterial;
 
+        [SerializeField] private P12Rig physicsRig;
         [SerializeField] private Transform newRigRoot; // Only used for CreateCollidersOnSeparateRig
-
-        [NonSerialized] public Dictionary<HumanBodyBones, Transform> Rig;
 
         private void Awake()
         {
@@ -52,33 +52,31 @@ namespace Hai.Project12.Remesher.Runtime
 
             if (rigidbodyPhysics == P12RemesherRigidbodyPhysics.CreateCollidersOnSeparateRig)
             {
-                var boneToTransform = new Dictionary<HumanBodyBones, Transform>();
-
-                var hips = RecreateBone(HumanBodyBones.Hips, boneToTransform);
+                var hips = RecreateExistingBone(HumanBodyBones.Hips);
                 hips.gameObject.SetActive(false);
                 hips.transform.SetParent(newRigRoot, true);
 
-                var spine = RecreateBone(HumanBodyBones.Spine, boneToTransform);
-                var chest = RecreateBone(HumanBodyBones.Chest, boneToTransform);
-                // TODO: Upper chest
-                var neck = RecreateBone(HumanBodyBones.Neck, boneToTransform);
-                var head = RecreateBone(HumanBodyBones.Head, boneToTransform);
+                var spine = RecreateExistingBone(HumanBodyBones.Spine);
+                var chest = RecreateExistingBone(HumanBodyBones.Chest);
+                // TODO: Recreate upper chest
+                var neck = RecreateExistingBone(HumanBodyBones.Neck);
+                var head = RecreateExistingBone(HumanBodyBones.Head);
 
-                var upperArmLeft = RecreateBone(HumanBodyBones.LeftUpperArm, boneToTransform);
-                var lowerArmLeft = RecreateBone(HumanBodyBones.LeftLowerArm, boneToTransform);
-                var handLeft = RecreateBone(HumanBodyBones.LeftHand, boneToTransform);
+                var upperArmLeft = RecreateExistingBone(HumanBodyBones.LeftUpperArm);
+                var lowerArmLeft = RecreateExistingBone(HumanBodyBones.LeftLowerArm);
+                var handLeft = RecreateExistingBone(HumanBodyBones.LeftHand);
 
-                var upperArmRight = RecreateBone(HumanBodyBones.RightUpperArm, boneToTransform);
-                var lowerArmRight = RecreateBone(HumanBodyBones.RightLowerArm, boneToTransform);
-                var handRight = RecreateBone(HumanBodyBones.RightHand, boneToTransform);
+                var upperArmRight = RecreateExistingBone(HumanBodyBones.RightUpperArm);
+                var lowerArmRight = RecreateExistingBone(HumanBodyBones.RightLowerArm);
+                var handRight = RecreateExistingBone(HumanBodyBones.RightHand);
 
-                var upperLegLeft = RecreateBone(HumanBodyBones.LeftUpperLeg, boneToTransform);
-                var lowerLegLeft = RecreateBone(HumanBodyBones.LeftLowerLeg, boneToTransform);
-                var footLeft = RecreateBone(HumanBodyBones.LeftFoot, boneToTransform);
+                var upperLegLeft = RecreateExistingBone(HumanBodyBones.LeftUpperLeg);
+                var lowerLegLeft = RecreateExistingBone(HumanBodyBones.LeftLowerLeg);
+                var footLeft = RecreateExistingBone(HumanBodyBones.LeftFoot);
 
-                var upperLegRight = RecreateBone(HumanBodyBones.RightUpperLeg, boneToTransform);
-                var lowerLegRight = RecreateBone(HumanBodyBones.RightLowerLeg, boneToTransform);
-                var footRight = RecreateBone(HumanBodyBones.RightFoot, boneToTransform);
+                var upperLegRight = RecreateExistingBone(HumanBodyBones.RightUpperLeg);
+                var lowerLegRight = RecreateExistingBone(HumanBodyBones.RightLowerLeg);
+                var footRight = RecreateExistingBone(HumanBodyBones.RightFoot);
 
                 spine.SetParent(hips, true);
                 chest.SetParent(spine, true);
@@ -103,8 +101,6 @@ namespace Hai.Project12.Remesher.Runtime
                 upperLegRight.SetParent(hips, true);
                 lowerLegRight.SetParent(upperLegRight, true);
                 footRight.SetParent(lowerLegRight, true);
-
-                Rig = boneToTransform;
             }
 
             var allColliders = new List<Collider>();
@@ -122,8 +118,8 @@ namespace Hai.Project12.Remesher.Runtime
                 var hips = newRigRoot.GetChild(0).GetComponent<MeshCollider>();
                 IgnoreRecurse(hips);
 
-                var spine = Rig[HumanBodyBones.Spine].GetComponent<MeshCollider>();
-                var chest = Rig[HumanBodyBones.Chest].GetComponent<MeshCollider>();
+                var spine = physicsRig.GetBoneTransform(HumanBodyBones.Spine).GetComponent<MeshCollider>();
+                var chest = physicsRig.GetBoneTransform(HumanBodyBones.Chest).GetComponent<MeshCollider>();
                 Physics.IgnoreCollision(
                     chest,
                     hips
@@ -131,19 +127,19 @@ namespace Hai.Project12.Remesher.Runtime
 
                 Physics.IgnoreCollision(
                     spine,
-                    Rig[HumanBodyBones.LeftUpperLeg].GetComponent<MeshCollider>()
+                    physicsRig.GetBoneTransform(HumanBodyBones.LeftUpperLeg).GetComponent<MeshCollider>()
                 );
                 Physics.IgnoreCollision(
                     spine,
-                    Rig[HumanBodyBones.RightUpperLeg].GetComponent<MeshCollider>()
+                    physicsRig.GetBoneTransform(HumanBodyBones.RightUpperLeg).GetComponent<MeshCollider>()
                 );
                 Physics.IgnoreCollision(
                     chest,
-                    Rig[HumanBodyBones.LeftUpperLeg].GetComponent<MeshCollider>()
+                    physicsRig.GetBoneTransform(HumanBodyBones.LeftUpperLeg).GetComponent<MeshCollider>()
                 );
                 Physics.IgnoreCollision(
                     chest,
-                    Rig[HumanBodyBones.RightUpperLeg].GetComponent<MeshCollider>()
+                    physicsRig.GetBoneTransform(HumanBodyBones.RightUpperLeg).GetComponent<MeshCollider>()
                 );
             }
 
@@ -160,16 +156,16 @@ namespace Hai.Project12.Remesher.Runtime
             }
         }
 
-        private Transform RecreateBone(HumanBodyBones bone, Dictionary<HumanBodyBones, Transform> boneToTransform_mutated)
+        private Transform RecreateExistingBone(HumanBodyBones bone)
         {
-            var hips = humanoidReference.GetBoneTransform(bone);
+            var existingBone = humanoidReference.GetBoneTransform(bone);
             var result = new GameObject
             {
-                transform = { position = hips.position, rotation = hips.rotation },
+                transform = { position = existingBone.position, rotation = existingBone.rotation },
                 name = bone.ToString()
             }.transform;
 
-            boneToTransform_mutated[bone] = result;
+            physicsRig.SetBoneTransform(bone, result);
 
             return result;
         }
@@ -383,7 +379,7 @@ namespace Hai.Project12.Remesher.Runtime
                         var matchedSmrBoneHbbIndex = matchedSmrBones.IndexOf(smrBone);
                         if (matchedSmrBoneHbbIndex != -1)
                         {
-                            var go = Rig[applicableHbbs[matchedSmrBoneHbbIndex]].gameObject;
+                            var go = physicsRig.GetBoneTransform(applicableHbbs[matchedSmrBoneHbbIndex]).gameObject;
 
                             if (true)
                             {

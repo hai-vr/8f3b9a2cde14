@@ -6,7 +6,8 @@
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",
-        "Hai.Project12.HaiSystems.Supporting"
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.HaiSystems.DataStructures"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
