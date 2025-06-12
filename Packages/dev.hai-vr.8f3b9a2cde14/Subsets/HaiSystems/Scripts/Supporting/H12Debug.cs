@@ -56,6 +56,7 @@ namespace Hai.Project12.HaiSystems.Supporting
                 LogTag.Project12 => "#9370DB",        // Medium Purple
                 // LogTag.Device => "#00CED1",        // Dark Turquoise
                 LogTag.Vixxy => "#8B0000",        // Dark Red
+                LogTag.VixxyNetworking => "#8B0000",        // Dark Red
                 // LogTag.Input => "#808000",         // Olive
                 // LogTag.Gizmo => "#FF6347",         // Tomato
                 // LogTag.Scene => "#4682B4",         // Steel Blue
@@ -91,7 +92,8 @@ namespace Hai.Project12.HaiSystems.Supporting
             Project12,
             ListenNetworking,
             SteamNetworking,
-            Vixxy
+            Vixxy,
+            VixxyNetworking,
         }
 
         public enum MessageType

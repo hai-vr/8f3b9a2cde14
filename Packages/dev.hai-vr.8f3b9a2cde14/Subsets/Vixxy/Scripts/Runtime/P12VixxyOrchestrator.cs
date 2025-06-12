@@ -31,6 +31,9 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private readonly HashSet<I12VixxyAggregator> _workAggregators = new();
 
+        public event NetworkDataUpdateRequired OnNetworkDataUpdateRequired;
+        public delegate void NetworkDataUpdateRequired();
+
         private void Awake()
         {
             if (!acquisitionService) acquisitionService = AcquisitionService.SceneInstance;

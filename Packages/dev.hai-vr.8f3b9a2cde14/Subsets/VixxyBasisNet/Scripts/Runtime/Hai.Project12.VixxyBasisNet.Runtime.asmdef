@@ -1,0 +1,24 @@
+{
+    "name": "Hai.Project12.VixxyBasisNet.Runtime",
+    "rootNamespace": "Hai.Project12.Vixxy.Runtime",
+    "references": [
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "BasisDebug",
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.Vixxy.Runtime",
+        "HVR.Basis.Comms",
+        "BasisSDK",
+        "LiteNetLib"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
