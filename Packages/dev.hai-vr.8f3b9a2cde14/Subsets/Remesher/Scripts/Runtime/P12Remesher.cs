@@ -109,6 +109,12 @@ namespace Hai.Project12.Remesher.Runtime
                 if (null != skinnedMeshRenderer)
                 {
                     var generatedColliders = ManipulateSmr(skinnedMeshRenderer, boneExclusions);
+
+                    foreach (Collider generatedCollider in generatedColliders)
+                    {
+                        generatedCollider.excludeLayers = 1 << LayerMask.NameToLayer("Player");
+                    }
+
                     allColliders.AddRange(generatedColliders);
                 }
             }

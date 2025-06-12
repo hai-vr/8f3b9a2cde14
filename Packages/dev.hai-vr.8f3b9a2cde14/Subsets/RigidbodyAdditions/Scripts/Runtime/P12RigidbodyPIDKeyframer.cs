@@ -13,8 +13,10 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
         [SerializeField] private P12Rig physicsRig;
         [SerializeField] private HumanBodyBones humanBodyBone;
 
-        [FormerlySerializedAs("targetCenterOfMass")] [SerializeField] private Transform target; // TODO: This is no longer a center of mass
+        [SerializeField] private Transform target; // TODO: This is no longer a center of mass
         [EarlyInjectable] [SerializeField] private P12QuickDataViz dataViz;
+
+        [SerializeField] private Animator targetReferenceOptional;
 
         [SerializeField] private float proportionalGain = 1000;
         [SerializeField] private float integralGain = 10;
@@ -82,7 +84,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             var currentCenterOfMass = bodyOptional.worldCenterOfMass;
             if (float.IsNaN(currentCenterOfMass.x)) return;
 
-            var targetCenterOfMass = target.position + target.TransformVector(bodyOptional.centerOfMass);
+            var actualTarget = targetReferenceOptional != null ? targetReferenceOptional.GetBoneTransform(humanBodyBone) : target;
+            var targetCenterOfMass = actualTarget.position + actualTarget.TransformVector(bodyOptional.centerOfMass);
 
             var force = _positionPid._Update(Time.fixedDeltaTime, currentCenterOfMass, targetCenterOfMass);
             var forceMagnitude = force.magnitude;
@@ -90,7 +93,7 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             bodyOptional.AddForce(force, ForceMode.Acceleration);
 
             var currentRotation = bodyOptional.transform.rotation;
-            var targetRotation = target.rotation;
+            var targetRotation = actualTarget.rotation;
 
             var torque = _rotationPid._Update(Time.fixedDeltaTime, currentRotation, targetRotation);
             var torqueMagnitude = torque.magnitude;
@@ -110,7 +113,6 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             _drawCurrentRotation = currentRotation;
             _drawTargetRotation = targetRotation;
 
-            // Compensate for gravity
             if (compensateGravity)
             {
                 bodyOptional.AddForce(-Physics.gravity, ForceMode.Force);
