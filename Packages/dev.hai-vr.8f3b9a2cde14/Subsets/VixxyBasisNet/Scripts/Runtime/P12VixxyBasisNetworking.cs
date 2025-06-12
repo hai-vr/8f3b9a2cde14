@@ -1,4 +1,5 @@
-﻿using Basis.Scripts.BasisSdk;
+﻿using System;
+using Basis.Scripts.BasisSdk;
 using Basis.Scripts.Behaviour;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.Vixxy.Runtime;
@@ -49,18 +50,25 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
 
         public override void OnNetworkChange(byte messageIndex, bool IsLocallyOwned)
         {
+            if (_relayLateInit != null)
+            {
+                H12NetworkMessageUtilities.ProtocolAccident("Received OnNetworkChange more than once in this object's lifetime, this is not normal.");
+                return;
+            }
             _relayLateInit = IsLocallyOwned ? new H12Wearer(this) : new H12NonWearer(this);
             _relayLateInit.OnNetworkInitialized();
         }
 
-        public override void OnNetworkMessageReceived(ushort RemoteUser, byte[] buffer, DeliveryMethod DeliveryMethod)
+        public override void OnNetworkMessageReceived(ushort RemoteUser, byte[] unsafeBuffer, DeliveryMethod DeliveryMethod)
         {
-            if (_relayLateInit != null) _relayLateInit.OnNetworkMessageReceived(RemoteUser, buffer, DeliveryMethod);
+            if (_relayLateInit != null) _relayLateInit.OnNetworkMessageReceived(User(RemoteUser), unsafeBuffer, DeliveryMethod);
+            else H12NetworkMessageUtilities.ProtocolAccident("Received OnNetworkMessageReceived before any OnNetworkChange was received.");
         }
 
-        public override void OnNetworkMessageServerReductionSystem(byte[] buffer)
+        public override void OnNetworkMessageServerReductionSystem(byte[] unsafeBuffer)
         {
-            if (_relayLateInit != null) _relayLateInit.OnNetworkMessageServerReductionSystem(buffer);
+            if (_relayLateInit != null) _relayLateInit.OnNetworkMessageServerReductionSystem(unsafeBuffer);
+            else H12NetworkMessageUtilities.ProtocolAccident("Received OnNetworkMessageServerReductionSystem before any OnNetworkChange was received.");
         }
 
         public void SubmitReliable(byte[] buffer)
@@ -68,34 +76,30 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
             NetworkMessageSend(buffer, MainMessageDeliveryMethod);
         }
 
-        internal object NonWearer_DecodePacket()
+        private H12AvatarContextualUser User(ushort user)
+        {
+            return new H12AvatarContextualUser
+            {
+                User = user,
+                IsWearer = user == _wearerId
+            };
+        }
+
+        public void Wearer_SubmitFullSnapshotTo(H12AvatarContextualUser remoteUser)
         {
             throw new System.NotImplementedException();
         }
 
-        internal object Wearer_DecodePacket(byte[] buffer)
+        public void NonWearer_ProcessFullSnapshot(object subBuffer)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
+    }
 
-        internal bool CheckThat_IsSelf(ushort remoteUser) => false;
-        internal bool CheckThat_IsWearer(ushort remoteUser) => remoteUser == _wearerId;
-        internal bool CheckThat_IsNonWearer(ushort remoteUser) => remoteUser != _wearerId;
-
-        internal void ProtocolError(string message)
-        {
-            H12Debug.LogError(message, H12Debug.LogTag.VixxyNetworking);
-        }
-
-        internal void ProtocolWarning(string message)
-        {
-            H12Debug.LogWarning(message, H12Debug.LogTag.VixxyNetworking);
-        }
-
-        internal void ProtocolAssetMismatch(string message)
-        {
-            H12Debug.LogError(message, H12Debug.LogTag.VixxyNetworking);
-        }
+    public struct H12AvatarContextualUser
+    {
+        public ushort User;
+        public bool IsWearer;
     }
 
     internal interface I12Net
@@ -105,7 +109,7 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
         internal const byte SubmitIncremental_W_to_NW = 0x03;
 
         void OnNetworkInitialized();
-        void OnNetworkMessageReceived(ushort RemoteUser, byte[] buffer, DeliveryMethod DeliveryMethod);
-        void OnNetworkMessageServerReductionSystem(byte[] buffer);
+        void OnNetworkMessageReceived(H12AvatarContextualUser RemoteUser, byte[] unsafeBuffer, DeliveryMethod DeliveryMethod);
+        void OnNetworkMessageServerReductionSystem(byte[] unsafeBuffer);
     }
 }

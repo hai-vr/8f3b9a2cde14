@@ -1,11 +1,13 @@
-﻿using LiteNetLib;
+﻿using System;
+using Hai.Project12.HaiSystems.Supporting;
+using LiteNetLib;
 
 namespace Hai.Project12.VixxyBasisNet.Runtime
 {
     internal class H12NonWearer : I12Net
     {
         private readonly P12VixxyBasisNetworking _vixxyNet;
-        private readonly byte[] _premade_RequestState_NW_to_W = { I12Net.RequestState_NW_to_W };
+        private readonly byte[] Buffer_RequestState_NW_to_W = { I12Net.RequestState_NW_to_W };
 
         public H12NonWearer(P12VixxyBasisNetworking vixxyNet)
         {
@@ -14,38 +16,55 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
 
         public void OnNetworkInitialized()
         {
-            _vixxyNet.SubmitReliable(_premade_RequestState_NW_to_W);
+            _vixxyNet.SubmitReliable(Buffer_RequestState_NW_to_W);
         }
 
-        public void OnNetworkMessageReceived(ushort RemoteUser, byte[] buffer, DeliveryMethod DeliveryMethod)
+        public void OnNetworkMessageReceived(H12AvatarContextualUser RemoteUser, byte[] unsafeBuffer, DeliveryMethod DeliveryMethod)
         {
-            // TODO: Handle packets:
-            // - From Wearer: SubmitFullSnapshot => ()
-            // - (Packets from self must be considered as programming errors)
-            // - (Packets from other non-Wearers must be considered as network tampering with non-standard components)
-            if (_vixxyNet.CheckThat_IsWearer(RemoteUser))
+            if (RemoteUser.IsWearer)
             {
-                ProceedWithDecoding(buffer);
-            }
-            else if (_vixxyNet.CheckThat_IsSelf(RemoteUser))
-            {
-                _vixxyNet.ProtocolError("Protocol error: Cannot receive a message from self.");
+                ProceedWithDecoding(unsafeBuffer);
             }
             else
             {
-                _vixxyNet.ProtocolError("Protocol error: Non-wearers cannot receive this message from other non-wearers.");
+                H12NetworkMessageUtilities.ProtocolError("Non-wearers cannot receive this message from other non-wearers.");
             }
         }
 
-        public void OnNetworkMessageServerReductionSystem(byte[] buffer)
+        public void OnNetworkMessageServerReductionSystem(byte[] unsafeBuffer)
         {
-            ProceedWithDecoding(buffer);
+            ProceedWithDecoding(unsafeBuffer);
         }
 
-        private void ProceedWithDecoding(byte[] buffer)
+        private void ProceedWithDecoding(byte[] unsafeBuffer)
         {
-            var decodedPacket = _vixxyNet.NonWearer_DecodePacket();
-            // TODO: Do stuff with that packet
+            if (unsafeBuffer.Length == 0)
+            {
+                H12NetworkMessageUtilities.ProtocolError("Buffer cannot be empty.");
+                return;
+            }
+
+            byte packetId = unsafeBuffer[0];
+            switch (packetId)
+            {
+                case I12Net.SubmitFullSnapshot_W_to_NW:
+                    var TODO_DERIVE_BUFFER_LENGTH = 12345;
+                    if (unsafeBuffer.Length != TODO_DERIVE_BUFFER_LENGTH)
+                    {
+                        H12NetworkMessageUtilities.ProtocolError_IncorrectFixedBufferLength(unsafeBuffer, TODO_DERIVE_BUFFER_LENGTH);
+                        return;
+                    }
+
+                    // TODO: We should decode the buffer right there. Otherwise we have to check the buffer size validity down there.
+                    var arraySegment = H12NetworkMessageUtilities.SubBuffer(unsafeBuffer);
+                    object snapshot = null; // TODO: Decode
+                    _vixxyNet.NonWearer_ProcessFullSnapshot(snapshot);
+                    break;
+
+                default:
+                    H12NetworkMessageUtilities.ProtocolError("Unknown packet ID.");
+                    break;
+            }
         }
     }
 }

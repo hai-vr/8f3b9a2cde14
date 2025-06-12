@@ -1,4 +1,5 @@
-﻿using LiteNetLib;
+﻿using Hai.Project12.HaiSystems.Supporting;
+using LiteNetLib;
 
 namespace Hai.Project12.VixxyBasisNet.Runtime
 {
@@ -16,27 +17,48 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
             _vixxyNet.Wearer_SubmitFullSnapshot_ToAllNonWearers();
         }
 
-        public void OnNetworkMessageReceived(ushort RemoteUser, byte[] buffer, DeliveryMethod DeliveryMethod)
+        public void OnNetworkMessageReceived(H12AvatarContextualUser RemoteUser, byte[] unsafeBuffer, DeliveryMethod DeliveryMethod)
         {
-            if (_vixxyNet.CheckThat_IsNonWearer(RemoteUser))
+            if (!RemoteUser.IsWearer)
             {
-                ProceedWithDecoding(buffer);
+                ProceedWithDecoding(unsafeBuffer, RemoteUser);
             }
             else
             {
-                _vixxyNet.ProtocolError("Protocol error: Cannot receive a message from self.");
+                H12NetworkMessageUtilities.StateError("Wearer can't receive a message from wearer.");
             }
         }
 
-        public void OnNetworkMessageServerReductionSystem(byte[] buffer)
+        public void OnNetworkMessageServerReductionSystem(byte[] unsafeBuffer)
         {
-            _vixxyNet.ProtocolError("Protocol error: Server reduction system cannot be received by wearer.");
+            H12NetworkMessageUtilities.StateError("Server reduction system message cannot be received by wearer.");
         }
 
-        private void ProceedWithDecoding(byte[] buffer)
+        private void ProceedWithDecoding(byte[] unsafeBuffer, H12AvatarContextualUser remoteUser)
         {
-            var decodedPacket = _vixxyNet.Wearer_DecodePacket(buffer);
-            // TODO: Do stuff with that packet
+            if (unsafeBuffer.Length == 0)
+            {
+                H12NetworkMessageUtilities.ProtocolError("Buffer cannot be empty.");
+                return;
+            }
+
+            byte packetId = unsafeBuffer[0];
+            switch (packetId)
+            {
+                case I12Net.RequestState_NW_to_W:
+                    if (unsafeBuffer.Length != 1)
+                    {
+                        H12NetworkMessageUtilities.ProtocolError($"Buffer has incorrect length (expected 1, was {unsafeBuffer.Length}.");
+                        return;
+                    }
+
+                    _vixxyNet.Wearer_SubmitFullSnapshotTo(remoteUser);
+                    break;
+
+                default:
+                    H12NetworkMessageUtilities.ProtocolError("Unknown packet ID.");
+                    break;
+            }
         }
     }
 }
