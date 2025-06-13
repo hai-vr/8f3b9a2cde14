@@ -24,23 +24,41 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
         private readonly Dictionary<HumanBodyBones, float> _defaultMass = new();
         private readonly Dictionary<HumanBodyBones, H12RigData> _rigData = new();
 
-        [SerializeField] private P12RigState controlHips = P12RigState.Powered;
-        [SerializeField] private P12RigState controlSpine = P12RigState.Powered;
-        [SerializeField] private P12RigState controlChest = P12RigState.Powered;
-        [SerializeField] private P12RigState controlNeck = P12RigState.Powered;
-        [SerializeField] private P12RigState controlHead = P12RigState.Powered;
-        [SerializeField] private P12RigState controlLeftUpperArm = P12RigState.Powered;
-        [SerializeField] private P12RigState controlLeftLowerArm = P12RigState.Powered;
-        [SerializeField] private P12RigState controlLeftHand = P12RigState.Powered;
-        [SerializeField] private P12RigState controlRightUpperArm = P12RigState.Powered;
-        [SerializeField] private P12RigState controlRightLowerArm = P12RigState.Powered;
-        [SerializeField] private P12RigState controlRightHand = P12RigState.Powered;
-        [SerializeField] private P12RigState controlLeftUpperLeg = P12RigState.Powered;
-        [SerializeField] private P12RigState controlLeftLowerLeg = P12RigState.Powered;
-        [SerializeField] private P12RigState controlLeftFoot = P12RigState.Keyframed;
-        [SerializeField] private P12RigState controlRightUpperLeg = P12RigState.Powered;
-        [SerializeField] private P12RigState controlRightLowerLeg = P12RigState.Powered;
-        [SerializeField] private P12RigState controlRightFoot = P12RigState.Keyframed;
+        [Range(0,2)] [SerializeField] private int iHips = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iSpine = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iChest = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iNeck = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iHead = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iLeftUpperArm = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iLeftLowerArm = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iLeftHand = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iRightUpperArm = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iRightLowerArm = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iRightHand = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iLeftUpperLeg = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iLeftLowerLeg = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iLeftFoot = (int)P12RigState.Keyframed;
+        [Range(0,2)] [SerializeField] private int iRightUpperLeg = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iRightLowerLeg = (int)P12RigState.Powered;
+        [Range(0,2)] [SerializeField] private int iRightFoot = (int)P12RigState.Keyframed;
+
+        private P12RigState controlHips => (P12RigState)iHips;
+        private P12RigState controlSpine => (P12RigState)iSpine;
+        private P12RigState controlChest => (P12RigState)iChest;
+        private P12RigState controlNeck => (P12RigState)iNeck;
+        private P12RigState controlHead => (P12RigState)iHead;
+        private P12RigState controlLeftUpperArm => (P12RigState)iLeftUpperArm;
+        private P12RigState controlLeftLowerArm => (P12RigState)iLeftLowerArm;
+        private P12RigState controlLeftHand => (P12RigState)iLeftHand;
+        private P12RigState controlRightUpperArm => (P12RigState)iRightUpperArm;
+        private P12RigState controlRightLowerArm => (P12RigState)iRightLowerArm;
+        private P12RigState controlRightHand => (P12RigState)iRightHand;
+        private P12RigState controlLeftUpperLeg => (P12RigState)iLeftUpperLeg;
+        private P12RigState controlLeftLowerLeg => (P12RigState)iLeftLowerLeg;
+        private P12RigState controlLeftFoot => (P12RigState)iLeftFoot;
+        private P12RigState controlRightUpperLeg => (P12RigState)iRightUpperLeg;
+        private P12RigState controlRightLowerLeg => (P12RigState)iRightLowerLeg;
+        private P12RigState controlRightFoot => (P12RigState)iRightFoot;
 
         private struct H12RigData
         {
@@ -271,6 +289,6 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
 
     public enum P12RigState
     {
-        Powered, Keyframed, Flailing
+        Flailing, Powered, Keyframed
     }
 }
