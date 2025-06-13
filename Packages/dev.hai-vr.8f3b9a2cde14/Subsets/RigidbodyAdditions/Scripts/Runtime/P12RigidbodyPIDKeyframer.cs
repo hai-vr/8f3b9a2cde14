@@ -10,27 +10,27 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
     {
         [FormerlySerializedAs("body")] [SerializeField] private Rigidbody bodyOptional;
 
-        [SerializeField] private P12Rig physicsRig;
-        [SerializeField] private HumanBodyBones humanBodyBone;
+        [SerializeField] internal P12Rig physicsRig;
+        [SerializeField] internal HumanBodyBones humanBodyBone;
 
-        [SerializeField] private Transform target; // TODO: This is no longer a center of mass
-        [EarlyInjectable] [SerializeField] private P12QuickDataViz dataViz;
+        [SerializeField] internal Transform target; // TODO: This is no longer a center of mass
+        [EarlyInjectable] [SerializeField] internal P12QuickDataViz dataViz;
 
-        [SerializeField] private Animator targetReferenceOptional;
+        [SerializeField] internal Animator targetReferenceOptional;
 
-        [SerializeField] private float proportionalGain = 1000;
-        [SerializeField] private float integralGain = 10;
-        [SerializeField] private float derivativeGain = 40;
-        [SerializeField] private float integralMaximumMagnitude = 10;
+        [SerializeField] internal float proportionalGain = 1000;
+        [SerializeField] internal float integralGain = 10;
+        [SerializeField] internal float derivativeGain = 40;
+        [SerializeField] internal float integralMaximumMagnitude = 10;
 
-        [SerializeField] private float proportionalTorqueMul = 10f;
-        [SerializeField] private float integralTorqueMul = 1f;
-        [SerializeField] private float derivativeTorqueMul = 1f;
-        [SerializeField] private float integralMaximumMagnitudelTorqueMul = 1f;
+        [SerializeField] internal float proportionalTorqueMul = 10f;
+        [SerializeField] internal float integralTorqueMul = 1f;
+        [SerializeField] internal float derivativeTorqueMul = 1f;
+        [SerializeField] internal float integralMaximumMagnitudelTorqueMul = 1f;
 
-        [SerializeField] private bool compensateGravity = true;
-        [SerializeField] private float forceLimit = 1000f;
-        [SerializeField] private float torqueLimit = 2000f;
+        [SerializeField] internal bool compensateGravity = true;
+        [SerializeField] internal float forceLimit = 1000f;
+        [SerializeField] internal float torqueLimit = 2000f;
 
         [SerializeField] private bool _debug_clickToResetJoints;
         [SerializeField] private bool _debug_print;

@@ -8,7 +8,8 @@
         "Unity.Addressables",
         "Hai.Project12.DataViz.Runtime",
         "Hai.Project12.HaiSystems.Supporting",
-        "Hai.Project12.HaiSystems.DataStructures"
+        "Hai.Project12.HaiSystems.DataStructures",
+        "Hai.Project12.RigidbodyAdditions.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

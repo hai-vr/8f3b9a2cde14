@@ -9,7 +9,7 @@ namespace Hai.Project12.Remesher.Runtime
     /// Given SkinnedMeshRenderers, this splits the mesh into several meshes where each mesh represents a bone,
     /// and adds a convex hull MeshCollider to each bone. All the mesh simplification concerns are handled by
     /// what is already built-in the MeshCollider, not us.
-    [DefaultExecutionOrder(-100)]
+    [DefaultExecutionOrder(-100)] // Needs to be run before P12HumanoidReacticulator
     public class P12Remesher : MonoBehaviour
     {
         private const float BoneWeightAcceptanceThreshold = 0.4f;
@@ -158,7 +158,7 @@ namespace Hai.Project12.Remesher.Runtime
             {
                 var childCollider = child.GetComponent<MeshCollider>();
                 Physics.IgnoreCollision(current, childCollider);
-                IgnoreRecurse(current);
+                IgnoreRecurse(childCollider);
             }
         }
 

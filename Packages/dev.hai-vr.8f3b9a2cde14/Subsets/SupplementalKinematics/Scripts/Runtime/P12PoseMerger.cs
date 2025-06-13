@@ -11,7 +11,7 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
         // In the HumanBodyBones, UpperChest comes near the end. This creates a problem if we need
         // to set the position and rotation of each transform, as iterating the original enum would shift the
         // position of the bones that had been set earlier.
-        private static readonly HumanBodyBones[] HumanoidRigHbbsInExpectedHierarchyOrder_EyesAndJawNotIncluded = {
+        internal static readonly HumanBodyBones[] HumanoidRigHbbsInExpectedHierarchyOrder_EyesAndJawNotIncluded = {
             Hips, Spine, Chest, UpperChest, Neck, Head,
 
             LeftUpperLeg, LeftLowerLeg, LeftFoot, LeftToes,

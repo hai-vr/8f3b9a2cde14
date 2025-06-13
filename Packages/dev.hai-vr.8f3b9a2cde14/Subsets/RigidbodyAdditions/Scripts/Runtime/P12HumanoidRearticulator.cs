@@ -6,7 +6,7 @@ using static UnityEngine.HumanBodyBones;
 
 namespace Hai.Project12.RigidbodyAdditions.Runtime
 {
-    [DefaultExecutionOrder(-90)]
+    [DefaultExecutionOrder(-90)] // Must be run after P12Remesher
     public class P12HumanoidRearticulator : MonoBehaviour
     {
         private static readonly HumanBodyBones[] PhysicsRigHbbsInExpectedHierarchyOrder = {
