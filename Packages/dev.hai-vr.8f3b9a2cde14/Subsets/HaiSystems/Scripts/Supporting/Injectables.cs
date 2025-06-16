@@ -15,4 +15,11 @@ namespace Hai.Project12.HaiSystems.Supporting
     public sealed class LateInjectable : Attribute
     {
     }
+
+    /// Denotes a field that isn't meant for the user to fill, and should probably be null by default.
+    /// Used for quick and visible system outputs.
+    [AttributeUsage(AttributeTargets.Field)]
+    public sealed class AutoOutput : Attribute
+    {
+    }
 }

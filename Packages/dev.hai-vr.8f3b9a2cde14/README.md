@@ -5,6 +5,8 @@
 - I12 are interfaces.
 - Custom attributes belong in the Supporting assembly, and shouldn't have prefixes.
 
+These rules may not apply in the `Subsets/SupplementalKinematics/Scripts/Runtime/IKSolver/` folder because these files originalte from another project.
+
 ## Handling of null values
 
 - Offensive programming: The project operates on the principles of offensive programming.

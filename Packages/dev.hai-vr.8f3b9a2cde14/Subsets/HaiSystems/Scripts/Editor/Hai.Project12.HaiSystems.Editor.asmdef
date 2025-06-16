@@ -2,6 +2,7 @@
     "name": "Hai.Project12.HaiSystems.Editor",
     "rootNamespace": "",
     "references": [
+        "Hai.Project12.HaiSystems.Supporting"
     ],
     "includePlatforms": [
         "Editor"

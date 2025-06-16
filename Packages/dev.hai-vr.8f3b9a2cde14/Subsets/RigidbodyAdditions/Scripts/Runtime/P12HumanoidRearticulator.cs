@@ -17,6 +17,11 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
             RightShoulder, RightUpperArm, RightLowerArm, RightHand,
         };
 
+        private static readonly HashSet<HumanBodyBones> CollideableBones = new()
+        {
+            Hips, Spine, Chest, UpperChest, Neck, Head,
+        };
+
         [SerializeField] private bool includeFingers;
         [SerializeField] private Animator humanoidReference;
         [SerializeField] private P12Rig physicsRig; // FIXME: The nullability of this should be replaced. We need the rig
@@ -52,10 +57,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
                 if (boneTransform != null)
                 {
-                    MakeRigidbody(hbb, boneTransform);
-
-                    var articulationBody = boneTransform.GetComponent<Rigidbody>(); // TODO: Also support rigidbody?
-                    availableBones.Add((hbb, articulationBody));
+                    var body = MakeRigidbody(hbb, boneTransform);
+                    availableBones.Add((hbb, body));
                 }
             }
 
@@ -165,13 +168,17 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
                 or RightToes;
         }
 
-        private void MakeRigidbody(HumanBodyBones hbb, Transform boneTransform)
+        private Rigidbody MakeRigidbody(HumanBodyBones hbb, Transform boneTransform)
         {
             var go = boneTransform.gameObject;
             var body = go.AddComponent<Rigidbody>();
             body.interpolation = RigidbodyInterpolation.Interpolate;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
             body.useGravity = false; // The keyframe controller should set this to true.
+            if (!CollideableBones.Contains(hbb))
+            {
+                body.excludeLayers = int.MaxValue;
+            }
 
             // FIXME: The inertia tensor for the spine and the foot on Wolfram are wrong.
             // body.automaticInertiaTensor = false;
@@ -245,6 +252,8 @@ namespace Hai.Project12.RigidbodyAdditions.Runtime
 
                 _configurableJoints.Add(joint);
             }
+
+            return body;
         }
     }
 }

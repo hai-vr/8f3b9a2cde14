@@ -1,6 +1,12 @@
 ﻿using System;
 using Hai.Project12.DataViz.Runtime;
 using Hai.Project12.HaiSystems.DataStructures;
+#if RESILIENCE_IN_PROJECT
+using Resilience.Kinematics.KinematicsSolver;
+using Resilience.SharedObjects;
+using Resilience.Utility;
+#endif
+using UnityEditor;
 using UnityEngine;
 using static UnityEngine.HumanBodyBones;
 
@@ -42,10 +48,17 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
 
         [SerializeField] private bool runInUpdateLoop = true;
 
+#if RESILIENCE_IN_PROJECT
+        [SerializeField] private RVRIKEffectors solverEffectors;
+        [SerializeField] private RVRKinematicsSolver solverOptional;
+#endif
+
         [SerializeField] private bool _debug_readjustHighMassPhysics = true;
         [SerializeField] private AnimationCurve _debug_readjustHighMassPhysicsCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
         [SerializeField] private float _debug_readjustHighMassPhysicsCurveClose = 0.02f;
         [SerializeField] private float _debug_readjustHighMassPhysicsCurveFar = 0.05f;
+        [SerializeField] private bool _debug_drawSolverLines;
+        [SerializeField] private bool _debug_skipSovler;
 
         // TODO: Remove this in the future, when we have a process to create an execution loop that is more tightly controlled.
         // The changes made by this component must not contaminate the networking data.
@@ -54,6 +67,40 @@ namespace Hai.Project12.SupplementalKinematics.Runtime
             if (runInUpdateLoop)
             {
                 Resolve();
+#if RESILIENCE_IN_PROJECT
+                if (solverOptional != null && !_debug_skipSovler)
+                {
+                    // TODO: All invocations to GetBoneTransform should be cached.
+                    var head = traditionalInput.GetBoneTransform(Head);
+                    var leftHand = traditionalInput.GetBoneTransform(LeftHand);
+                    var rightHand = traditionalInput.GetBoneTransform(RightHand);
+                    var hips = visualOutput.GetBoneTransform(Hips);
+                    var leftFoot = visualOutput.GetBoneTransform(LeftFoot);
+                    var rightFoot = visualOutput.GetBoneTransform(RightFoot);
+
+                    solverEffectors.headTarget.position = head.position;
+                    solverEffectors.leftHandTarget.position = leftHand.position;
+                    solverEffectors.rightHandTarget.position = rightHand.position;
+                    solverEffectors.hipTarget.position = hips.position;
+                    solverEffectors.leftFootTarget.position = leftFoot.position;
+                    solverEffectors.rightFootTarget.position = rightFoot.position;
+
+                    solverEffectors.headTarget.rotation = head.rotation * MbusAnimatorUtil.ReflectiveGetPostRotation(traditionalInput.avatar, Head);
+                    solverEffectors.leftHandTarget.rotation = leftHand.rotation * MbusAnimatorUtil.ReflectiveGetPostRotation(traditionalInput.avatar, LeftHand);
+                    solverEffectors.rightHandTarget.rotation = rightHand.rotation * MbusAnimatorUtil.ReflectiveGetPostRotation(traditionalInput.avatar, RightHand);
+                    solverEffectors.hipTarget.rotation = hips.rotation * MbusAnimatorUtil.ReflectiveGetPostRotation(traditionalInput.avatar, Hips);
+                    solverEffectors.leftFootTarget.rotation = leftFoot.rotation * MbusAnimatorUtil.ReflectiveGetPostRotation(traditionalInput.avatar, LeftFoot);
+                    solverEffectors.rightFootTarget.rotation = rightFoot.rotation * MbusAnimatorUtil.ReflectiveGetPostRotation(traditionalInput.avatar, RightFoot);
+
+                    solverOptional.DoUpdate();
+
+                    if (_debug_drawSolverLines)
+                    {
+                        Resilience.Visualize.DataViz.Instance.DrawLine(leftHand.position, head.position, Color.cyan, 2f);
+                        Resilience.Visualize.DataViz.Instance.DrawLine(rightHand.position, head.position, Color.cyan, 2f);
+                    }
+                }
+#endif
             }
         }
 
