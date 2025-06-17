@@ -66,7 +66,10 @@ namespace Hai.Project12.Vixxy.Runtime
 
             _context = orchestrator.Context();
 
-            BakeControlForRuntime();
+            if (Application.isPlaying)
+            {
+                BakeControlForRuntime();
+            }
         }
 
         internal void DebugOnly_ReBakeControl()
@@ -104,8 +107,10 @@ namespace Hai.Project12.Vixxy.Runtime
                 // (P12VixxyPropertyBase is no longer a struct, so we don't need to reassign the changes)
                 foreach (var property in subject.properties)
                 {
-                    var isApplicable = BakeProperty(property, subject);
+                    var bakeResult = BakeProperty(property, subject);
+                    var isApplicable = bakeResult == P12VixxyPropertyBakeResult.Success;
                     property.IsApplicable = isApplicable;
+                    property.BakeResult = bakeResult;
 
                     isAnyPropertyApplicable |= isApplicable;
                     if (isApplicable && property.SpecialMarker == P12SpecialMarker.AffectsMaterialPropertyBlock)
@@ -128,9 +133,9 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
-        private bool BakeProperty(P12VixxyPropertyBase property, P12VixxySubject subject)
+        private P12VixxyPropertyBakeResult BakeProperty(P12VixxyPropertyBase property, P12VixxySubject subject)
         {
-            if (!TryGetType(property.fullClassName, out var foundType)) return false; // // Not applicable: Type not found
+            if (!TryGetType(property.fullClassName, out var foundType)) return P12VixxyPropertyBakeResult.TypeNotFound; // // Not applicable: Type not found
 
             // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
             var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
@@ -140,7 +145,7 @@ namespace Hai.Project12.Vixxy.Runtime
             // - If it *is* a material property block, then the type must be a renderer, so that we can skip the type check at runtime.
             if (affectsMaterialPropertyBlock && !typeof(Renderer).IsAssignableFrom(foundType))
             {
-                return false; // Not applicable: Property requiring a MaterialPropertyBlock has no Renderer
+                return P12VixxyPropertyBakeResult.PropertyRequiringMaterialPropertyBlockHasNoRenderer; // Not applicable: Property requiring a MaterialPropertyBlock has no Renderer
             }
 
             var foundComponents = new List<Component>();
@@ -153,7 +158,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 }
             }
 
-            if (foundComponents.Count <= 0) return false; // Not applicable: No objects has that component
+            if (foundComponents.Count <= 0) return P12VixxyPropertyBakeResult.NoObjectsHasThatComponent; // Not applicable: No objects has that component
 
             var propertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
 
@@ -164,7 +169,7 @@ namespace Hai.Project12.Vixxy.Runtime
             }
             else if (property.propertyName.StartsWith(PropBlendShapePrefix))
             {
-                if (foundType != typeof(SkinnedMeshRenderer)) return false; // Not applicable: blendShape can only be used on SMRs
+                if (foundType != typeof(SkinnedMeshRenderer)) return P12VixxyPropertyBakeResult.BlendShapeCanOnlyBeUsedOnSkinnedMeshRenderers; // Not applicable: blendShape can only be used on SMRs
 
                 var nonApplicableComponents = new List<Component>();
                 var smrToIndex = new Dictionary<SkinnedMeshRenderer, int>();
@@ -195,7 +200,7 @@ namespace Hai.Project12.Vixxy.Runtime
                     foundComponents.Remove(nonApplicableComponent);
                 }
 
-                if (foundComponents.Count == 0) return false; // Not applicable: No SMR with a valid mesh has this blendshape.
+                if (foundComponents.Count == 0) return P12VixxyPropertyBakeResult.NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape; // Not applicable: No SMR with a valid mesh has this blendshape.
 
                 property.SpecialMarker = P12SpecialMarker.BlendShape;
                 property.SmrToBlendshapeIndex = smrToIndex;
@@ -211,7 +216,7 @@ namespace Hai.Project12.Vixxy.Runtime
                 else
                 {
                     var propertyInfoNullable = GetPropertyInfoOrNull(foundType, property.propertyName);
-                    if (propertyInfoNullable == null) return false; // Not applicable: No field nor property
+                    if (propertyInfoNullable == null) return P12VixxyPropertyBakeResult.NoFieldNorPropertyMatches; // Not applicable: No field nor property
 
                     property.TPropertyIfMarkedAsTPropertyAccess = propertyInfoNullable;
                     property.SpecialMarker = P12SpecialMarker.PropertyAccess;
@@ -222,7 +227,7 @@ namespace Hai.Project12.Vixxy.Runtime
             property.FoundComponents = foundComponents;
             property.PropertySuffix = propertySuffix;
 
-            return true;
+            return P12VixxyPropertyBakeResult.Success;
         }
 
         private bool TryGetType(string propertyFullClassName, out Type foundType)
@@ -295,7 +300,7 @@ namespace Hai.Project12.Vixxy.Runtime
             foreach (var subject in subjects)
             {
                 // TODO: Rather than do that check every time, only keep applicable subjects into an internal field.
-                if (!subject.IsApplicable) return;
+                if (!subject.IsApplicable) continue;
 
                 foreach (var property in subject.properties)
                 {
@@ -316,47 +321,54 @@ namespace Hai.Project12.Vixxy.Runtime
                         // Defensive check in case of external destruction.
                         if (null != component)
                         {
-                            if (property.SpecialMarker == P12SpecialMarker.AffectsMaterialPropertyBlock)
+                            switch (property.SpecialMarker)
                             {
-                                var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
-                                switch (lerpValue)
+                                case P12SpecialMarker.AffectsMaterialPropertyBlock:
                                 {
-                                    case float lerpFloatValue: materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpFloatValue); break;
-                                    case Color lerpColorValue: materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue); break;
-                                    case Vector4 lerpVector4Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value); break;
-                                    case Vector3 lerpVector3Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector3Value); break;
-                                    // TODO: Other types
+                                    var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
+                                    switch (lerpValue)
+                                    {
+                                        case float lerpFloatValue: materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpFloatValue); break;
+                                        case Color lerpColorValue: materialPropertyBlock.SetColor(property.ShaderMaterialProperty, lerpColorValue); break;
+                                        case Vector4 lerpVector4Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector4Value); break;
+                                        case Vector3 lerpVector3Value: materialPropertyBlock.SetVector(property.ShaderMaterialProperty, lerpVector3Value); break;
+                                        // TODO: Other types
+                                    }
+                                    orchestrator.StagePropertyBlock(component.gameObject);
+                                    break;
                                 }
-                                orchestrator.StagePropertyBlock(component.gameObject);
-                            }
-                            else if (property.SpecialMarker == P12SpecialMarker.BlendShape)
-                            {
-                                if (lerpValue is float lerpFloatValue)
+                                case P12SpecialMarker.BlendShape:
                                 {
-                                    var smr = (SkinnedMeshRenderer)component;
-                                    var blendShapeIndex = property.SmrToBlendshapeIndex[smr];
-                                    smr.SetBlendShapeWeight(blendShapeIndex, lerpFloatValue);
+                                    if (lerpValue is float lerpFloatValue)
+                                    {
+                                        var smr = (SkinnedMeshRenderer)component;
+                                        var blendShapeIndex = property.SmrToBlendshapeIndex[smr];
+                                        smr.SetBlendShapeWeight(blendShapeIndex, lerpFloatValue);
+                                    }
+
+                                    break;
                                 }
-                            }
-                            else if (property.SpecialMarker == P12SpecialMarker.FieldAccess)
-                            {
-                                var fieldInfo = property.FieldIfMarkedAsFieldAccess;
-                                // TODO: Cast to the type that this field expects
-                                fieldInfo.SetValue(component, lerpValue);
-                                orchestrator.StagePossibleSpecialComponentHandling(component);
-                            }
-                            else if (property.SpecialMarker == P12SpecialMarker.PropertyAccess)
-                            {
-                                var propertyInfo = property.TPropertyIfMarkedAsTPropertyAccess;
-                                // TODO: Cast to the type that this field expects
-                                propertyInfo.SetValue(component, lerpValue);
-                                orchestrator.StagePossibleSpecialComponentHandling(component);
-                            }
-                            else if (property.SpecialMarker == P12SpecialMarker.Undefined)
-                            {
-                                throw new ArgumentException("We tried to access an Undefined property, but Undefined properties are not supposed" +
-                                                            " to be valid if the property IsApplicable. This may be a programming error, did you" +
-                                                            " properly check that the property IsApplicable?");
+                                case P12SpecialMarker.FieldAccess:
+                                {
+                                    var fieldInfo = property.FieldIfMarkedAsFieldAccess;
+                                    // TODO: Cast to the type that this field expects
+                                    fieldInfo.SetValue(component, lerpValue);
+                                    orchestrator.StagePossibleSpecialComponentHandling(component);
+                                    break;
+                                }
+                                case P12SpecialMarker.PropertyAccess:
+                                {
+                                    var propertyInfo = property.TPropertyIfMarkedAsTPropertyAccess;
+                                    // TODO: Cast to the type that this field expects
+                                    propertyInfo.SetValue(component, lerpValue);
+                                    orchestrator.StagePossibleSpecialComponentHandling(component);
+                                    break;
+                                }
+                                case P12SpecialMarker.Undefined:
+                                default:
+                                    throw new ArgumentException("We tried to access an Undefined property, but Undefined properties are not supposed" +
+                                                                " to be valid if the property IsApplicable. This may be a programming error, did you" +
+                                                                " properly check that the property IsApplicable?");
                             }
                         }
                         else
@@ -508,6 +520,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         // Runtime only
         [NonSerialized] internal bool IsApplicable;
+        [NonSerialized] internal P12VixxyPropertyBakeResult BakeResult;
         [NonSerialized] internal Type FoundType;
         [NonSerialized] internal List<Component> FoundComponents;
         [NonSerialized] internal P12SpecialMarker SpecialMarker;
@@ -529,5 +542,16 @@ namespace Hai.Project12.Vixxy.Runtime
         BlendShape,
         FieldAccess,
         PropertyAccess
+    }
+
+    internal enum P12VixxyPropertyBakeResult
+    {
+        Success,
+        TypeNotFound,
+        PropertyRequiringMaterialPropertyBlockHasNoRenderer,
+        NoObjectsHasThatComponent,
+        BlendShapeCanOnlyBeUsedOnSkinnedMeshRenderers,
+        NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape,
+        NoFieldNorPropertyMatches
     }
 }
