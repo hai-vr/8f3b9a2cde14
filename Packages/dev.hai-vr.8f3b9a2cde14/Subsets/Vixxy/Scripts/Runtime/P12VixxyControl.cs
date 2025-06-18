@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Basis.Scripts.BasisSdk;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
 using UnityEngine;
@@ -26,6 +27,8 @@ namespace Hai.Project12.Vixxy.Runtime
         private const string PropBlendShapePrefix = "blendShape.";
 
         // Runtime only
+        private BasisAvatar _avatar;
+
         private int _iddress;
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
@@ -94,8 +97,22 @@ namespace Hai.Project12.Vixxy.Runtime
             _menuElement.defaultValue = _bakedDefaultValue;
             _menuElement.storedValue = _bakedDefaultValue;
             sample = _menuElement;
-            orchestrator.RegisterMenu(_menuElement);
 
+            _avatar = GetComponentInParent<BasisAvatar>(true);
+            _avatar.OnAvatarReady -= OnAvatarReady;
+            _avatar.OnAvatarReady += OnAvatarReady;
+        }
+
+        private void OnDestroy()
+        {
+            orchestrator.UnregisterMenu(_menuElement);
+            sample.OnValueChanged -= OnValueChanged;
+            _avatar.OnAvatarReady -= OnAvatarReady;
+        }
+
+        private void OnAvatarReady(bool isOwner)
+        {
+            orchestrator.RegisterMenu(_menuElement);
             sample.OnValueChanged -= OnValueChanged;
             sample.OnValueChanged += OnValueChanged;
         }
@@ -111,12 +128,6 @@ namespace Hai.Project12.Vixxy.Runtime
         private void OnValueChanged(float newValue)
         {
             orchestrator.___SubmitToAcquisitionService(Address, newValue);
-        }
-
-        private void OnDestroy()
-        {
-            orchestrator.UnregisterMenu(_menuElement);
-            sample.OnValueChanged -= OnValueChanged;
         }
 
         internal void DebugOnly_ReBakeControl()
@@ -404,6 +415,7 @@ namespace Hai.Project12.Vixxy.Runtime
                                 case P12SpecialMarker.AffectsMaterialPropertyBlock:
                                 {
                                     var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
+                                    // TODO: Instead of checking the type, use something like property.ApplyMaterialProperty(materialPropertyBlock, value), where the property itself knows how to apply it to the property block.
                                     switch (lerpValue)
                                     {
                                         case float lerpFloatValue: materialPropertyBlock.SetFloat(property.ShaderMaterialProperty, lerpFloatValue); break;
@@ -423,13 +435,11 @@ namespace Hai.Project12.Vixxy.Runtime
                                         var blendShapeIndex = property.SmrToBlendshapeIndex[smr];
                                         smr.SetBlendShapeWeight(blendShapeIndex, lerpFloatValue);
                                     }
-
                                     break;
                                 }
                                 case P12SpecialMarker.FieldAccess:
                                 {
                                     var fieldInfo = property.FieldIfMarkedAsFieldAccess;
-                                    // TODO: Cast to the type that this field expects
                                     fieldInfo.SetValue(component, lerpValue);
                                     orchestrator.StagePossibleSpecialComponentHandling(component);
                                     break;
@@ -437,7 +447,6 @@ namespace Hai.Project12.Vixxy.Runtime
                                 case P12SpecialMarker.PropertyAccess:
                                 {
                                     var propertyInfo = property.TPropertyIfMarkedAsTPropertyAccess;
-                                    // TODO: Cast to the type that this field expects
                                     propertyInfo.SetValue(component, lerpValue);
                                     orchestrator.StagePossibleSpecialComponentHandling(component);
                                     break;

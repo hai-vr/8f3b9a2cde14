@@ -251,7 +251,8 @@ namespace Hai.Project12.Vixxy.Runtime
             {
                 // DEFENSIVE for live edits only. This condition should not be entered by design.
                 H12Debug.LogWarning("A MaterialPropertyBlock object was not found. This is either a programming error, or the user is currently doing a live edit," +
-                                    " and MaterialPropertyBlock are not normally cached if the control did not previously make use of materials.");
+                                    " and MaterialPropertyBlock are not normally cached if the control did not previously make use of materials. We will create one," +
+                                    " however, if this wasn't a live edit, then it needs fixing.");
                 _objectToMaterialPropertyBlock.Add(bakedObject, new MaterialPropertyBlock());
                 _objectToRenderer_mayContainNullObjects.Add(bakedObject, bakedObject.GetComponent<Renderer>());
             }
