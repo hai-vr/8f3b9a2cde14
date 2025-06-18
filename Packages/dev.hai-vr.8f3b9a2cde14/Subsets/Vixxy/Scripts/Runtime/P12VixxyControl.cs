@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
@@ -13,7 +14,7 @@ namespace Hai.Project12.Vixxy.Runtime
     /// - Similarly to animation, it is fine for the user to define rules that cannot apply (i.e. setting a material property on a type that isn't a Renderer,
     ///   referencing a field on a type that cannot exist, etc.); do not treat those as errors,<br/>
     /// - Do not treat anything else defensively than the above points, which are expectations of this specific system.
-    public class P12VixxyControl : MonoBehaviour, I12VixxyActuator
+    public partial class P12VixxyControl : MonoBehaviour, I12VixxyActuator
     {
         // Licensing notes:
         // Portions of the code below originally comes from portions of a proprietary software that I (Haï~) am the author of,
@@ -24,60 +25,106 @@ namespace Hai.Project12.Vixxy.Runtime
         private const string PropMaterialPrefix = "material.";
         private const string PropBlendShapePrefix = "blendShape.";
 
-        // static: Share this type cache across multiple controls
-        private static readonly Dictionary<string, Type> ComponentDictionary = new Dictionary<string, Type>();
-
-        /// The orchestrator defines the context that the subjects of this control will affect (e.g. Recursive Search).
-        /// Vixxy is not an avatar-specific component, so it needs that limited context.
-        [SerializeField] internal P12VixxyOrchestrator orchestrator;
-        [SerializeField] internal string address;
-        [SerializeField] internal P12SettableFloatElement sample;
-
-        [SerializeField] internal P12VixxyActivations[] activations;
-        [SerializeField] internal P12VixxySubject[] subjects;
-
-        public float lowerBound = 0f;
-        public float upperBound = 1f;
-        public AnimationCurve interpolationCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
         // Runtime only
         private int _iddress;
         private Transform _context;
         private H12ActuatorRegistrationToken _registeredActuator;
 
-        static P12VixxyControl()
-        {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            foreach (var assembly in assemblies)
-            {
-                foreach (var type in assembly.GetTypes())
-                {
-                    if (typeof(Component).IsAssignableFrom(type))
-                    {
-                        ComponentDictionary.TryAdd(type.FullName, type);
-                    }
-                }
-            }
-        }
+        private P12SettableFloatElement _menuElement;
+        private float _previousValue;
+        private float _bakedDefaultValue;
+
+        [NonSerialized] internal string Address;
+        [NonSerialized] internal P12VixxyRememberScope Remember;
+        [NonSerialized] internal string RememberTagNullable;
+        [NonSerialized] internal bool Networked;
 
         public void Awake()
         {
-            _iddress = H12VixxyAddress.AddressToId(address);
-
             _context = orchestrator.Context();
 
-            if (Application.isPlaying)
+            Address = string.IsNullOrWhiteSpace(address) ? GenerateAddressFromPath() : address;
+            _iddress = H12VixxyAddress.AddressToId(Address);
+
+            switch (mode)
             {
-                BakeControlForRuntime();
+                case P12VixxyControlMode.Simplified:
+                {
+                    Remember = P12VixxyRememberScope.RememberAcrossAvatars;
+                    RememberTagNullable = null;
+                    Networked = true;
+                }
+                break;
+                case P12VixxyControlMode.Advanced:
+                {
+                    if (remember == P12VixxyRememberScope.RememberInThisTag)
+                    {
+                        if (!string.IsNullOrWhiteSpace(rememberTag))
+                        {
+                            Remember = P12VixxyRememberScope.RememberInThisTag;
+                            RememberTagNullable = rememberTag;
+                        }
+                        else
+                        {
+                            // Get rid of invalid user-provided configurations.
+                            Remember = P12VixxyRememberScope.RememberInThisAvatar;
+                            RememberTagNullable = null;
+                        }
+                    }
+                    else
+                    {
+                        Remember = remember;
+                    }
+                    Networked = networked;
+                }
+                break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
+
+            BakeControlSubjectsForRuntime();
+            _bakedDefaultValue = defaultValue; // TODO: The baked value depends on the level of detail in the control, and the type of control.
+
+            // TODO: This is temporary code
+            _menuElement = ScriptableObject.CreateInstance<P12SettableFloatElement>();
+            _menuElement.localizedTitle = gameObject.name;
+            _menuElement.min = 0f;
+            _menuElement.max = 1f;
+            _menuElement.displayAs = P12SettableFloatElement.P12UnitDisplayKind.Toggle; // TODO: This depends on the type of control.
+            _menuElement.defaultValue = _bakedDefaultValue;
+            _menuElement.storedValue = _bakedDefaultValue;
+            sample = _menuElement;
+            orchestrator.RegisterMenu(_menuElement);
+
+            sample.OnValueChanged -= OnValueChanged;
+            sample.OnValueChanged += OnValueChanged;
+        }
+
+        private string GenerateAddressFromPath()
+        {
+            var componentIndex = Array.IndexOf(transform.GetComponents<P12VixxyControl>(), this);
+            var path = H12Utilities.ResolveRelativePath(orchestrator.Context().transform, transform);
+            var newAddress = $"{path}@{H12Utilities.SimpleSha1(path)}+{componentIndex}";
+            return newAddress;
+        }
+
+        private void OnValueChanged(float newValue)
+        {
+            orchestrator.___SubmitToAcquisitionService(Address, newValue);
+        }
+
+        private void OnDestroy()
+        {
+            orchestrator.UnregisterMenu(_menuElement);
+            sample.OnValueChanged -= OnValueChanged;
         }
 
         internal void DebugOnly_ReBakeControl()
         {
-            BakeControlForRuntime();
+            BakeControlSubjectsForRuntime();
         }
 
-        private void BakeControlForRuntime()
+        private void BakeControlSubjectsForRuntime()
         {
             // In this phase, we do all the checks, so that when actuation is requested (this might be as expensive
             // as running every frame), we don't need to do type checks or other work.
@@ -85,7 +132,7 @@ namespace Hai.Project12.Vixxy.Runtime
             for (var i = 0; i < subjects.Length; i++)
             {
                 var subject = subjects[i];
-                subject.BakeAffectedObjects(_context);
+                BakeSubjectAffectedObjects(subject, _context);
 
                 if (subject.BakedObjects.Count == 0)
                 {
@@ -133,9 +180,46 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
+        private static void BakeSubjectAffectedObjects(P12VixxySubject subject, Transform context)
+        {
+            var bakedObjects = new List<GameObject>();
+
+            if (subject.selection == P12VixxySelection.Normal)
+            {
+                bakedObjects.AddRange(subject.targets);
+            }
+            else if (subject.selection == P12VixxySelection.RecursiveSearch)
+            {
+                // TODO: Prevent path traversal
+                // TODO: Prevent misconficuration (childrenOf being null or childrenOf containing null-destroyed objects) (check how Vixen does it)
+                // TODO: Handle "except these objects" of a recursive search
+                foreach (var childrenRoot in subject.childrenOf)
+                {
+                    var allTransforms = childrenRoot.GetComponentsInChildren<Transform>(true);
+                    foreach (var t in allTransforms)
+                    {
+                        bakedObjects.Add(t.gameObject);
+                    }
+                }
+            }
+            else if (subject.selection == P12VixxySelection.Everything)
+            {
+                // TODO: Handle "except these objects" of a recursive search
+                var allTransforms = context.GetComponentsInChildren<Transform>(true);
+                foreach (var t in allTransforms)
+                {
+                    bakedObjects.Add(t.gameObject);
+                };
+            }
+
+            H12Utilities.RemoveDestroyedFromList(bakedObjects); // Following the UGC rule; see class header.
+
+            subject.BakedObjects = bakedObjects;
+        }
+
         private P12VixxyPropertyBakeResult BakeProperty(P12VixxyPropertyBase property, P12VixxySubject subject)
         {
-            if (!TryGetType(property.fullClassName, out var foundType)) return P12VixxyPropertyBakeResult.TypeNotFound; // // Not applicable: Type not found
+            if (!H12ComponentDictionary.ComponentDictionary.TryGetValue(property.fullClassName, out var foundType)) return P12VixxyPropertyBakeResult.TypeNotFound; // // Not applicable: Type not found
 
             // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
             var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
@@ -230,20 +314,9 @@ namespace Hai.Project12.Vixxy.Runtime
             return P12VixxyPropertyBakeResult.Success;
         }
 
-        private bool TryGetType(string propertyFullClassName, out Type foundType)
-        {
-            if (ComponentDictionary.TryGetValue(propertyFullClassName, out var result))
-            {
-                foundType = result;
-                return true;
-            }
-
-            foundType = null;
-            return false;
-        }
-
         private void OnEnable()
         {
+            _previousValue = float.MinValue + 1.23456789f;
             _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnAddressUpdated);
         }
 
@@ -255,6 +328,11 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void OnAddressUpdated(string _, float value)
         {
+            // FIXME: This is a bypass so that we don't update an address that hasn't changed.
+            // Ideally, the orchestrator should instead provide us a guarantee of calling us only when the value changes.
+            if (value == _previousValue) return;
+            _previousValue = value;
+
             // FIXME: Storing that value is probably not a good idea to do at this specific stage of the processing.
             //           For comparison, we can't do this for aggregators (which can have multiple input values), it's not their responsibility.
             sample.storedValue = value;
@@ -419,123 +497,7 @@ namespace Hai.Project12.Vixxy.Runtime
         }
     }
 
-    [Serializable]
-    public struct P12VixxyActivations
-    {
-        public Component component; // To toggle a GameObject, provide the Transform instead. It makes things easier as GameObject is not a component.
-        public ActivationThreshold threshold;
-        public bool whenActive;
-    }
-
-    public enum ActivationThreshold
-    {
-        /// Is considered to be ON when the absolute difference to the target is strictly smaller than 1.
-        /// This is the best choice for stuff like material dissolves, where the object appears before it is even complete, and therefore the default.
-        Blended,
-        /// Is considered to be ON when the current value is equal to the target value.
-        Strict,
-    }
-
-    [Serializable]
-    public struct P12VixxySubject
-    {
-        public P12VixxySelection selection;
-
-        // TODO: It may be relevant to create a MonoBehaviour that represents groups of objects that can be referenced multiple times throughout.
-        public GameObject[] targets;
-        public GameObject[] childrenOf;
-        public GameObject[] exceptions;
-
-        // Note: The list of properties may sometimes contain properties that are not shown in the UI,
-        // because the first target does not contain the component type referenced by that property.
-        //
-        // In that case, when the Processor runs, these properties are NOT applied, even if the actual
-        // objects being changed do contain the component type.
-        // We don't want to apply "ghost" properties that are not visible to the user in the UI.
-        //
-        // In the case of Vixxy (and not Vixen), we should just prune these properties at runtime.
-        [SerializeReference] public List<P12VixxyPropertyBase> properties;
-
-        // Runtime only
-        [NonSerialized] internal List<GameObject> BakedObjects;
-        [NonSerialized] internal bool IsApplicable;
-
-        public void BakeAffectedObjects(Transform context)
-        {
-            // TODO: Recursive and Everything based on context
-            BakedObjects = new List<GameObject>();
-            if (selection == P12VixxySelection.Normal)
-            {
-                BakedObjects.AddRange(targets);
-            }
-            else if (selection == P12VixxySelection.RecursiveSearch)
-            {
-                // TODO: Exceptions
-                foreach (var childrenRoot in childrenOf)
-                {
-                    var allTransforms = childrenRoot.GetComponentsInChildren<Transform>(true);
-                    foreach (var t in allTransforms)
-                    {
-                        BakedObjects.Add(t.gameObject);
-                    }
-                }
-            }
-            else if (selection == P12VixxySelection.Everything)
-            {
-                // TODO: Exceptions
-                var allTransforms = context.GetComponentsInChildren<Transform>(true);
-                foreach (var t in allTransforms)
-                {
-                    BakedObjects.Add(t.gameObject);
-                };
-            }
-
-            H12Utilities.RemoveDestroyedFromList(BakedObjects); // Following the UGC rule; see class header.
-        }
-    }
-
-    public enum P12VixxySelection
-    {
-        Normal,
-        RecursiveSearch,
-        Everything
-    }
-
-    [Serializable]
-    public class P12VixxyProperty<T> : P12VixxyPropertyBase
-    {
-        public T bound;
-        public T unbound;
-    }
-
-    [Serializable]
-    public class P12VixxyPropertyBase : I12VixxyProperty
-    {
-        // TODO: It might be relevant to use another approach than getting animatable properties,
-        // since we have control over the system. It doesn't have to piggyback on the animation APIs.
-        public string fullClassName;
-        public string propertyName;
-
-        public bool flip;
-
-        // Runtime only
-        [NonSerialized] internal bool IsApplicable;
-        [NonSerialized] internal P12VixxyPropertyBakeResult BakeResult;
-        [NonSerialized] internal Type FoundType;
-        [NonSerialized] internal List<Component> FoundComponents;
-        [NonSerialized] internal P12SpecialMarker SpecialMarker;
-        [NonSerialized] internal int ShaderMaterialProperty;
-        [NonSerialized] internal string PropertySuffix;
-        [NonSerialized] internal FieldInfo FieldIfMarkedAsFieldAccess; // null if SpecialMarker is not FieldAccess
-        [NonSerialized] internal PropertyInfo TPropertyIfMarkedAsTPropertyAccess; // null if SpecialMarker is not PropertyAccess
-        [NonSerialized] internal Dictionary<SkinnedMeshRenderer, int> SmrToBlendshapeIndex; // null if SpecialMarker is not BlendShape
-    }
-
-    interface I12VixxyProperty
-    {
-    }
-
-    public enum P12SpecialMarker
+    internal enum P12SpecialMarker
     {
         Undefined,
         AffectsMaterialPropertyBlock,

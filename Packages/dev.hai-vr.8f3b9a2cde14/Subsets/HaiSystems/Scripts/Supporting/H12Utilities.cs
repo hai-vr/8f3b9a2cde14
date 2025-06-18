@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEngine;
 
 namespace Hai.Project12.HaiSystems.Supporting
 {
     public static class H12Utilities
     {
+        /// Given a list of components that is known to have destroyed components in it, clean it.
         public static void RemoveDestroyedFromList(List<Component> listToClean)
         {
             for (var i = listToClean.Count - 1; i >= 0; i--)
@@ -15,6 +19,8 @@ namespace Hai.Project12.HaiSystems.Supporting
                 }
             }
         }
+
+        /// Given a list of GameObjects that is known to have destroyed GameObjects in it, clean it.
         public static void RemoveDestroyedFromList(List<GameObject> listToClean)
         {
             for (var i = listToClean.Count - 1; i >= 0; i--)
@@ -64,6 +70,34 @@ namespace Hai.Project12.HaiSystems.Supporting
                 LODGroup thatLod => thatLod.enabled,
                 _ => true
             };
+        }
+
+        /// Gets the path of child relative to root, like an animation path that ignores the presence of Animator components.
+        public static string ResolveRelativePath(Transform root, Transform child)
+        {
+            if (root == child)
+            {
+                return "";
+            }
+
+            if (child.parent != root && child.parent != null)
+            {
+                return $"{ResolveRelativePath(root, child.parent)}/{child.name}";
+            }
+
+            return child.name;
+        }
+
+        // Calculates a SHA1 hash of a string, to mimic hashes of commits. The default length is 7, to mimic the default length of
+        // short hashes on git. Do not use this for cryptographic purposes, this is meant for use in the creation of unique names for
+        // parameters.
+        public static string SimpleSha1(string str, int length = 7)
+        {
+            using var sha = SHA1.Create();
+            return BitConverter.ToString(sha.ComputeHash(new UTF8Encoding().GetBytes(str)))
+                .Replace("-", "")
+                .ToLowerInvariant()
+                .Substring(0, length);
         }
     }
 }

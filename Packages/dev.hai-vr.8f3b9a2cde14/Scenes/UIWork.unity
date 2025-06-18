@@ -22407,6 +22407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acquisitionService: {fileID: 0}
+  gadgetRepository: {fileID: 0}
   context: {fileID: 1154253538}
 --- !u!1 &186114176
 GameObject:
@@ -44059,6 +44060,12 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  isActiveByDefault: 0
+  defaultValue: 0
+  mode: 0
+  remember: 2
+  rememberTag: 
+  networked: 1
   references:
     version: 2
     RefIds:

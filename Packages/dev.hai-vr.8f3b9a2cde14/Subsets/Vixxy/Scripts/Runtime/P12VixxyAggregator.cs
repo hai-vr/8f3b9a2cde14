@@ -14,7 +14,7 @@ namespace Hai.Project12.Vixxy.Runtime
         [LateInjectable] public AcquisitionService acquisitionService;
 
         private readonly HashSet<P12VixxyAggregator> _transformerResult = new();
-        private readonly HashSet<P12VixxyActuatorSampler> _actuatorResult = new();
+        private readonly HashSet<I12VixxyActuator> _actuatorResult = new();
 
         private int _iddressA;
         private int _iddressB;

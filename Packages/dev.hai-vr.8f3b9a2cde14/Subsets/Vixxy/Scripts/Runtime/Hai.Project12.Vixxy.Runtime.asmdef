@@ -2,8 +2,6 @@
     "name": "Hai.Project12.Vixxy.Runtime",
     "rootNamespace": "Hai.Project12.Vixxy.Runtime",
     "references": [
-        "Unity.TextMeshPro",
-        "BattlePhazeSettingsManger",
         "Basis",
         "BasisAddressableDriver",
         "Unity.Addressables",

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
+    // TODO: This class can be removed.
     public class P12VixxySubmitSettableToAcquisition : MonoBehaviour
     {
         public string address = "";

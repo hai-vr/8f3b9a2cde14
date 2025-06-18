@@ -3,6 +3,7 @@
 - P12 are MonoBehaviours and ScriptableObjects, including serializable structs and enums referenced by MonoBehaviours and ScriptableObjects.
 - H12 are non-MonoBehaviours.
 - I12 are interfaces.
+- Enumerations that are part of a serializable object must be marked `[Serializable]` to distinguished them from enums used internally.
 - Custom attributes belong in the Supporting assembly, and shouldn't have prefixes.
 
 These rules may not apply in the `Subsets/SupplementalKinematics/Scripts/Runtime/IKSolver/` folder because these files originalte from another project.

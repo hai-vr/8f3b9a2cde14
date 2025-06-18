@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Hai.Project12.HaiSystems.Supporting;
+using Hai.Project12.InteractionElements.Runtime;
+using Hai.Project12.UserInterfaceElements.Runtime;
 using HVR.Basis.Comms;
 using UnityEngine;
 
@@ -16,6 +18,7 @@ namespace Hai.Project12.Vixxy.Runtime
         // - When all data arrived, and we're starting the update cycle, we wake up all aggregators of that data.
 
         [SerializeField] private AcquisitionService acquisitionService;
+        [LateInjectable] [SerializeField] private P12GadgetRepository gadgetRepository;
         [SerializeField] private Transform context; // Can be null. If it is null, the orchestrator *is* the context.
 
         private readonly HashSet<I12VixxyAggregator> _aggregatorsToUpdateThisTick = new();
@@ -36,6 +39,8 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void Awake()
         {
+            H12LateInjector.InjectDependenciesInto(this);
+
             if (!acquisitionService) acquisitionService = AcquisitionService.SceneInstance;
         }
 
@@ -263,6 +268,22 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             // FIXME: No-op for now.
             // _stagedComponents.Add(component);
+        }
+
+        public void RegisterMenu(P12SettableFloatElement element)
+        {
+            gadgetRepository.Add(element);
+        }
+
+        public void UnregisterMenu(P12SettableFloatElement element)
+        {
+            gadgetRepository.Remove(element);
+        }
+
+        public void ___SubmitToAcquisitionService(string address, float newValue)
+        {
+            // TODO: This is temporary.
+            acquisitionService.Submit(address, newValue);
         }
     }
 }

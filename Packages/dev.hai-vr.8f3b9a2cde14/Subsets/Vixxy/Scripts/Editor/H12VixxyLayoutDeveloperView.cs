@@ -9,11 +9,12 @@ namespace Hai.Project12.Vixxy.Editor
 {
     public class H12VixxyLayoutDeveloperView
     {
+        private const string AddPropertyOfTypeLabel = "+ Add Property of type {0}";
+        private const string AddSubjectLabel = "+ Add Subject";
+        private const string MsgAddressIsOptional = "Address is completely optional, we will generate one for you. If you need explicit control by external programs, then do specify one.";
         private const string MsgPropertyFailedToResolve = "This property has failed to resolve. Reason: {0}";
         private const string RuntimeBakedDataLabel = "Runtime Baked Data";
         private const string SampleFromLabel = "Sample from";
-        private const string AddSubjectLabel = "+ Add Subject";
-        private const string AddPropertyOfTypeLabel = "+ Add Property of type {0}";
 
         // ReSharper disable once InconsistentNaming
         private readonly P12VixxyControl my;
@@ -32,7 +33,21 @@ namespace Hai.Project12.Vixxy.Editor
 
             EditorGUI.BeginDisabledGroup(isPlaying);
             EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(P12VixxyControl.address)));
+            if (string.IsNullOrWhiteSpace(my.address))
+            {
+                EditorGUILayout.HelpBox(MsgAddressIsOptional, MessageType.Info);
+            }
             EditorGUI.EndDisabledGroup();
+
+            if (isPlaying)
+            {
+                HaiEFCommon.ColoredBackgroundVoid(true, P12VixxyControlEditor.RuntimeColorOK, () =>
+                {
+                    EditorGUILayout.BeginVertical(H12UiHelpers.GroupBoxStyle);
+                    EditorGUILayout.TextField(nameof(P12VixxyControl.Address), my.Address);
+                    EditorGUILayout.EndVertical();
+                });
+            }
 
             var subjectsSp = serializedObject.FindProperty(nameof(P12VixxyControl.subjects));
             for (var subjectIndex = 0; subjectIndex < subjectsSp.arraySize; subjectIndex++)

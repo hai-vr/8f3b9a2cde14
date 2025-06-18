@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Hai.Project12.Vixxy.Runtime
 {
+    // TODO: This class can be removed.
     public class P12VixxySampleActuator : MonoBehaviour, I12VixxyActuator
     {
         [EarlyInjectable] public P12VixxyOrchestrator orchestrator;

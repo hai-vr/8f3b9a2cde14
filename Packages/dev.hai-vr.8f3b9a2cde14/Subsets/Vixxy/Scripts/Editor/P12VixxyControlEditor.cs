@@ -14,9 +14,9 @@ namespace Hai.Project12.Vixxy.Editor
 
         internal const float DeleteButtonWidth = 40;
 
+        private const string UserViewLabel = "User View";
         private const string CreatorViewLabel = "Creator View";
         private const string DeveloperViewLabel = "Developer View";
-        private const string UserViewLabel = "User View";
 
         private static bool _userViewFoldout;
         private static bool _creatorViewFoldout;

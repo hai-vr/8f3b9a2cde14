@@ -158,7 +158,7 @@ namespace Hai.Project12.Vixxy.Editor
                 EditorGUILayout.EndVertical();
             }
 
-            return true;
+            return false;
         }
 
         private void CreateArrayAddition(SerializedProperty whichArrayProperty, Type arrayType, bool limitToOne = false)
