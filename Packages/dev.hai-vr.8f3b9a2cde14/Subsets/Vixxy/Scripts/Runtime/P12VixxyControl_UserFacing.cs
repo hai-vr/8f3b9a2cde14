@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Hai.Project12.HaiSystems.Supporting;
 using Hai.Project12.UserInterfaceElements.Runtime;
 using UnityEngine;
 
@@ -19,8 +18,8 @@ namespace Hai.Project12.Vixxy.Runtime
 
         [SerializeField] internal P12SettableFloatElement sample;
 
-        [SerializeField] internal P12VixxyActivations[] activations;
-        [SerializeField] internal P12VixxySubject[] subjects;
+        [SerializeField] internal P12VixxyActivation[] activations = Array.Empty<P12VixxyActivation>();
+        [SerializeField] internal P12VixxySubject[] subjects = Array.Empty<P12VixxySubject>();
 
         /// The value that is considered to be OFF. This may be larger than upperBound.
         [SerializeField] internal float lowerBound = 0f;
@@ -57,7 +56,7 @@ namespace Hai.Project12.Vixxy.Runtime
     }
 
     [Serializable]
-    public struct P12VixxyActivations
+    public struct P12VixxyActivation
     {
         public Component component; // To toggle a GameObject, provide the Transform instead. It makes things easier as GameObject is not a component.
         public ActivationThreshold threshold;
@@ -75,7 +74,7 @@ namespace Hai.Project12.Vixxy.Runtime
     }
 
     [Serializable]
-    public struct P12VixxySubject
+    public class P12VixxySubject
     {
         public P12VixxySelection selection;
 
@@ -133,6 +132,7 @@ namespace Hai.Project12.Vixxy.Runtime
         // TODO: It might be relevant to use another approach than getting animatable properties,
         // since we have control over the system. It doesn't have to piggyback on the animation APIs.
         public string fullClassName;
+        public P12VixxyPropertyVariant variant;
         public string propertyName;
 
         public bool flip;
@@ -142,12 +142,19 @@ namespace Hai.Project12.Vixxy.Runtime
         [NonSerialized] internal P12VixxyPropertyBakeResult BakeResult;
         [NonSerialized] internal Type FoundType;
         [NonSerialized] internal List<Component> FoundComponents;
-        [NonSerialized] internal P12SpecialMarker SpecialMarker;
+        [NonSerialized] internal P12KindMarker KindMarker;
         [NonSerialized] internal int ShaderMaterialProperty;
-        [NonSerialized] internal string PropertySuffix;
         [NonSerialized] internal FieldInfo FieldIfMarkedAsFieldAccess; // null if SpecialMarker is not FieldAccess
         [NonSerialized] internal PropertyInfo TPropertyIfMarkedAsTPropertyAccess; // null if SpecialMarker is not PropertyAccess
         [NonSerialized] internal Dictionary<SkinnedMeshRenderer, int> SmrToBlendshapeIndex; // null if SpecialMarker is not BlendShape
+    }
+
+    [Serializable]
+    public enum P12VixxyPropertyVariant
+    {
+        Standard,
+        MaterialProperty,
+        BlendShape
     }
 
     interface I12VixxyProperty

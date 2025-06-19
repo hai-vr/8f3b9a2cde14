@@ -1,3 +1,6 @@
+#if UNITY_EDITOR
+using Hai.Project12.HaiSystems.Supporting;
+using UnityEditor;
 using UnityEngine;
 
 namespace Hai.Project12.UserInterfaceElements.Runtime
@@ -6,10 +9,26 @@ namespace Hai.Project12.UserInterfaceElements.Runtime
     {
         private void Awake()
         {
-            foreach (var obj in FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            var eoObjs = FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var obj in eoObjs)
+            {
                 if (obj && obj.CompareTag("EditorOnly"))
-                    Destroy(obj);
+                {
+                    if (!PrefabUtility.IsPartOfPrefabInstance(obj))
+                    {
+                        Destroy(obj);
+                    }
+                    else
+                    {
+                        // This seems to happen if we have additive scenes, but this is weird.
+                        BasisDebug.Log($"{nameof(P12AutoDeleteEOInScene)} tried to delete {obj.name} (at {H12Utilities.ResolveAbsolutePath(obj.transform)})," +
+                                       $" but it is part of a prefab instance (how??? is this caused by additive scenes?)." +
+                                       $" Application.isPlaying returns {Application.isPlaying}");
+                    }
+                }
+            }
             Destroy(gameObject);
         }
     }
 }
+#endif

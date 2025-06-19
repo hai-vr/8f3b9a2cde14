@@ -24,7 +24,7 @@ Data aggregators:
 
 Some of this data, including aggregated data, will get transmitted over the network.
 
-Data aggregators provides the backend to improve the function of Vixen flags, as flags that depend on other flags
+Data aggregators provide the backend to improve the function of Vixen flags, as flags that depend on other flags
 will be solved using these iteration cycles, within one frame.
 
 Actuators:

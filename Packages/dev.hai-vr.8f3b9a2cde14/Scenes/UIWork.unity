@@ -44073,7 +44073,8 @@ MonoBehaviour:
       type: {class: 'P12VixxyProperty`1[[System.Single, mscorlib]]', ns: Hai.Project12.Vixxy.Runtime, asm: Hai.Project12.Vixxy.Runtime}
       data:
         fullClassName: UnityEngine.MeshRenderer
-        propertyName: material._Smoothness
+        variant: 1
+        propertyName: _Smoothness
         flip: 0
         bound: 1
         unbound: 0.5
@@ -44081,6 +44082,7 @@ MonoBehaviour:
       type: {class: 'P12VixxyProperty`1[[UnityEngine.Vector3, UnityEngine.CoreModule]]', ns: Hai.Project12.Vixxy.Runtime, asm: Hai.Project12.Vixxy.Runtime}
       data:
         fullClassName: UnityEngine.Rendering.Universal.DecalProjector
+        variant: 0
         propertyName: size
         flip: 0
         bound: {x: 3, y: 3, z: 3}
@@ -44089,7 +44091,8 @@ MonoBehaviour:
       type: {class: 'P12VixxyProperty`1[[UnityEngine.Color, UnityEngine.CoreModule]]', ns: Hai.Project12.Vixxy.Runtime, asm: Hai.Project12.Vixxy.Runtime}
       data:
         fullClassName: UnityEngine.MeshRenderer
-        propertyName: material._BaseColor
+        variant: 1
+        propertyName: _BaseColor
         flip: 0
         bound: {r: 0, g: 1, b: 0, a: 1}
         unbound: {r: 1, g: 1, b: 1, a: 1}
@@ -44097,7 +44100,8 @@ MonoBehaviour:
       type: {class: 'P12VixxyProperty`1[[System.Single, mscorlib]]', ns: Hai.Project12.Vixxy.Runtime, asm: Hai.Project12.Vixxy.Runtime}
       data:
         fullClassName: UnityEngine.SkinnedMeshRenderer
-        propertyName: "blendShape.\u25B2"
+        variant: 2
+        propertyName: "\u25B2"
         flip: 0
         bound: 100
         unbound: 0
@@ -117029,6 +117033,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 851887029}
   m_CullTransparentMesh: 1
+--- !u!1 &854728039
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 854728040}
+  - component: {fileID: 854728041}
+  m_Layer: 0
+  m_Name: CilboxTarget
+  m_TagString: EditorOnly
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &854728040
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 854728039}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.27183, y: 0.17844, z: 1.49386}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &854728041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 854728039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 683884e5dc26652089dc0acf7a7ce79a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  assemblyData: 
+  showFunctionProfiling: 0
+  exportDebuggingData: 0
+  disabled: 0
+  timeoutLengthTicks: 5000000
+  interpreterAccountingDepth: 0
+  interpreterAccountingDropDead: 0
+  interpreterAccountingCumulitive: 0
+  interpreterInstructionsCount: 0
 --- !u!1 &856689278
 GameObject:
   m_ObjectHideFlags: 0
@@ -153974,6 +154031,51 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1337969486}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1338148083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1338148084}
+  - component: {fileID: 1338148085}
+  m_Layer: 0
+  m_Name: CilboxTest
+  m_TagString: EditorOnly
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &1338148084
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1338148083}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.27183, y: 0.17844, z: 1.49386}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1338148085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1338148083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6758078573c1463cbbea592f0161bee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  input: Oranges
 --- !u!1 &1341313552
 GameObject:
   m_ObjectHideFlags: 0
@@ -252993,3 +253095,5 @@ SceneRoots:
   - {fileID: 1904536490}
   - {fileID: 1944587063}
   - {fileID: 1260450335}
+  - {fileID: 854728040}
+  - {fileID: 1338148084}

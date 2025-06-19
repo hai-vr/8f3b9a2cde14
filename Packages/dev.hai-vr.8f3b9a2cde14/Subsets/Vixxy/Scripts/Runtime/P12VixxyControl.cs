@@ -23,11 +23,8 @@ namespace Hai.Project12.Vixxy.Runtime
         // The code below is released under the same terms as the LICENSE file of the specific "Vixxy/" subdirectory that this file is contained in which is MIT,
         // including the specific portions of the code that originally came from "Vixen".
 
-        private const string PropMaterialPrefix = "material.";
-        private const string PropBlendShapePrefix = "blendShape.";
-
         // Runtime only
-        private BasisAvatar _avatar;
+        private BasisAvatar _avatarNullable;
 
         private int _iddress;
         private Transform _context;
@@ -41,10 +38,13 @@ namespace Hai.Project12.Vixxy.Runtime
         [NonSerialized] internal P12VixxyRememberScope Remember;
         [NonSerialized] internal string RememberTagNullable;
         [NonSerialized] internal bool Networked;
+        [NonSerialized] internal bool WasOnAvatarReadyCalled;
+        [NonSerialized] internal bool IsWearer;
 
         public void Awake()
         {
             _context = orchestrator.Context();
+            _avatarNullable = GetComponentInParent<BasisAvatar>(true); // This can happen in testing scenes, where the control is outside an avatar.
 
             Address = string.IsNullOrWhiteSpace(address) ? GenerateAddressFromPath() : address;
             _iddress = H12VixxyAddress.AddressToId(Address);
@@ -56,8 +56,8 @@ namespace Hai.Project12.Vixxy.Runtime
                     Remember = P12VixxyRememberScope.RememberAcrossAvatars;
                     RememberTagNullable = null;
                     Networked = true;
+                    break;
                 }
-                break;
                 case P12VixxyControlMode.Advanced:
                 {
                     if (remember == P12VixxyRememberScope.RememberInThisTag)
@@ -79,11 +79,15 @@ namespace Hai.Project12.Vixxy.Runtime
                         Remember = remember;
                     }
                     Networked = networked;
+                    break;
                 }
-                break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            // UGC Rule: Sanitize arrays.
+            activations ??= Array.Empty<P12VixxyActivation>();
+            subjects ??= Array.Empty<P12VixxySubject>();
 
             BakeControlSubjectsForRuntime();
             _bakedDefaultValue = defaultValue; // TODO: The baked value depends on the level of detail in the control, and the type of control.
@@ -98,21 +102,31 @@ namespace Hai.Project12.Vixxy.Runtime
             _menuElement.storedValue = _bakedDefaultValue;
             sample = _menuElement;
 
-            _avatar = GetComponentInParent<BasisAvatar>(true);
-            _avatar.OnAvatarReady -= OnAvatarReady;
-            _avatar.OnAvatarReady += OnAvatarReady;
+            if (_avatarNullable != null)
+            {
+                _avatarNullable.OnAvatarReady -= OnAvatarReady;
+                _avatarNullable.OnAvatarReady += OnAvatarReady;
+            }
         }
 
         private void OnDestroy()
         {
             orchestrator.UnregisterMenu(_menuElement);
             sample.OnValueChanged -= OnValueChanged;
-            _avatar.OnAvatarReady -= OnAvatarReady;
+            if (_avatarNullable != null)
+            {
+                _avatarNullable.OnAvatarReady -= OnAvatarReady;
+            }
         }
 
         private void OnAvatarReady(bool isOwner)
         {
-            orchestrator.RegisterMenu(_menuElement);
+            WasOnAvatarReadyCalled = true;
+            IsWearer = isOwner;
+            if (isOwner)
+            {
+                orchestrator.RegisterMenu(_menuElement);
+            }
             sample.OnValueChanged -= OnValueChanged;
             sample.OnValueChanged += OnValueChanged;
         }
@@ -130,6 +144,7 @@ namespace Hai.Project12.Vixxy.Runtime
             orchestrator.___SubmitToAcquisitionService(Address, newValue);
         }
 
+        /// Called by the Editor when a serialized property changes due to live edits. This is not to be invoked by anything else.
         internal void DebugOnly_ReBakeControl()
         {
             BakeControlSubjectsForRuntime();
@@ -143,13 +158,19 @@ namespace Hai.Project12.Vixxy.Runtime
             for (var i = 0; i < subjects.Length; i++)
             {
                 var subject = subjects[i];
+
+                // UGC Rule: Sanitize input arrays.
+                subject.targets ??= Array.Empty<GameObject>();
+                subject.childrenOf ??= Array.Empty<GameObject>();
+                subject.exceptions ??= Array.Empty<GameObject>();
+                subject.properties ??= new List<P12VixxyPropertyBase>();
+
                 BakeSubjectAffectedObjects(subject, _context);
 
                 if (subject.BakedObjects.Count == 0)
                 {
                     // Subject Not applicable: No objects
                     subject.IsApplicable = false;
-                    subjects[i] = subject;
 
                     foreach (var property in subject.properties)
                     {
@@ -171,7 +192,7 @@ namespace Hai.Project12.Vixxy.Runtime
                     property.BakeResult = bakeResult;
 
                     isAnyPropertyApplicable |= isApplicable;
-                    if (isApplicable && property.SpecialMarker == P12SpecialMarker.AffectsMaterialPropertyBlock)
+                    if (isApplicable && property.KindMarker == P12KindMarker.AffectsMaterialPropertyBlock)
                     {
                         isAnyPropertyDependentOnMaterialPropertyBlock = true;
                     }
@@ -187,7 +208,6 @@ namespace Hai.Project12.Vixxy.Runtime
 
                 // When Subject Not applicable: As no property is applicable, the subject is not applicable either.
                 subject.IsApplicable = isAnyPropertyApplicable;
-                subjects[i] = subject;
             }
         }
 
@@ -195,32 +215,42 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             var bakedObjects = new List<GameObject>();
 
-            if (subject.selection == P12VixxySelection.Normal)
+            switch (subject.selection)
             {
-                bakedObjects.AddRange(subject.targets);
-            }
-            else if (subject.selection == P12VixxySelection.RecursiveSearch)
-            {
-                // TODO: Prevent path traversal
-                // TODO: Prevent misconficuration (childrenOf being null or childrenOf containing null-destroyed objects) (check how Vixen does it)
-                // TODO: Handle "except these objects" of a recursive search
-                foreach (var childrenRoot in subject.childrenOf)
+                case P12VixxySelection.Normal:
                 {
-                    var allTransforms = childrenRoot.GetComponentsInChildren<Transform>(true);
+                    bakedObjects.AddRange(subject.targets);
+                    break;
+                }
+                case P12VixxySelection.RecursiveSearch:
+                {
+                    // TODO: Prevent out-of-context searches
+                    // TODO: Handle "except these objects" of a recursive search (check how Vixen does it)
+                    foreach (var childrenRoot in subject.childrenOf)
+                    {
+                        if (childrenRoot != null) // UGC rule.
+                        {
+                            var allTransforms = childrenRoot.GetComponentsInChildren<Transform>(true);
+                            foreach (var t in allTransforms)
+                            {
+                                bakedObjects.Add(t.gameObject);
+                            }
+                        }
+                    }
+                    break;
+                }
+                case P12VixxySelection.Everything:
+                {
+                    // TODO: Handle "except these objects" of a recursive search
+                    var allTransforms = context.GetComponentsInChildren<Transform>(true);
                     foreach (var t in allTransforms)
                     {
                         bakedObjects.Add(t.gameObject);
                     }
+                    break;
                 }
-            }
-            else if (subject.selection == P12VixxySelection.Everything)
-            {
-                // TODO: Handle "except these objects" of a recursive search
-                var allTransforms = context.GetComponentsInChildren<Transform>(true);
-                foreach (var t in allTransforms)
-                {
-                    bakedObjects.Add(t.gameObject);
-                };
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             H12Utilities.RemoveDestroyedFromList(bakedObjects); // Following the UGC rule; see class header.
@@ -230,42 +260,40 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private P12VixxyPropertyBakeResult BakeProperty(P12VixxyPropertyBase property, P12VixxySubject subject)
         {
-            if (!H12ComponentDictionary.ComponentDictionary.TryGetValue(property.fullClassName, out var foundType)) return P12VixxyPropertyBakeResult.TypeNotFound; // // Not applicable: Type not found
+            if (!H12ComponentDictionary.TryGetComponentType(property.fullClassName, out var foundType)) return P12VixxyPropertyBakeResult.TypeNotFound;
 
-            // FIXME: This is not always correct, think material swaps and some other subtleties (can't remember which).
-            var affectsMaterialPropertyBlock = property.propertyName.StartsWith(PropMaterialPrefix);
+            var affectsMaterialPropertyBlock = property.variant == P12VixxyPropertyVariant.MaterialProperty;
+            var affectsBlendShape = property.variant == P12VixxyPropertyVariant.BlendShape;
 
-            // This is just a sanity check:
-            // - If it's not a material property block, it is OK.
-            // - If it *is* a material property block, then the type must be a renderer, so that we can skip the type check at runtime.
+            // UGC: Detect misconfiguration oddities
             if (affectsMaterialPropertyBlock && !typeof(Renderer).IsAssignableFrom(foundType))
             {
-                return P12VixxyPropertyBakeResult.PropertyRequiringMaterialPropertyBlockHasNoRenderer; // Not applicable: Property requiring a MaterialPropertyBlock has no Renderer
+                return P12VixxyPropertyBakeResult.PropertyRequiringMaterialPropertyBlockHasNoRendererType;
+            }
+            if (affectsBlendShape && foundType != typeof(SkinnedMeshRenderer))
+            {
+                return P12VixxyPropertyBakeResult.BlendShapeCanOnlyBeUsedOnSkinnedMeshRenderers;
             }
 
             var foundComponents = new List<Component>();
             foreach (var bakedObject in subject.BakedObjects)
             {
                 var component = bakedObject.GetComponent(foundType);
-                if (component != null) // This is *NOT* UGC Rule. Some of the targets just may not have that component, especially the secondaries.
+                if (component != null) // This is *NOT* UGC Rule. Some of the targets just may not have that component, especially the non-first objects, and recursive searches.
                 {
                     foundComponents.Add(component);
                 }
             }
 
-            if (foundComponents.Count <= 0) return P12VixxyPropertyBakeResult.NoObjectsHasThatComponent; // Not applicable: No objects has that component
-
-            var propertySuffix = property.propertyName.Contains('.') ? property.propertyName.Substring(property.propertyName.IndexOf('.') + 1) : "";
+            if (foundComponents.Count <= 0) return P12VixxyPropertyBakeResult.NoObjectsHasThatComponent;
 
             if (affectsMaterialPropertyBlock)
             {
-                property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName.Substring(PropMaterialPrefix.Length));
-                property.SpecialMarker = P12SpecialMarker.AffectsMaterialPropertyBlock;
+                property.ShaderMaterialProperty = Shader.PropertyToID(property.propertyName);
+                property.KindMarker = P12KindMarker.AffectsMaterialPropertyBlock;
             }
-            else if (property.propertyName.StartsWith(PropBlendShapePrefix))
+            else if (affectsBlendShape)
             {
-                if (foundType != typeof(SkinnedMeshRenderer)) return P12VixxyPropertyBakeResult.BlendShapeCanOnlyBeUsedOnSkinnedMeshRenderers; // Not applicable: blendShape can only be used on SMRs
-
                 var nonApplicableComponents = new List<Component>();
                 var smrToIndex = new Dictionary<SkinnedMeshRenderer, int>();
                 foreach (var component in foundComponents)
@@ -274,7 +302,7 @@ namespace Hai.Project12.Vixxy.Runtime
                     var sharedMesh = smr.sharedMesh;
                     if (sharedMesh != null)
                     {
-                        var blendShapeIndex = sharedMesh.GetBlendShapeIndex(propertySuffix);
+                        var blendShapeIndex = sharedMesh.GetBlendShapeIndex(property.propertyName);
                         if (blendShapeIndex != -1)
                         {
                             smrToIndex[smr] = blendShapeIndex;
@@ -295,9 +323,9 @@ namespace Hai.Project12.Vixxy.Runtime
                     foundComponents.Remove(nonApplicableComponent);
                 }
 
-                if (foundComponents.Count == 0) return P12VixxyPropertyBakeResult.NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape; // Not applicable: No SMR with a valid mesh has this blendshape.
+                if (foundComponents.Count == 0) return P12VixxyPropertyBakeResult.NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape;
 
-                property.SpecialMarker = P12SpecialMarker.BlendShape;
+                property.KindMarker = P12KindMarker.BlendShape;
                 property.SmrToBlendshapeIndex = smrToIndex;
             }
             else
@@ -306,21 +334,20 @@ namespace Hai.Project12.Vixxy.Runtime
                 if (fieldInfoNullable != null)
                 {
                     property.FieldIfMarkedAsFieldAccess = fieldInfoNullable;
-                    property.SpecialMarker = P12SpecialMarker.FieldAccess;
+                    property.KindMarker = P12KindMarker.FieldAccess;
                 }
                 else
                 {
                     var propertyInfoNullable = GetPropertyInfoOrNull(foundType, property.propertyName);
-                    if (propertyInfoNullable == null) return P12VixxyPropertyBakeResult.NoFieldNorPropertyMatches; // Not applicable: No field nor property
+                    if (propertyInfoNullable == null) return P12VixxyPropertyBakeResult.NoFieldNorPropertyMatches;
 
                     property.TPropertyIfMarkedAsTPropertyAccess = propertyInfoNullable;
-                    property.SpecialMarker = P12SpecialMarker.PropertyAccess;
+                    property.KindMarker = P12KindMarker.PropertyAccess;
                 }
             }
 
             property.FoundType = foundType;
             property.FoundComponents = foundComponents;
-            property.PropertySuffix = propertySuffix;
 
             return P12VixxyPropertyBakeResult.Success;
         }
@@ -328,7 +355,7 @@ namespace Hai.Project12.Vixxy.Runtime
         private void OnEnable()
         {
             _previousValue = float.MinValue + 1.23456789f;
-            _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnAddressUpdated);
+            _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnImplicitAddressUpdated);
         }
 
         private void OnDisable()
@@ -337,7 +364,7 @@ namespace Hai.Project12.Vixxy.Runtime
             _registeredActuator = default;
         }
 
-        private void OnAddressUpdated(string _, float value)
+        private void OnImplicitAddressUpdated(float value)
         {
             // FIXME: This is a bypass so that we don't update an address that hasn't changed.
             // Ideally, the orchestrator should instead provide us a guarantee of calling us only when the value changes.
@@ -410,9 +437,9 @@ namespace Hai.Project12.Vixxy.Runtime
                         // Defensive check in case of external destruction.
                         if (null != component)
                         {
-                            switch (property.SpecialMarker)
+                            switch (property.KindMarker)
                             {
-                                case P12SpecialMarker.AffectsMaterialPropertyBlock:
+                                case P12KindMarker.AffectsMaterialPropertyBlock:
                                 {
                                     var materialPropertyBlock = orchestrator.GetMaterialPropertyBlockForBakedObject(component.gameObject);
                                     // TODO: Instead of checking the type, use something like property.ApplyMaterialProperty(materialPropertyBlock, value), where the property itself knows how to apply it to the property block.
@@ -427,7 +454,7 @@ namespace Hai.Project12.Vixxy.Runtime
                                     orchestrator.StagePropertyBlock(component.gameObject);
                                     break;
                                 }
-                                case P12SpecialMarker.BlendShape:
+                                case P12KindMarker.BlendShape:
                                 {
                                     if (lerpValue is float lerpFloatValue)
                                     {
@@ -437,24 +464,24 @@ namespace Hai.Project12.Vixxy.Runtime
                                     }
                                     break;
                                 }
-                                case P12SpecialMarker.FieldAccess:
+                                case P12KindMarker.FieldAccess:
                                 {
                                     var fieldInfo = property.FieldIfMarkedAsFieldAccess;
                                     fieldInfo.SetValue(component, lerpValue);
                                     orchestrator.StagePossibleSpecialComponentHandling(component);
                                     break;
                                 }
-                                case P12SpecialMarker.PropertyAccess:
+                                case P12KindMarker.PropertyAccess:
                                 {
                                     var propertyInfo = property.TPropertyIfMarkedAsTPropertyAccess;
                                     propertyInfo.SetValue(component, lerpValue);
                                     orchestrator.StagePossibleSpecialComponentHandling(component);
                                     break;
                                 }
-                                case P12SpecialMarker.Undefined:
+                                case P12KindMarker.Undefined:
                                 default:
                                     throw new ArgumentException("We tried to access an Undefined property, but Undefined properties are not supposed" +
-                                                                " to be valid if the property IsApplicable. This may be a programming error, did you" +
+                                                                " to be valid if the property IsApplicable. This may be a programming error, did we" +
                                                                 " properly check that the property IsApplicable?");
                             }
                         }
@@ -506,7 +533,7 @@ namespace Hai.Project12.Vixxy.Runtime
         }
     }
 
-    internal enum P12SpecialMarker
+    internal enum P12KindMarker
     {
         Undefined,
         AffectsMaterialPropertyBlock,
@@ -519,7 +546,7 @@ namespace Hai.Project12.Vixxy.Runtime
     {
         Success,
         TypeNotFound,
-        PropertyRequiringMaterialPropertyBlockHasNoRenderer,
+        PropertyRequiringMaterialPropertyBlockHasNoRendererType,
         NoObjectsHasThatComponent,
         BlendShapeCanOnlyBeUsedOnSkinnedMeshRenderers,
         NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape,

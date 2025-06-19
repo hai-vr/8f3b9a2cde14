@@ -34,7 +34,7 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private void OnEnable()
         {
-            _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnAddressUpdated);
+            _registeredActuator = orchestrator.RegisterActuator(_iddress, this, OnAnonymousAddressUpdated);
         }
 
         private void OnDisable()
@@ -43,7 +43,7 @@ namespace Hai.Project12.Vixxy.Runtime
             _registeredActuator = default;
         }
 
-        private void OnAddressUpdated(string _, float value)
+        private void OnAnonymousAddressUpdated(float value)
         {
             // FIXME: Storing that value is probably not a good idea to do at this specific stage of the processing.
             //           For comparison, we can't do this for aggregators (which can have multiple input values), it's not their responsibility.

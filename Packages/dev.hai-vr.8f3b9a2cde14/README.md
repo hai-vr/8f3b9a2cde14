@@ -38,6 +38,9 @@ These must **not** be treated as errors, and be gracefully handled as being an e
 The same thing in classes or fields that *don't* follow the UGC Rule must be treated as a programming error,
 and cause an exception to occur.
 
+Serialized Arrays and Lists inside objects and structures that follow the UGC Rule need to be sanitized on Awake so that they cannot be themselves null
+(their collections may contain null values).
+
 ## Basis modifications for our app
 
 Since this is a consumer of the Basis framework, we want to modify Basis as little as possible so that we may update the Basis

@@ -37,10 +37,15 @@ namespace Hai.Project12.Vixxy.Runtime
         public event NetworkDataUpdateRequired OnNetworkDataUpdateRequired;
         public delegate void NetworkDataUpdateRequired();
 
+        /// Contrary to AcquisitionService, which only references data pertaining to the local user, implicit addresses can refer to data
+        /// coming from other users to drive that the avatar of that user.
+        public delegate void ImplicitAddressUpdated(float value);
+
         private void Awake()
         {
             H12LateInjector.InjectDependenciesInto(this);
 
+            // TODO: Should we nullify the acquisitionService if it's not locally worn?
             if (!acquisitionService) acquisitionService = AcquisitionService.SceneInstance;
         }
 
@@ -159,12 +164,12 @@ namespace Hai.Project12.Vixxy.Runtime
             // }
         }
 
-        public H12ActuatorRegistrationToken RegisterActuator(string address, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
+        public H12ActuatorRegistrationToken RegisterActuator(string address, I12VixxyActuator actuator, ImplicitAddressUpdated implicitAddressUpdatedFn)
         {
-            return RegisterActuator(H12VixxyAddress.AddressToId(address), actuator, addressUpdatedFn);
+            return RegisterActuator(H12VixxyAddress.AddressToId(address), actuator, implicitAddressUpdatedFn);
         }
 
-        public H12ActuatorRegistrationToken RegisterActuator(int iddress, I12VixxyActuator actuator, AcquisitionService.AddressUpdated addressUpdatedFn)
+        public H12ActuatorRegistrationToken RegisterActuator(int iddress, I12VixxyActuator actuator, ImplicitAddressUpdated implicitAddressUpdatedFn)
         {
             if (_iddressToActuators.TryGetValue(iddress, out var existingActuators))
             {
@@ -181,6 +186,7 @@ namespace Hai.Project12.Vixxy.Runtime
             _actuatorsToUpdateThisTick.Add(actuator);
 
             var address = H12VixxyAddress.ResolveKnownAddressFromId(iddress);
+            AcquisitionService.AddressUpdated addressUpdatedFn = (_, value) => implicitAddressUpdatedFn.Invoke(value);
             acquisitionService.RegisterAddresses(new [] { address }, addressUpdatedFn);
 
             return new H12ActuatorRegistrationToken
@@ -267,7 +273,11 @@ namespace Hai.Project12.Vixxy.Runtime
 
         public void StagePossibleSpecialComponentHandling(Component component)
         {
-            // FIXME: No-op for now.
+            // TODO: This is a No-op for now.
+            // The intent was that some components might need a method called once all actuators have performed an operation on it,
+            // a bit like material property blocks.
+            // e.g. a rebuild operation. But this might not be the case.
+
             // _stagedComponents.Add(component);
         }
 

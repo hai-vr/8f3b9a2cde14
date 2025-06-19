@@ -12,6 +12,7 @@ namespace Hai.Project12.Vixxy.Editor
         private const string AddPropertyOfTypeLabel = "+ Add Property of type {0}";
         private const string AddSubjectLabel = "+ Add Subject";
         private const string MsgAddressIsOptional = "Address is completely optional, we will generate one for you. If you need explicit control by external programs, then do specify one.";
+        private const string MsgOnAvatarReadyNotInvoked = "OnAvatarReady was not called on the avatar of this component while we were listening.\nThis may be because this is a test scene and not a loaded avatar. If this isn't the case, this is a proper error.";
         private const string MsgPropertyFailedToResolve = "This property has failed to resolve. Reason: {0}";
         private const string RuntimeBakedDataLabel = "Runtime Baked Data";
         private const string SampleFromLabel = "Sample from";
@@ -44,6 +45,12 @@ namespace Hai.Project12.Vixxy.Editor
                 HaiEFCommon.ColoredBackgroundVoid(true, P12VixxyControlEditor.RuntimeColorOK, () =>
                 {
                     EditorGUILayout.BeginVertical(H12UiHelpers.GroupBoxStyle);
+                    EditorGUILayout.Toggle(nameof(P12VixxyControl.WasOnAvatarReadyCalled), my.WasOnAvatarReadyCalled);
+                    if (!my.WasOnAvatarReadyCalled)
+                    {
+                        HaiEFCommon.ColoredBackgroundVoid(true, Color.white, () => { EditorGUILayout.HelpBox(MsgOnAvatarReadyNotInvoked, MessageType.Error); });
+                    }
+                    EditorGUILayout.Toggle(nameof(P12VixxyControl.IsWearer), my.IsWearer);
                     EditorGUILayout.TextField(nameof(P12VixxyControl.Address), my.Address);
                     EditorGUILayout.EndVertical();
                 });
@@ -95,9 +102,12 @@ namespace Hai.Project12.Vixxy.Editor
                         EditorGUILayout.LabelField(RuntimeBakedDataLabel, EditorStyles.boldLabel);
                         EditorGUILayout.Toggle(nameof(P12VixxySubject.IsApplicable), it.IsApplicable);
                         EditorGUILayout.LabelField(nameof(P12VixxySubject.BakedObjects));
-                        foreach (var found in it.BakedObjects)
+                        if (it.IsApplicable)
                         {
-                            EditorGUILayout.ObjectField(found, found.GetType(), true);
+                            foreach (var found in it.BakedObjects)
+                            {
+                                EditorGUILayout.ObjectField(found, found.GetType(), true);
+                            }
                         }
                         EditorGUILayout.EndVertical();
                     });
@@ -111,10 +121,10 @@ namespace Hai.Project12.Vixxy.Editor
                     if (DrawPropertyOrReturn(propertySp, propertyIndex, propertiesSp, isPlaying)) return true;
                 }
 
-                AddProperty(propertiesSp, "float", () => new P12VixxyProperty<float>());
-                AddProperty(propertiesSp, "Color", () => new P12VixxyProperty<Color>());
-                AddProperty(propertiesSp, "Vector4", () => new P12VixxyProperty<Vector4>());
-                AddProperty(propertiesSp, "Vector3", () => new P12VixxyProperty<Vector3>());
+                ButtonToAddProperty(propertiesSp, "float", () => new P12VixxyProperty<float>());
+                ButtonToAddProperty(propertiesSp, "Color", () => new P12VixxyProperty<Color>());
+                ButtonToAddProperty(propertiesSp, "Vector4", () => new P12VixxyProperty<Vector4>());
+                ButtonToAddProperty(propertiesSp, "Vector3", () => new P12VixxyProperty<Vector3>());
 
                 EditorGUILayout.EndVertical();
             }
@@ -126,7 +136,7 @@ namespace Hai.Project12.Vixxy.Editor
             return false;
         }
 
-        private static void AddProperty(SerializedProperty propertiesSp, string name, Func<object> factoryFn)
+        private static void ButtonToAddProperty(SerializedProperty propertiesSp, string name, Func<object> factoryFn)
         {
             if (GUILayout.Button(string.Format(AddPropertyOfTypeLabel, name)))
             {
@@ -175,6 +185,7 @@ namespace Hai.Project12.Vixxy.Editor
             EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.PropertyField(propertySp.FindPropertyRelative(nameof(P12VixxyPropertyBase.fullClassName)));
+            EditorGUILayout.PropertyField(propertySp.FindPropertyRelative(nameof(P12VixxyPropertyBase.variant)));
             EditorGUILayout.PropertyField(propertySp.FindPropertyRelative(nameof(P12VixxyPropertyBase.propertyName)));
             EditorGUILayout.PropertyField(propertySp.FindPropertyRelative(nameof(P12VixxyPropertyBase.flip)));
             if (isGenericVixxyProperty)
@@ -195,9 +206,8 @@ namespace Hai.Project12.Vixxy.Editor
                     if (it.IsApplicable)
                     {
                         EditorGUILayout.ObjectField(nameof(P12VixxyPropertyBase.FoundType), null, it.FoundType, false);
-                        EditorGUILayout.EnumPopup(nameof(P12VixxyPropertyBase.SpecialMarker), it.SpecialMarker);
-                        EditorGUILayout.TextField(nameof(P12VixxyPropertyBase.PropertySuffix), it.PropertySuffix);
-                        if (it.SpecialMarker == P12SpecialMarker.BlendShape)
+                        EditorGUILayout.EnumPopup(nameof(P12VixxyPropertyBase.KindMarker), it.KindMarker);
+                        if (it.KindMarker == P12KindMarker.BlendShape)
                         {
                             EditorGUILayout.LabelField(nameof(P12VixxyPropertyBase.SmrToBlendshapeIndex), EditorStyles.boldLabel);
                             foreach (var smrToBlendshapeIndex in it.SmrToBlendshapeIndex)

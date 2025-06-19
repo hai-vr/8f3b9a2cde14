@@ -14,6 +14,8 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
 
         public void OnNetworkInitialized()
         {
+            // If Non-Wearers loaded our avatar before the Wearer did, then the Wearer never received the request for a full snapshot.
+            // Therefore, by default the Wearer submits a full snapshot upon network initialized.
             _vixxyNet.Wearer_SubmitFullSnapshot_ToAllNonWearers();
         }
 

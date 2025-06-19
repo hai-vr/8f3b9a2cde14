@@ -18,7 +18,7 @@ namespace Hai.Project12.Vixxy.Runtime
         }
 
         /// Returns an ID for that address, storing that address if it was not seen before.
-        /// This is ID only valid for the duration of the app's execution, don't store it across app executions.
+        /// This ID is only valid for the duration of the app's execution; don't store it across app executions.
         /// Valid IDs start at 1.
         public static int AddressToId(string address)
         {

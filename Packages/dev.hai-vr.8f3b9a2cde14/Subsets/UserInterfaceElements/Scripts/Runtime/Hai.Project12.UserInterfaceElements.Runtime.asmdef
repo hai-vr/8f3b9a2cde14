@@ -12,7 +12,8 @@
         "BasisDebug",
         "Unity.InputSystem",
         "SettingsManagerModules",
-        "Hai.Project12.InteractionElements.Runtime"
+        "Hai.Project12.InteractionElements.Runtime",
+        "Hai.Project12.HaiSystems.Supporting"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

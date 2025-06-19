@@ -72,17 +72,29 @@ namespace Hai.Project12.HaiSystems.Supporting
             };
         }
 
+        public static string ResolveAbsolutePath(Transform element)
+        {
+            return ResolveRelativePathInternal(null, element);
+        }
+
         /// Gets the path of child relative to root, like an animation path that ignores the presence of Animator components.
         public static string ResolveRelativePath(Transform root, Transform child)
         {
-            if (root == child)
+            if (root == null) throw new ArgumentNullException(nameof(root)); // Explicitly disallow null for this public method.
+
+            return ResolveRelativePathInternal(root, child);
+        }
+
+        private static string ResolveRelativePathInternal(Transform rootNullable, Transform child)
+        {
+            if (rootNullable == child)
             {
                 return "";
             }
 
-            if (child.parent != root && child.parent != null)
+            if (child.parent != rootNullable && child.parent != null)
             {
-                return $"{ResolveRelativePath(root, child.parent)}/{child.name}";
+                return $"{ResolveRelativePathInternal(rootNullable, child.parent)}/{child.name}";
             }
 
             return child.name;
