@@ -8,7 +8,9 @@
 - I12 are interfaces.
 - Custom attributes belong in the Supporting assembly, and shouldn't have prefixes.
 
-These rules may not apply in the `Subsets/SupplementalKinematics/Scripts/Runtime/IKSolver/` folder because these files originalte from another project.
+These rules may not apply in the `Subsets/SupplementalKinematics/Scripts/Runtime/IKSolver/` folder because these files originate from another project.
+
+Some scripts in `Subsets/TF/Scripts` can start with TF instead of P12.
 
 ## Handling of null values
 

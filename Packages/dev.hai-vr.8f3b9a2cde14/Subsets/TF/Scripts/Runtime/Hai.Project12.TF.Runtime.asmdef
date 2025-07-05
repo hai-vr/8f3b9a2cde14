@@ -1,0 +1,20 @@
+{
+    "name": "Hai.Project12.TF.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.HaiSystems.DataStructures"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
