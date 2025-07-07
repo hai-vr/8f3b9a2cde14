@@ -8,11 +8,12 @@ namespace Hai.Project12.TF.Editor
     [CustomEditor(typeof(TFBehaviour))]
     public class TFBehaviourEditor : UnityEditor.Editor
     {
-        private const string ApplyLabel = "Apply";
-        private const string ApplyWithoutRefreshing = "Apply without refreshing";
+        private const string ApplyAndRefreshLabel = "Apply and Refresh";
+        private const string ApplyWithoutRefreshing = "Apply";
         private const string RefillFieldsLabel = "Refill Fields";
         private const string DeveloperViewLabel = "Developer View";
         private const string AdvancedViewLabel = "Advanced View";
+        private const string MsgObjectNamesAffectsEditing = "Adding object names in code can slow down editing, as it makes the code depend on the object name.";
 
         private H12TFLayoutFields _layoutFields;
         private H12TFLayoutEvents _layoutEvents;
@@ -46,21 +47,23 @@ namespace Hai.Project12.TF.Editor
             _layoutFields.Layout();
             _layoutEvents.Layout();
 
-            if (GUILayout.Button(ApplyLabel))
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(ApplyAndRefreshLabel))
             {
-                var compiler = new TFCodeGen((TFBehaviour)target);
+                var compiler = new H12TFCodeGen((TFBehaviour)target);
                 compiler.Generate();
             }
 
-            if (GUILayout.Button(ApplyWithoutRefreshing))
+            if (GUILayout.Button(ApplyWithoutRefreshing, GUILayout.Width(100)))
             {
-                var compiler = new TFCodeGen((TFBehaviour)target);
+                var compiler = new H12TFCodeGen((TFBehaviour)target);
                 compiler.Generate(false);
             }
+            EditorGUILayout.EndHorizontal();
 
             if (GUILayout.Button(RefillFieldsLabel))
             {
-                var compiler = new TFCodeGen((TFBehaviour)target);
+                var compiler = new H12TFCodeGen((TFBehaviour)target);
                 compiler.RefillFields();
             }
 
@@ -75,7 +78,12 @@ namespace Hai.Project12.TF.Editor
             {
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(TFBehaviour.description)));
                 EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(TFBehaviour.supportLegacyPlatform)));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(TFBehaviour.addObjectNamesInCode)));
+                var addObjectNamesInCodeSp = serializedObject.FindProperty(nameof(TFBehaviour.addObjectNamesInCode));
+                EditorGUILayout.PropertyField(addObjectNamesInCodeSp);
+                if (addObjectNamesInCodeSp.boolValue)
+                {
+                    EditorGUILayout.HelpBox(MsgObjectNamesAffectsEditing, MessageType.Warning);
+                }
             }
 
             _developerViewFoldout = HaiEFCommon.LilFoldout(DeveloperViewLabel, "", _developerViewFoldout, ref anyChanged);

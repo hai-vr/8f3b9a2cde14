@@ -5,7 +5,7 @@ using Object = UnityEngine.Object;
 
 namespace Hai.Project12.TF.Runtime
 {
-    [AddComponentMenu("TFBehaviour")]
+    [AddComponentMenu("TF Behaviour")]
     public class TFBehaviour : MonoBehaviour
     {
         public List<TFField> fields = new();
@@ -23,7 +23,10 @@ namespace Hai.Project12.TF.Runtime
     public class TFField
     {
         public string name;
-        public TFValue value;
+        public TFValue value; // TODO: Migrate to TFTypeInfo and TFDefinedValue
+        public TFTypeInfo typeInformation;
+        [SerializeReference] public ITFValue val;
+
         public string internalGuid;
     }
 
@@ -31,11 +34,12 @@ namespace Hai.Project12.TF.Runtime
     public class TFEvent
     {
         public string eventName;
-        public List<TFElement> instructions = new();
+        public List<TFInstruction> instructions = new();
+        [SerializeReference] public List<TFPredicate> predicates = new();
     }
 
     [Serializable]
-    public class TFElement
+    public class TFInstruction
     {
         public string identifier;
         public bool hasReturnValue;
@@ -44,7 +48,6 @@ namespace Hai.Project12.TF.Runtime
         // The following applicable if NOT static
         public TFParameter self;
         // FIXME: migrate to TFParameter(self)
-        // [Obsolete] public Object instance; // FIXME: Need the ability to target a field.
 
         public TFParameter[] parameters;
         public string assignTo;
@@ -61,21 +64,49 @@ namespace Hai.Project12.TF.Runtime
         public bool isVariableOrField;
         public string identifierInternalGuid;
 
-        public TFValue value;
+        [Obsolete] public TFValue value; // TODO: Migrate to TFTypeInfo and ITFValue
+
+        // TODO: Use this new model:
+        public TFTypeInfo typeInformation;
+        [SerializeReference] public ITFValue val;
+        [SerializeReference] public List<ITFValue> values = new();
 
         public string fieldifiedIdentifier;
+
+        // Editor metadata
+        public bool isStaged;
+        public bool isMultivaluable;
+    }
+
+    public interface ITFValue {}
+    [Serializable] public class TFValueNonStaged : ITFValue {}
+    [Serializable] public class TFValueNull : ITFValue {}
+    [Serializable] public class TFValueThis : ITFValue {}
+    [Serializable] public class TFValueString { public string value; }
+    [Serializable] public class TFValueBool { public bool value; }
+    [Serializable] public class TFValueUnityObject { public Object value; }
+    [Serializable] public class TFValueField { public string refInternalGuid; }
+
+    public interface TFPredicate {}
+
+    [Serializable]
+    public class TFTypeInfo
+    {
+        public string fullClassName;
+        public TFParameterTargetType targetType;
     }
 
     [Serializable]
+    [Obsolete]
     public class TFValue
     {
-        public string fullClassName; // FIXME: This data is not actually used during generation
-        public bool isThis; // Only applicable to this.gameObject and this.transform
-        public TFParameterTargetType targetType;
+        [Obsolete] public string fullClassName;
+        [Obsolete] public TFParameterTargetType targetType;
         //
-        public string stringValue;
-        public Object objectValue;
-        public bool boolValue;
+        [Obsolete] public bool isThis; // Only applicable to this.gameObject and this.transform
+        [Obsolete] public string stringValue;
+        [Obsolete] public Object objectValue;
+        [Obsolete] public bool boolValue;
     }
 
     [Serializable]

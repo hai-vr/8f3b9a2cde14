@@ -2,13 +2,13 @@
 
 namespace Hai.Project12.TF.Editor
 {
-    internal class TFWriter
+    internal class H12TFWriter
     {
         private const int IndentationSpaces = 4;
         private readonly StringWriter _writer;
         private readonly TFRoot _tfRoot;
 
-        internal TFWriter(StringWriter writer, TFRoot tfRoot)
+        internal H12TFWriter(StringWriter writer, TFRoot tfRoot)
         {
             _writer = writer;
             _tfRoot = tfRoot;

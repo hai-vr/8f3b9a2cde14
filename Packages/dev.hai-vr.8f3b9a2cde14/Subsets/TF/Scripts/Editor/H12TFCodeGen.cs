@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 
 namespace Hai.Project12.TF.Editor
 {
-    internal class TFCodeGen
+    internal class H12TFCodeGen
     {
         // Declared as consts to prevent unintentional replacements
         private const string __PublicKeyword = "public";
@@ -36,7 +36,7 @@ namespace Hai.Project12.TF.Editor
         private readonly Dictionary<Object, string> _fieldifications = new();
         private readonly Dictionary<Object, string> _fieldificationMetadata = new();
 
-        internal TFCodeGen(TFBehaviour behaviour)
+        internal H12TFCodeGen(TFBehaviour behaviour)
         {
             _behaviour = behaviour;
         }
@@ -154,6 +154,13 @@ namespace Hai.Project12.TF.Editor
             // Class definition
             var supportLegacyPlatform = _behaviour.supportLegacyPlatform;
             {
+                if (!string.IsNullOrWhiteSpace(_behaviour.description))
+                {
+                    tfClassDefinition
+                        .Add(new TFUnindentedLine("/**"))
+                        .Add(new TFUnindentedLine($"{SanitizeMultilineComment(_behaviour.description)}"))
+                        .Add(new TFUnindentedLine("*/"));
+                }
                 if (supportLegacyPlatform) tfClassDefinition
                     .Add(new TFUnindentedLine("#if !TF_IS_BASIS || TF_BASIS_USES_SHIMS"))
                     .Add(new TFLine("[UdonBehaviourSyncMode(BehaviourSyncMode.None)]"))
@@ -178,7 +185,7 @@ namespace Hai.Project12.TF.Editor
 
             // We're done
 
-            var tfWriter = new TFWriter(new StringWriter(), tfRoot);
+            var tfWriter = new H12TFWriter(new StringWriter(), tfRoot);
             var written = tfWriter.WriteAll();
 
             File.WriteAllText(Path.Combine(Application.dataPath, $"{TEMP__BehaviourClassName}.cs"), written);
@@ -189,6 +196,20 @@ namespace Hai.Project12.TF.Editor
             }
 
             RefillFields(TEMP__BehaviourClassName);
+        }
+
+        private string SanitizeMultilineComment(string untrustedText)
+        {
+            string previous;
+            var replace = untrustedText;
+            do
+            {
+                previous = replace;
+                replace = replace
+                    .Replace("/*", "--"); // "//**" must not become "--/*--"
+            } while (previous != replace);
+
+            return replace;
         }
 
         private string SanitizeNameAsSingleLineComment(string untrustedText)
@@ -282,6 +303,7 @@ namespace Hai.Project12.TF.Editor
 
                     var line = instruction.isStatic
                         ? $"{instruction.identifier}({instructionParametersAsCode})"
+                        // FIXME: Non-static should not imply object value
                         : $"{Fieldificate(instruction.self.value.objectValue, ref instruction.fieldifiedIdentifier)}.{instruction.identifier}({instructionParametersAsCode})";
 
                     var instructionAssignTo = SanitizeVariableOrFieldName(instruction.assignTo);
@@ -315,12 +337,20 @@ namespace Hai.Project12.TF.Editor
             var value = parameter.value;
             switch (value.targetType)
             {
-                case TFParameterTargetType.String: return value.stringValue;
+                case TFParameterTargetType.String: return $"\"{SanitizeStringValue(value.stringValue)}\"";
                 case TFParameterTargetType.Object: return Fieldificate(value.objectValue, ref parameter.fieldifiedIdentifier);
                 case TFParameterTargetType.Boolean: return value.boolValue ? "true" : "false";
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private string SanitizeStringValue(string input)
+        {
+            return input
+                .Replace("\n", "\\n")
+                .Replace("\r", "")
+                .Replace("\"", @"\""");
         }
 
         private string Fieldificate(Object objectToFieldify, ref string fieldifiedIdentifier)

@@ -73,13 +73,13 @@ namespace Hai.Project12.TF.Editor
                 for (var j = 0; j < instructionsSp.arraySize; j++)
                 {
                     var instructionSp = instructionsSp.GetArrayElementAtIndex(j);
-                    var identifierSp = instructionSp.FindPropertyRelative(nameof(TFElement.identifier));
-                    var parametersSp = instructionSp.FindPropertyRelative(nameof(TFElement.parameters));
-                    var isBeingEditedSp = instructionSp.FindPropertyRelative(nameof(TFElement.isBeingEdited));
+                    var identifierSp = instructionSp.FindPropertyRelative(nameof(TFInstruction.identifier));
+                    var parametersSp = instructionSp.FindPropertyRelative(nameof(TFInstruction.parameters));
+                    var isBeingEditedSp = instructionSp.FindPropertyRelative(nameof(TFInstruction.isBeingEdited));
 
                     var uiParameters = AsUIParameters(parametersSp);
 
-                    var isStatic = instructionSp.FindPropertyRelative(nameof(TFElement.isStatic)).boolValue;
+                    var isStatic = instructionSp.FindPropertyRelative(nameof(TFInstruction.isStatic)).boolValue;
                     if (isStatic)
                     {
                         // Method name
@@ -103,7 +103,7 @@ namespace Hai.Project12.TF.Editor
                     {
                         // Method name
                         EditorGUILayout.BeginHorizontal();
-                        var selfSp = instructionSp.FindPropertyRelative(nameof(TFElement.self));
+                        var selfSp = instructionSp.FindPropertyRelative(nameof(TFInstruction.self));
                         var valueSp = selfSp.FindPropertyRelative(nameof(TFParameter.value));
                         var fullClassNameSp = valueSp.FindPropertyRelative(nameof(TFValue.fullClassName));
 
@@ -132,7 +132,7 @@ namespace Hai.Project12.TF.Editor
                         // Instance param
                         if (!isStatic)
                         {
-                            ShowParameter(instructionSp.FindPropertyRelative(nameof(TFElement.self)), -1);
+                            ShowParameter(instructionSp.FindPropertyRelative(nameof(TFInstruction.self)), -1);
                         }
 
                         // Other params
