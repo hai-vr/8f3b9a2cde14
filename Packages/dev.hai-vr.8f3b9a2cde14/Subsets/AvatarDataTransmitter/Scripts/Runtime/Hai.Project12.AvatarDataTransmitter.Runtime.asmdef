@@ -1,0 +1,25 @@
+{
+    "name": "Hai.Project12.AvatarDataTransmitter.Runtime",
+    "rootNamespace": "Hai.Project12.Vixxy.Runtime",
+    "references": [
+        "Unity.TextMeshPro",
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "BasisDebug",
+        "Hai.Project12.HaiSystems.Supporting",
+        "Hai.Project12.InteractionElements.Runtime",
+        "HVR.Basis.Comms",
+        "BasisSDK",
+        "LiteNetLib"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

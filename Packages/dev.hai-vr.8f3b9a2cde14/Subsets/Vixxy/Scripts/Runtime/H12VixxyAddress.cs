@@ -33,9 +33,9 @@ namespace Hai.Project12.Vixxy.Runtime
         }
 
         /// Returns the string address for an ID that was returned by any method of this class. Throws an exception if that ID was never seen.
-        public static string ResolveKnownAddressFromId(int iddress)
+        public static string ResolveKnownAddressFromId(int knownIddress)
         {
-            if (IdToAddressDict.TryGetValue(iddress, out var id)) return id;
+            if (IdToAddressDict.TryGetValue(knownIddress, out var id)) return id;
             throw new IndexOutOfRangeException();
         }
     }

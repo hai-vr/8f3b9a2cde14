@@ -44,7 +44,10 @@ namespace Hai.Project12.Vixxy.Runtime
         public void Awake()
         {
             _context = orchestrator.Context();
-            _avatarNullable = GetComponentInParent<BasisAvatar>(true); // This can happen in testing scenes, where the control is outside an avatar.
+
+            // null avatar can happen in testing scenes, where the control is outside an avatar.
+            // We don't want to treat this as being an error.
+            _avatarNullable = GetComponentInParent<BasisAvatar>(true);
 
             Address = string.IsNullOrWhiteSpace(address) ? GenerateAddressFromPath() : address;
             _iddress = H12VixxyAddress.AddressToId(Address);
@@ -107,6 +110,17 @@ namespace Hai.Project12.Vixxy.Runtime
                 _avatarNullable.OnAvatarReady -= OnAvatarReady;
                 _avatarNullable.OnAvatarReady += OnAvatarReady;
             }
+            else
+            {
+                // A lack of avatar probably means we're in a testing scene, so add it to the menu.
+                orchestrator.RegisterMenu(_menuElement);
+            }
+
+            if (Networked)
+            {
+                var netDataUsage = P12VixxyNetDataUsage.Bit; // TODO: This depends on the type of control.
+                orchestrator.RequireNetworked(Address, _bakedDefaultValue, netDataUsage);
+            }
         }
 
         private void OnDestroy()
@@ -154,11 +168,9 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             // In this phase, we do all the checks, so that when actuation is requested (this might be as expensive
             // as running every frame), we don't need to do type checks or other work.
-            // This means that we need to catch all invalid cases. See below comments that say "Not Applicable".
-            for (var i = 0; i < subjects.Length; i++)
+            // This means that we need to catch all invalid cases.
+            foreach (var subject in subjects)
             {
-                var subject = subjects[i];
-
                 // UGC Rule: Sanitize input arrays.
                 subject.targets ??= Array.Empty<GameObject>();
                 subject.childrenOf ??= Array.Empty<GameObject>();
@@ -169,12 +181,13 @@ namespace Hai.Project12.Vixxy.Runtime
 
                 if (subject.BakedObjects.Count == 0)
                 {
-                    // Subject Not applicable: No objects
                     subject.IsApplicable = false;
+                    subject.BakeResult = P12VixxySubjectsBakeResult.NoBakedObjects;
 
                     foreach (var property in subject.properties)
                     {
                         property.IsApplicable = false;
+                        property.BakeResult = P12VixxyPropertyBakeResult.SubjectHasNoBakedObjects;
                     }
 
                     continue;
@@ -183,7 +196,6 @@ namespace Hai.Project12.Vixxy.Runtime
                 var isAnyPropertyApplicable = false;
                 var isAnyPropertyDependentOnMaterialPropertyBlock = false;
 
-                // (P12VixxyPropertyBase is no longer a struct, so we don't need to reassign the changes)
                 foreach (var property in subject.properties)
                 {
                     var bakeResult = BakeProperty(property, subject);
@@ -206,8 +218,8 @@ namespace Hai.Project12.Vixxy.Runtime
                     }
                 }
 
-                // When Subject Not applicable: As no property is applicable, the subject is not applicable either.
                 subject.IsApplicable = isAnyPropertyApplicable;
+                subject.BakeResult = isAnyPropertyApplicable ? P12VixxySubjectsBakeResult.Success : P12VixxySubjectsBakeResult.NoPropertyIsApplicable;
             }
         }
 
@@ -268,7 +280,7 @@ namespace Hai.Project12.Vixxy.Runtime
             // UGC: Detect misconfiguration oddities
             if (affectsMaterialPropertyBlock && !typeof(Renderer).IsAssignableFrom(foundType))
             {
-                return P12VixxyPropertyBakeResult.PropertyRequiringMaterialPropertyBlockHasNoRendererType;
+                return P12VixxyPropertyBakeResult.MaterialPropertyBlockCanOnlyBeUsedOnRenderers;
             }
             if (affectsBlendShape && foundType != typeof(SkinnedMeshRenderer))
             {
@@ -323,7 +335,7 @@ namespace Hai.Project12.Vixxy.Runtime
                     foundComponents.Remove(nonApplicableComponent);
                 }
 
-                if (foundComponents.Count == 0) return P12VixxyPropertyBakeResult.NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape;
+                if (foundComponents.Count == 0) return P12VixxyPropertyBakeResult.NoSkinnedMeshRendererHasThisBlendShape;
 
                 property.KindMarker = P12KindMarker.BlendShape;
                 property.SmrToBlendshapeIndex = smrToIndex;
@@ -542,14 +554,25 @@ namespace Hai.Project12.Vixxy.Runtime
         PropertyAccess
     }
 
+    /// When baking properties, the user may have misconfigured the property, or the property configuration may not apply to a
+    /// given targeted app. This enumeration describes the various errors that can happen, and it also serves as a comment in the
+    /// code explaining why the property is not applicable.
     internal enum P12VixxyPropertyBakeResult
     {
         Success,
+        SubjectHasNoBakedObjects,
         TypeNotFound,
-        PropertyRequiringMaterialPropertyBlockHasNoRendererType,
         NoObjectsHasThatComponent,
+        MaterialPropertyBlockCanOnlyBeUsedOnRenderers,
         BlendShapeCanOnlyBeUsedOnSkinnedMeshRenderers,
-        NoSkinnedMeshRendererWithAValidMeshHasThisBlendShape,
+        NoSkinnedMeshRendererHasThisBlendShape,
         NoFieldNorPropertyMatches
+    }
+
+    internal enum P12VixxySubjectsBakeResult
+    {
+        Success,
+        NoBakedObjects,
+        NoPropertyIsApplicable
     }
 }

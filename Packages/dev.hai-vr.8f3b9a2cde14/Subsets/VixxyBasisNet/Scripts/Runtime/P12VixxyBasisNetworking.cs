@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Hai.Project12.VixxyBasisNet.Runtime
 {
-    public class P12VixxyBasisNetworking : BasisAvatarMonoBehaviour
+    public class P12VixxyBasisNetworking : BasisAvatarMonoBehaviour, I12VixxyNetworkable
     {
         private const DeliveryMethod MainMessageDeliveryMethod = DeliveryMethod.Sequenced;
 
@@ -93,6 +93,10 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
         public void NonWearer_ProcessFullSnapshot(object subBuffer)
         {
             throw new NotImplementedException();
+        }
+
+        public void RequireNetworked(string address, float defaultValue, P12VixxyNetDataUsage netDataUsage)
+        {
         }
     }
 

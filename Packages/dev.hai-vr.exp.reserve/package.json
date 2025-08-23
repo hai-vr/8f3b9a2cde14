@@ -1,0 +1,16 @@
+{
+  "name": "dev.hai-vr.exp.reserve",
+  "displayName": "Haï ~ exp.reserve",
+  "version": "0.0.9800-alpha.1",
+  "unity": "2019.4",
+  "description": "exp.reserve",
+  "author" : {
+    "name" : "Haï~"
+  },
+  "vpmDependencies": {
+  },
+  "url" : "https://docs.hai-vr.dev/docs/products/exp.reserve",
+  "documentationUrl": "https://docs.hai-vr.dev/docs/products/exp.reserve",
+  "changelogUrl": "https://docs.hai-vr.dev/docs/changelogs/exp.reserve",
+  "license": "NOT DEFINED, CHANGE ME"
+}

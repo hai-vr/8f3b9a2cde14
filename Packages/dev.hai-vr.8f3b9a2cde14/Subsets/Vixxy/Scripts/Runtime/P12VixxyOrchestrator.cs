@@ -34,6 +34,8 @@ namespace Hai.Project12.Vixxy.Runtime
 
         private readonly HashSet<I12VixxyAggregator> _workAggregators = new();
 
+        private I12VixxyNetworkable _networkable;
+
         public event NetworkDataUpdateRequired OnNetworkDataUpdateRequired;
         public delegate void NetworkDataUpdateRequired();
 
@@ -239,6 +241,8 @@ namespace Hai.Project12.Vixxy.Runtime
             if (_iddressToAggregators.TryGetValue(iddress, out var existingActuator)) existingActuator.Remove(aggregator);
         }
 
+        /// Inform the orchestrator that the object will need a material property block assigned to it.
+        /// If this object does not have a Renderer component, it is not considered to be an error.
         public void RequireMaterialPropertyBlock(GameObject bakedObject)
         {
             if (!_objectToMaterialPropertyBlock.ContainsKey(bakedObject))
@@ -248,6 +252,7 @@ namespace Hai.Project12.Vixxy.Runtime
             }
         }
 
+        /// Obtain the material property block for the object.
         public MaterialPropertyBlock GetMaterialPropertyBlockForBakedObject(GameObject bakedObject)
         {
             // If the key doesn't exist, it is a programming error. Callers should only call GetMaterialPropertyBlockFor
@@ -266,6 +271,7 @@ namespace Hai.Project12.Vixxy.Runtime
             return _objectToMaterialPropertyBlock[bakedObject];
         }
 
+        /// Inform the orchestrator that the material property block needs to be applied on the object.
         public void StagePropertyBlock(GameObject bakedObject)
         {
             _stagedBlocks.Add(bakedObject);
@@ -295,6 +301,11 @@ namespace Hai.Project12.Vixxy.Runtime
         {
             // TODO: This is temporary.
             acquisitionService.Submit(address, newValue);
+        }
+
+        public void RequireNetworked(string address, float bakedDefaultValue, P12VixxyNetDataUsage netDataUsage)
+        {
+            _networkable.RequireNetworked(address, bakedDefaultValue, netDataUsage);
         }
     }
 }

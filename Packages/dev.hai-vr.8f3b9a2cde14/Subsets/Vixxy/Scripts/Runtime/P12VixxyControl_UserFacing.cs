@@ -66,7 +66,8 @@ namespace Hai.Project12.Vixxy.Runtime
     [Serializable]
     public enum ActivationThreshold
     {
-        /// Is considered to be ON when the absolute difference to the target is strictly smaller than 1.
+        /// When there's a transition, it is ON during that transition.<br/>
+        /// In technical terms, it is considered to be ON when the absolute difference to the target is strictly smaller than 1.
         /// This is the best choice for stuff like material dissolves, where the object appears before it is even complete, and therefore the default.
         Blended,
         /// Is considered to be ON when the current value is equal to the target value.
@@ -96,6 +97,7 @@ namespace Hai.Project12.Vixxy.Runtime
         // Runtime only
         [NonSerialized] internal List<GameObject> BakedObjects;
         [NonSerialized] internal bool IsApplicable;
+        [NonSerialized] internal P12VixxySubjectsBakeResult BakeResult;
     }
 
     [Serializable]

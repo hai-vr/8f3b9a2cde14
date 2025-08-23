@@ -1,0 +1,21 @@
+{
+    "name": "Hai.Project12.HVRXOblicTestApp.XOblic",
+    "rootNamespace": "Hai.Project12.HVRXOblicTestApp.XOblic",
+    "references": [
+        "Basis",
+        "BasisAddressableDriver",
+        "Unity.Addressables",
+        "BasisDebug",
+        "Hai.Project12.HaiSystems.Supporting",
+        "Cilbox"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
