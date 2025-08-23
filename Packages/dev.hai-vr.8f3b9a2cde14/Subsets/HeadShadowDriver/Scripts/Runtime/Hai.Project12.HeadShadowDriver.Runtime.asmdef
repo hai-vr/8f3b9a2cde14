@@ -2,7 +2,7 @@
     "name": "Hai.Project12.HeadShadowDriver.Runtime",
     "rootNamespace": "",
     "references": [
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "BasisSDK",
         "Unity.Addressables",

@@ -2,7 +2,7 @@
     "name": "Hai.Project12.TF.Editor",
     "rootNamespace": "",
     "references": [
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "Hai.Project12.HaiSystems.Supporting",

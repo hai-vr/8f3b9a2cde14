@@ -2,7 +2,7 @@
     "name": "Hai.Project12.HVRXOblicTestApp.XOblic",
     "rootNamespace": "Hai.Project12.HVRXOblicTestApp.XOblic",
     "references": [
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",

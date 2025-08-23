@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "Unity.TextMeshPro",
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisSDK",

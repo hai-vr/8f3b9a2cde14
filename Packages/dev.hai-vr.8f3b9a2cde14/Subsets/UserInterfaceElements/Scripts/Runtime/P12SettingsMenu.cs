@@ -252,11 +252,11 @@ namespace Hai.Project12.UserInterfaceElements.Runtime
         {
             _h12Builder.P12SingularButton(_L("ui.settings.option.vr_mode"), _L("ui.settings.action.switch_to_vr"), () =>
             {
-                BasisDeviceManagement.Instance.SwitchMode("OpenVRLoader");
+                BasisDeviceManagement.Instance.SwitchSetMode("OpenVRLoader");
             });
             _h12Builder.P12SingularButton(_L("ui.settings.option.desktop_mode"), _L("ui.settings.action.switch_to_desktop"), () =>
             {
-                BasisDeviceManagement.Instance.SwitchMode(BasisDeviceManagement.Desktop);
+                BasisDeviceManagement.Instance.SwitchSetMode(BasisConstants.Desktop);
             });
             _h12Builder.P12SingularButton(_L("ui.settings.option.debug"), _L("ui.settings.action.open_console"), () =>
             {

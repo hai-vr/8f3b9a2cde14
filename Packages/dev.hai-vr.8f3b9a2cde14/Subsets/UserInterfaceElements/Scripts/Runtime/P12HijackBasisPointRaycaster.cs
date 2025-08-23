@@ -1,5 +1,6 @@
 ﻿using Basis.Scripts.UI;
 using UnityEngine;
+using Basis.Scripts.BasisSdk.Interactions;
 
 namespace Hai.Project12.UserInterfaceElements.Runtime
 {
@@ -22,7 +23,8 @@ namespace Hai.Project12.UserInterfaceElements.Runtime
                 _basisPointRaycasterLateInit = FindAnyObjectByType<BasisPointRaycaster>(); // May return nullk
                 if (_basisPointRaycasterLateInit != null)
                 {
-                    _defaultMask = _basisPointRaycasterLateInit.Mask;
+                    // _defaultMask = _basisPointRaycasterLateInit.Mask;
+                    _defaultMask = BasisPlayerInteract.Mask;
                 }
             }
         }
@@ -31,7 +33,7 @@ namespace Hai.Project12.UserInterfaceElements.Runtime
         {
             if (_basisPointRaycasterLateInit == null) return;
 
-            _basisPointRaycasterLateInit.Mask = _maskForOnlyUiLayer;
+            BasisPlayerInteract.Mask = _maskForOnlyUiLayer;
             BasisDebug.Log("P12 BasisPointRaycaster now uses the UI mask to prevent world geometry from interfering.", BasisDebug.LogTag.Input);
         }
 
@@ -39,7 +41,7 @@ namespace Hai.Project12.UserInterfaceElements.Runtime
         {
             if (_basisPointRaycasterLateInit == null) return;
 
-            _basisPointRaycasterLateInit.Mask = _defaultMask;
+            BasisPlayerInteract.Mask = _defaultMask;
             BasisDebug.Log("P12 BasisPointRaycaster now uses the default mask.", BasisDebug.LogTag.Input);
         }
     }

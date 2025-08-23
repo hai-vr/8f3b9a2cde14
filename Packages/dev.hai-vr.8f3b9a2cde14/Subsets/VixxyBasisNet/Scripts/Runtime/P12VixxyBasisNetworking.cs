@@ -24,13 +24,6 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
             orchestrator.OnNetworkDataUpdateRequired += OnNetworkDataUpdateRequired;
 
             if (avatar == null) avatar = GetComponentInParent<BasisAvatar>(true);
-            avatar.OnAvatarNetworkReady -= OnAvatarNetworkReady;
-            avatar.OnAvatarNetworkReady += OnAvatarNetworkReady;
-        }
-
-        private void OnDestroy()
-        {
-            avatar.OnAvatarNetworkReady -= OnAvatarNetworkReady;
         }
 
         private void OnNetworkDataUpdateRequired()
@@ -39,17 +32,13 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
 
         }
 
-        private void OnAvatarNetworkReady(bool IsOwner)
-        {
-            _wearerId = avatar.LinkedPlayerID;
-        }
-
         internal void Wearer_SubmitFullSnapshot_ToAllNonWearers()
         {
         }
 
-        public override void OnNetworkChange(byte messageIndex, bool IsLocallyOwned)
+        public virtual void OnNetworkReady(bool IsLocallyOwned)
         {
+            _wearerId = avatar.LinkedPlayerID;
             if (_relayLateInit != null)
             {
                 H12NetworkMessageUtilities.ProtocolAccident("Received OnNetworkChange more than once in this object's lifetime, this is not normal.");
@@ -59,13 +48,13 @@ namespace Hai.Project12.VixxyBasisNet.Runtime
             _relayLateInit.OnNetworkInitialized();
         }
 
-        public override void OnNetworkMessageReceived(ushort RemoteUser, byte[] unsafeBuffer, DeliveryMethod DeliveryMethod)
+        public virtual void OnNetworkMessageReceived(ushort RemoteUser, byte[] unsafeBuffer, DeliveryMethod DeliveryMethod, bool IsADifferentAvatarLocally)
         {
             if (_relayLateInit != null) _relayLateInit.OnNetworkMessageReceived(User(RemoteUser), unsafeBuffer, DeliveryMethod);
             else H12NetworkMessageUtilities.ProtocolAccident("Received OnNetworkMessageReceived before any OnNetworkChange was received.");
         }
 
-        public override void OnNetworkMessageServerReductionSystem(byte[] unsafeBuffer)
+        public virtual void OnNetworkMessageServerReductionSystem(byte[] unsafeBuffer, bool IsADifferentAvatarLocally)
         {
             if (_relayLateInit != null) _relayLateInit.OnNetworkMessageServerReductionSystem(unsafeBuffer);
             else H12NetworkMessageUtilities.ProtocolAccident("Received OnNetworkMessageServerReductionSystem before any OnNetworkChange was received.");

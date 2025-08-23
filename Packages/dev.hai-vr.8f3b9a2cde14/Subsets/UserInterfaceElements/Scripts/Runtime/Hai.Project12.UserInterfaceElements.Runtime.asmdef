@@ -4,7 +4,7 @@
     "references": [
         "Unity.TextMeshPro",
         "BattlePhazeSettingsManger",
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "Hai.Project12.GameRoutine.Runtime",

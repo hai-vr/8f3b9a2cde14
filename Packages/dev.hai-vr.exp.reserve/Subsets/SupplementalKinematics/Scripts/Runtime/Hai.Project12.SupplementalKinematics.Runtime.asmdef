@@ -3,7 +3,7 @@
     "rootNamespace": "",
     "references": [
         "BattlePhazeSettingsManger",
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "Hai.Project12.DataViz.Runtime",

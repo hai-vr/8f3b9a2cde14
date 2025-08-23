@@ -3,7 +3,7 @@
     "rootNamespace": "Hai.Project12.Vixxy.Runtime",
     "references": [
         "Unity.TextMeshPro",
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",

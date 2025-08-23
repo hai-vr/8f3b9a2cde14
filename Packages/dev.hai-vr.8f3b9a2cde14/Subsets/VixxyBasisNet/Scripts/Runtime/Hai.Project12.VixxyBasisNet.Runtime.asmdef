@@ -2,7 +2,7 @@
     "name": "Hai.Project12.VixxyBasisNet.Runtime",
     "rootNamespace": "Hai.Project12.Vixxy.Runtime",
     "references": [
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",

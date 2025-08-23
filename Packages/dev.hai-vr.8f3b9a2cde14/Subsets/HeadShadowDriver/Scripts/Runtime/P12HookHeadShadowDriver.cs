@@ -23,8 +23,8 @@ namespace Hai.Project12.ListenServer.Runtime
             // This is null if we load too early. If so, we need to treat OnLocalPlayerCreatedAndReady as being an avatar change.
             if (BasisLocalPlayer.Instance)
             {
-                BasisLocalPlayer.Instance.OnLocalAvatarChanged -= OnLocalAvatarChanged;
-                BasisLocalPlayer.Instance.OnLocalAvatarChanged += OnLocalAvatarChanged;
+                BasisLocalPlayer.OnLocalAvatarChanged -= OnLocalAvatarChanged;
+                BasisLocalPlayer.OnLocalAvatarChanged += OnLocalAvatarChanged;
             }
             else
             {
@@ -37,8 +37,8 @@ namespace Hai.Project12.ListenServer.Runtime
         {
             BasisLocalPlayer.OnLocalPlayerCreatedAndReady -= OnLocalPlayerCreatedAndReady;
 
-            BasisLocalPlayer.Instance.OnLocalAvatarChanged -= OnLocalAvatarChanged;
-            BasisLocalPlayer.Instance.OnLocalAvatarChanged += OnLocalAvatarChanged;
+            BasisLocalPlayer.OnLocalAvatarChanged -= OnLocalAvatarChanged;
+            BasisLocalPlayer.OnLocalAvatarChanged += OnLocalAvatarChanged;
             OnLocalAvatarChanged();
         }
 
@@ -49,7 +49,7 @@ namespace Hai.Project12.ListenServer.Runtime
             Application.onBeforeRender -= OnBeforeRender;
             if (BasisLocalPlayer.Instance)
             {
-                BasisLocalPlayer.Instance.OnLocalAvatarChanged -= OnLocalAvatarChanged;
+                BasisLocalPlayer.OnLocalAvatarChanged -= OnLocalAvatarChanged;
             }
             BasisLocalPlayer.OnLocalPlayerCreatedAndReady -= OnLocalPlayerCreatedAndReady;
         }

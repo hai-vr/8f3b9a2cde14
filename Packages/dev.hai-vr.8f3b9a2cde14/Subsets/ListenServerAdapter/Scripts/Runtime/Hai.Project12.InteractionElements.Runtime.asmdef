@@ -2,7 +2,7 @@
     "name": "Hai.Project12.ListenServerAdapter.Runtime",
     "rootNamespace": "",
     "references": [
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",

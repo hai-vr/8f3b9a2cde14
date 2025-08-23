@@ -2,7 +2,7 @@
     "name": "Hai.Project12.Remesher.Runtime",
     "rootNamespace": "Hai.Project12.Remesher.Runtime",
     "references": [
-        "Basis",
+        "Basis Framework",
         "BasisAddressableDriver",
         "Unity.Addressables",
         "BasisDebug",
